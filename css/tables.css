@@ -1,0 +1,204 @@
+/* ============================================================
+   tables.css — Tablas, paginación, badges, top10-grid
+   ============================================================ */
+
+/* ---- Wrapper con scroll horizontal ---- */
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 6px;
+  border: 0.5px solid var(--color-border);
+}
+
+/* ---- Tabla base ---- */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* ---- Encabezado ---- */
+.data-table thead tr {
+  background: var(--color-blue-dark);
+}
+
+.data-table th {
+  color: var(--color-cyan);
+  font-weight: 600;
+  font-size: 11px;
+  padding: 9px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.data-table th.sortable {
+  cursor: pointer;
+}
+.data-table th.sortable:hover {
+  color: var(--color-white);
+}
+
+.sort-icon { opacity: 0.5; font-size: 10px; }
+.data-table th.sort-asc  .sort-icon,
+.data-table th.sort-desc .sort-icon { opacity: 1; color: var(--color-cyan); }
+
+/* ---- Filas ---- */
+.data-table tbody tr:nth-child(even) { background: rgba(1, 74, 147, 0.07); }
+.data-table tbody tr:nth-child(odd)  { background: transparent; }
+.data-table tbody tr:hover           { background: rgba(1, 254, 255, 0.07); }
+
+/* ---- Celda ---- */
+.data-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-main);
+  vertical-align: middle;
+}
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+/* ---- Resaltado top 1 rechazados ---- */
+.data-table tbody tr.top1-rejected {
+  background: rgba(69, 10, 10, 0.45) !important;
+}
+
+/* ---- Texto muted ---- */
+.text-muted { color: var(--color-text-muted); }
+
+/* ---- Barra visual de porcentaje ---- */
+.bar-container {
+  width: 90px;
+  height: 5px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.bar-fill            { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+.bar-fill--danger    { background: var(--color-danger); }
+.bar-fill--default   { background: var(--color-cyan); }
+.bar-fill--reason    { background: var(--color-warning); }
+
+/* ---- Contador de tabla ---- */
+.table-count { color: var(--color-text-muted); font-size: 12px; }
+
+/* ---- Paginación ---- */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.pagination .page-btn {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+}
+.pagination .page-btn:hover      { border-color: var(--color-cyan); color: var(--color-cyan); }
+.pagination .page-btn.active     { background: var(--color-blue-mid); border-color: var(--color-cyan); color: var(--color-cyan); font-weight: 600; }
+.pagination .page-btn:disabled   { opacity: 0.4; cursor: not-allowed; }
+
+/* ---- Badges de estado ---- */
+.badge {
+  display: inline-block;
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.badge--delivered, .badge--approved { background: #14532d; color: #86efac; }
+.badge--rejected                    { background: #450a0a; color: #fca5a5; }
+.badge--pending                     { background: #451a03; color: #fed7aa; }
+.badge--other                       { background: #1e3a5f; color: #93c5fd; }
+
+/* ---- Badges de categoría ---- */
+.badge--delivery { background: #1e3a8a; color: #93c5fd; }
+.badge--pickup   { background: #431407; color: #fdba74; }
+
+/* ---- Ícono POD ---- */
+.icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-cyan);
+  font-size: 15px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.2s;
+  background: none;
+  border: none;
+  padding: 0;
+}
+.icon-link:hover { opacity: 0.7; }
+
+/* ---- Motivos agrupados ---- */
+.reasons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 180px;
+  white-space: normal;
+}
+.reasons-list span { font-size: 11px; color: var(--color-text-muted); }
+
+/* ---- Tooltip inline en celda (ej: código de orden → dirección) ---- */
+.td-has-tooltip {
+  position: relative;
+  cursor: default;
+  border-bottom: 1px dashed rgba(1,254,255,0.4);
+}
+.td-tooltip-box {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0f1923;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  z-index: 200;
+  pointer-events: none;
+  line-height: 1.7;
+}
+.td-has-tooltip:hover .td-tooltip-box { display: block; }
+
+/* ---- Efectividad coloreada ---- */
+.eff--danger  { color: var(--color-danger);  font-weight: 600; }
+.eff--warning { color: var(--color-warning); font-weight: 600; }
+.eff--success { color: var(--color-success); font-weight: 600; }
+
+/* ---- Subsección de tabla ---- */
+.subsection-title {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* ---- Grid de top 10 (2 columnas) ---- */
+.top10-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 1100px) {
+  .top10-grid { grid-template-columns: 1fr; }
+}

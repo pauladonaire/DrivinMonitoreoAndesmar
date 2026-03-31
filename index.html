@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitoreo de Flota — Andesmar Cargas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/filters.css">
+  <link rel="stylesheet" href="css/kpis.css">
+  <link rel="stylesheet" href="css/tables.css">
+  <link rel="stylesheet" href="css/charts.css">
+  <link rel="stylesheet" href="css/modal.css">
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="app-header">
+    <div class="header-left">
+      <!--
+        El logo debe estar en la misma carpeta que index.html.
+        Si el archivo se llama de otra forma, actualizar el src aquí.
+      -->
+      <img src="assetslogo_andesmar.png"
+           onerror="this.onerror=null; this.src='assets/logo_andesmar.png';"
+           alt="Andesmar Cargas"
+           class="header-logo">
+      <div class="header-separator"></div>
+      <span class="header-title">MONITOREO</span>
+    </div>
+    <div class="header-right">
+      <div class="refresh-indicator" id="refreshIndicator">
+        <span class="refresh-dot" id="refreshDot"></span>
+        <span class="refresh-text" id="refreshText">Iniciando...</span>
+        <div class="spinner" id="loadingSpinner" style="display:none;"></div>
+      </div>
+      <button class="btn-close-day" id="btnCloseDay" onclick="closeDayProcedure()">
+        Cerrar día
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== BANNER DE ERROR ===== -->
+  <div class="error-banner" id="errorBanner" style="display:none;">
+    <span>⚠️ </span><span id="errorMessage">Error al cargar datos.</span>
+    <button onclick="retryFetch()">Reintentar</button>
+  </div>
+
+  <!-- ===== PANEL DE FILTROS (sticky) ===== -->
+  <div class="filters-panel" id="filtersPanel">
+    <div class="filters-row">
+
+      <!-- Buscador por código de orden -->
+      <div class="filter-group filter-group--search">
+        <label for="searchCode">Buscar Cód. Orden</label>
+        <input type="text" id="searchCode" placeholder="Código..." autocomplete="off">
+      </div>
+
+      <div class="filter-group">
+        <label for="filterDeposito">Depósito</label>
+        <select id="filterDeposito"><option value="">Todos</option></select>
+      </div>
+      <div class="filter-group">
+        <label for="filterFlota">Flota</label>
+        <select id="filterFlota"><option value="">Todos</option></select>
+      </div>
+      <div class="filter-group">
+        <label for="filterVehiculo">Vehículo</label>
+        <select id="filterVehiculo"><option value="">Todos</option></select>
+      </div>
+      <div class="filter-group">
+        <label for="filterConductor">Conductor</label>
+        <select id="filterConductor"><option value="">Todos</option></select>
+      </div>
+      <div class="filter-group">
+        <label for="filterEstado">Estado</label>
+        <select id="filterEstado"><option value="">Todos</option></select>
+      </div>
+      <div class="filter-group">
+        <label for="filterCategoria">Categoría</label>
+        <select id="filterCategoria">
+          <option value="">Todos</option>
+          <option value="delivery">Entregas</option>
+          <option value="pickup">Retiros</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="filterMotivo">Motivo rechazo</label>
+        <select id="filterMotivo"><option value="">Todos</option></select>
+      </div>
+      <div class="filter-group">
+        <label for="filterSupplier">Cliente</label>
+        <select id="filterSupplier"><option value="">Todos</option></select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn-primary" onclick="applyFilters()">Aplicar</button>
+        <button class="btn-secondary" onclick="clearFilters()">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CONTENIDO PRINCIPAL ===== -->
+  <main class="main-content">
+
+    <!-- ===== 1. RESUMEN OPERATIVO: KPIs + Donut ===== -->
+    <section class="section">
+      <h2 class="section-title">RESUMEN OPERATIVO</h2>
+
+      <div class="kpi-donut-layout">
+
+        <!-- Columna de KPIs -->
+        <div class="kpi-col">
+          <!-- Fila 1: valores absolutos -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-label">Total Órdenes</div>
+              <div class="kpi-value" id="valTotalOrdenes">—</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Total Entregas</div>
+              <div class="kpi-value" id="valTotalEntregas">—</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Total Retiros</div>
+              <div class="kpi-value" id="valTotalRetiros">—</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Total Rechazadas</div>
+              <div class="kpi-value" id="valTotalRechazadas">—</div>
+            </div>
+          </div>
+
+          <!-- Fila 2: efectividades con color semántico -->
+          <div class="kpi-grid">
+            <div class="kpi-card kpi-has-tooltip" id="kpiEfectividadGeneral">
+              <div class="kpi-label">Efectividad General <span class="kpi-info">ⓘ</span></div>
+              <div class="kpi-value" id="valEfectividadGeneral">—</div>
+              <div class="kpi-tooltip-box">Aprobadas ÷ Gestionadas × 100<br><em>Gestionadas = todas excepto Pendientes</em><br>🟢 ≥90% · 🟡 70–89% · 🔴 &lt;70%</div>
+            </div>
+            <div class="kpi-card kpi-has-tooltip" id="kpiEfectividadEntregas">
+              <div class="kpi-label">Efectividad Entregas <span class="kpi-info">ⓘ</span></div>
+              <div class="kpi-value" id="valEfectividadEntregas">—</div>
+              <div class="kpi-tooltip-box">Entregas aprobadas ÷ Entregas gestionadas × 100<br><em>Solo órdenes de tipo Entrega</em></div>
+            </div>
+            <div class="kpi-card kpi-has-tooltip" id="kpiEfectividadRetiros">
+              <div class="kpi-label">Efectividad Retiros <span class="kpi-info">ⓘ</span></div>
+              <div class="kpi-value" id="valEfectividadRetiros">—</div>
+              <div class="kpi-tooltip-box">Retiros aprobados ÷ Retiros gestionados × 100<br><em>Solo órdenes de tipo Retiro</em></div>
+            </div>
+            <div class="kpi-card kpi-has-tooltip" id="kpiPendientes">
+              <div class="kpi-label">% Pendientes <span class="kpi-info">ⓘ</span></div>
+              <div class="kpi-value" id="valPendientes">—</div>
+              <div class="kpi-tooltip-box">Pendientes ÷ Total órdenes × 100<br><em>Órdenes aún sin gestionar</em><br>🟢 ≤10% · 🟡 10–30% · 🔴 &gt;30%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Donut compacto de motivos de rechazo -->
+        <div class="donut-col">
+          <div class="donut-col-title">Motivos de Rechazo</div>
+          <div class="chart-container">
+            <canvas id="chartDona"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===== 2. TOP 10 ===== -->
+    <section class="section">
+      <h2 class="section-title">TOP 10</h2>
+      <div class="top10-grid">
+
+        <!-- Top 10 conductores -->
+        <div>
+          <div class="subsection-title">Conductores con más rechazadas</div>
+          <div class="table-wrapper">
+            <table class="data-table" id="top10DriversTable">
+              <thead>
+                <tr>
+                  <th>Pos.</th>
+                  <th>Conductor</th>
+                  <th>Vehículo</th>
+                  <th>Rechazadas</th>
+                  <th>Motivos</th>
+                  <th>Barra</th>
+                  <th>Contacto</th>
+                </tr>
+              </thead>
+              <tbody id="top10DriversBody">
+                <tr><td colspan="7"><div class="empty-state"><div>Sin datos</div></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Top 10 motivos + Top 5 clientes (misma columna derecha) -->
+        <div>
+          <div class="subsection-title">Motivos de rechazo</div>
+          <div class="table-wrapper">
+            <table class="data-table" id="top10ReasonsTable">
+              <thead>
+                <tr>
+                  <th>Pos.</th>
+                  <th>Motivo</th>
+                  <th>Categoría</th>
+                  <th>Cant.</th>
+                  <th>%</th>
+                  <th>Barra</th>
+                </tr>
+              </thead>
+              <tbody id="top10ReasonsBody">
+                <tr><td colspan="6"><div class="empty-state"><div>Sin datos</div></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Top 5 clientes con más rechazadas (debajo de motivos) -->
+          <div style="margin-top:16px;">
+            <div class="subsection-title">Top 5 clientes con más rechazadas</div>
+            <div class="table-wrapper">
+              <table class="data-table" id="top5ClientsTable">
+                <thead>
+                  <tr>
+                    <th>Pos.</th>
+                    <th>Cliente / Proveedor</th>
+                    <th>Rechazadas</th>
+                    <th>% del total</th>
+                    <th>Motivo principal</th>
+                  </tr>
+                </thead>
+                <tbody id="top5ClientsBody">
+                  <tr><td colspan="5"><div class="empty-state"><div>Sin datos</div></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ===== 3. EFECTIVIDAD POR CONDUCTOR ===== -->
+    <section class="section">
+      <h2 class="section-title">EFECTIVIDAD POR CONDUCTOR</h2>
+      <div class="table-wrapper">
+        <table class="data-table" id="driversTable">
+          <thead>
+            <tr>
+              <th class="sortable" data-col="driver_name">Conductor <span class="sort-icon">↕</span></th>
+              <th>Teléfono</th>
+              <th class="sortable" data-col="vehicle_code">Vehículo <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="total">Total <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="entregas">Entregas <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="retiros">Retiros <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="aprobadas">Aprobadas <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="rechazadas">Rechazadas <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="eff">Efectividad % <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="routeTime">Tiempo en ruta <span class="sort-icon">↕</span></th>
+              <th>Contacto</th>
+            </tr>
+          </thead>
+          <tbody id="driversTableBody">
+            <tr><td colspan="11"><div class="empty-state"><div>Cargando...</div></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" id="driversPagination"></div>
+    </section>
+
+    <!-- ===== 4. DETALLE DE ÓRDENES ===== -->
+    <section class="section">
+      <div class="section-header-row">
+        <h2 class="section-title">DETALLE DE ÓRDENES</h2>
+        <span class="table-count" id="tableCount">0 órdenes</span>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table" id="mainTable">
+          <thead>
+            <tr>
+              <th class="sortable" data-col="description">Plan <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="address_name">Cód. Dir. <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="code">Cód. Orden <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="client_name">Cliente <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="supplier_name">Proveedor <span class="sort-icon">↕</span></th>
+              <th>Tel. Destino</th>
+              <th class="sortable" data-col="driver_name">Conductor <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="vehicle_code">Vehículo <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="schema_name">Depósito <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="category">Categoría <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="status">Estado <span class="sort-icon">↕</span></th>
+              <th>Kg</th>
+              <th>Bultos</th>
+              <th class="sortable" data-col="eta">ETA <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="pod_arrival">Llegada real <span class="sort-icon">↕</span></th>
+              <th>Motivo rechazo</th>
+              <th>POD</th>
+              <th>Imágenes</th>
+              <th>Monto a cobrar</th>
+              <th>RTO</th>
+            </tr>
+          </thead>
+          <tbody id="mainTableBody">
+            <tr>
+              <td colspan="20">
+                <div class="empty-state">
+                  <div class="empty-icon">📦</div>
+                  <div>Cargando datos...</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </section>
+
+    <!-- ===== 5. HISTORIAL DE CIERRES ===== -->
+    <section class="section">
+      <div class="section-header-row">
+        <h2 class="section-title">HISTORIAL DE CIERRES</h2>
+        <button class="btn-secondary" onclick="exportClosureCSV()">Exportar CSV</button>
+      </div>
+      <div class="table-wrapper" style="margin-top:16px;">
+        <table class="data-table" id="closureHistoryTable">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Total Órdenes</th>
+              <th>Efectividad</th>
+              <th>Rechazadas</th>
+              <th>Cerrado a las</th>
+              <th>Detalle</th>
+            </tr>
+          </thead>
+          <tbody id="closureHistoryBody">
+            <tr><td colspan="6"><div class="empty-state"><div>Sin cierres registrados</div></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== MODAL LIGHTBOX ===== -->
+  <div class="lightbox-overlay" id="lightboxOverlay" style="display:none;">
+    <div class="lightbox-container">
+      <button class="lightbox-close" id="lightboxClose">✕</button>
+      <button class="lightbox-nav lightbox-prev" id="lightboxPrev">&#8592;</button>
+      <img class="lightbox-image" id="lightboxImage" src="" alt="Imagen de visita">
+      <button class="lightbox-nav lightbox-next" id="lightboxNext">&#8594;</button>
+      <div class="lightbox-counter" id="lightboxCounter">1 / 1</div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL CIERRE DEL DÍA ===== -->
+  <div class="modal-overlay" id="closureModal" style="display:none;">
+    <div class="modal-box modal-box--wide">
+      <h2 class="modal-title">Cierre del Día</h2>
+      <div id="closureModalContent"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="printClosureSummary('fleet_closure_' + (()=>{const h=new Date();return h.getFullYear()+'-'+String(h.getMonth()+1).padStart(2,'0')+'-'+String(h.getDate()).padStart(2,'0')})())">Imprimir / PDF</button>
+        <button class="btn-primary" onclick="closeModal('closureModal')">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL DETALLE CIERRE ===== -->
+  <div class="modal-overlay" id="closureDetailModal" style="display:none;">
+    <div class="modal-box modal-box--wide">
+      <h2 class="modal-title">Detalle del Cierre</h2>
+      <pre id="closureDetailContent" class="closure-detail-pre"></pre>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnPrintDetail" onclick="">Imprimir / PDF</button>
+        <button class="btn-primary" onclick="closeModal('closureDetailModal')">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TOOLTIP ===== -->
+  <div class="copy-tooltip" id="copyTooltip">¡Copiado!</div>
+
+  <!-- ===== CDN ===== -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+  <!-- ===== JS PROPIOS ===== -->
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/kpis.js"></script>
+  <script src="js/table.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/top10.js"></script>
+  <script src="js/drivers.js"></script>
+  <script src="js/closure.js"></script>
+  <script src="js/refresh.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+</html>

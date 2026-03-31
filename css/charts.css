@@ -1,0 +1,47 @@
+/* ============================================================
+   charts.css — Contenedores Chart.js
+   ============================================================ */
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  background: var(--color-surface);
+  border: 0.5px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.chart-title {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.chart-container {
+  position: relative;
+  height: 280px;
+}
+
+.chart-container--dona {
+  height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-container canvas {
+  background: transparent;
+}

@@ -1,0 +1,197 @@
+/* ============================================================
+   modal.css — Lightbox de imágenes y modales
+   ============================================================ */
+
+/* ---- Lightbox overlay ---- */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-container {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-image {
+  max-width: 80vw;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 0 40px rgba(1, 254, 255, 0.2);
+}
+
+.lightbox-close {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  background: rgba(255,255,255,0.1);
+  color: var(--color-white);
+  border: 1px solid rgba(255,255,255,0.3);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  z-index: 9001;
+}
+.lightbox-close:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+.lightbox-nav {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,73,147,0.7);
+  color: var(--color-white);
+  border: 1px solid var(--color-cyan);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  z-index: 9001;
+}
+.lightbox-nav:hover {
+  background: rgba(0,73,147,1);
+}
+
+.lightbox-prev { left: 16px; }
+.lightbox-next { right: 16px; }
+
+.lightbox-counter {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.6);
+  color: var(--color-text-muted);
+  font-size: 13px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+}
+
+/* ---- Modal genérico ---- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 8000;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-box {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 28px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.modal-box--wide {
+  max-width: 800px;
+}
+
+.modal-title {
+  color: var(--color-cyan);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* ---- Contenido de cierre del día ---- */
+.closure-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.closure-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.closure-summary-row:last-child {
+  border-bottom: none;
+}
+.closure-summary-label {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+.closure-summary-value {
+  color: var(--color-white);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.closure-email-status {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  text-align: center;
+}
+.closure-email-status.ok {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid var(--color-success);
+  color: var(--color-success);
+}
+.closure-email-status.err {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+}
+
+/* ---- Pre para JSON detalle ---- */
+.closure-detail-pre {
+  background: var(--color-dark-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 16px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-family: 'Courier New', monospace;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 50vh;
+}
