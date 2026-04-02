@@ -181,6 +181,205 @@
   color: var(--color-danger);
 }
 
+/* ============================================================
+   Mejora 7 — Toast "Domicilio No Visitado"
+   ============================================================ */
+
+@keyframes slide-in-right {
+  from { transform: translateX(110%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+.dnv-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 320px;
+  background: #2a1010;
+  border: 1px solid var(--color-danger);
+  border-radius: 8px;
+  padding: 12px 14px;
+  z-index: 9500;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+  animation: slide-in-right 0.3s ease;
+}
+
+.dnv-toast-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-danger);
+  margin-bottom: 8px;
+}
+
+.dnv-toast-header button {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 2px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.dnv-toast-header button:hover { color: var(--color-white); }
+
+.dnv-toast-list {
+  list-style: none;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  padding: 0;
+  margin: 0;
+}
+
+.dnv-toast-more {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 6px;
+  text-align: right;
+}
+
+/* ============================================================
+   Mejora 1 — Modal de Acciones
+   ============================================================ */
+
+.modal-box--actions {
+  max-width: 640px;
+}
+
+.action-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.action-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.action-form-group label {
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.action-form-group select,
+.action-form-group input[type="text"] {
+  background: var(--color-dark-bg);
+  color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  padding: 6px 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  outline: none;
+  height: 32px;
+  transition: border-color 0.2s;
+}
+
+.action-form-group select:focus,
+.action-form-group input:focus { border-color: var(--color-cyan); }
+
+.action-form-group textarea {
+  background: var(--color-dark-bg);
+  color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  padding: 6px 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  outline: none;
+  resize: vertical;
+  min-height: 64px;
+  transition: border-color 0.2s;
+}
+.action-form-group textarea:focus { border-color: var(--color-cyan); }
+
+.action-form-group--full {
+  grid-column: 1 / -1;
+}
+
+.action-form-group select option {
+  background: var(--color-surface);
+  color: var(--color-white);
+}
+
+.actions-list-title {
+  color: var(--color-cyan);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 16px 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.action-item {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  background: var(--color-dark-bg);
+}
+
+.action-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.action-item-time {
+  color: var(--color-cyan);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.action-item-ctx {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.action-delete-btn {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  border-radius: 4px;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: border-color 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.action-delete-btn:hover {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.action-item-desc {
+  color: var(--color-white);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 /* ---- Pre para JSON detalle ---- */
 .closure-detail-pre {
   background: var(--color-dark-bg);

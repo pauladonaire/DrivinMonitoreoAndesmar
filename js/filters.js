@@ -132,9 +132,17 @@ function applyFilters() {
   const searchRaw = document.getElementById('searchCode')?.value || '';
   const search    = searchRaw.trim().toLowerCase();
 
+  // Mejora 5: filtro de estado de ruta
+  const routeF = APP_STATE.routeFilter || 'all';
+
   const rows = [];
 
   APP_STATE.rawData.forEach(stop => {
+    // Filtro de ruta (Mejora 5)
+    if (routeF === 'not_started' && stop.route_is_started !== false) return;
+    if (routeF === 'in_progress' && !(stop.route_is_started === true && stop.route_is_finished === false)) return;
+    if (routeF === 'finished'    && stop.route_is_finished !== true) return;
+
     if (deposito  && stop.schema_name  !== deposito)  return;
     if (flota     && stop.fleet_name   !== flota)     return;
     if (vehiculo  && stop.vehicle_code !== vehiculo)  return;
@@ -162,6 +170,8 @@ function applyFilters() {
   APP_STATE.currentPage    = 1;
   APP_STATE.driversPage    = 1;
   renderAll();
+  // Mejora 7: verificar nuevos "Domicilio No Visitado"
+  if (typeof checkNewDomicilioNoVisitado === 'function') checkNewDomicilioNoVisitado();
 }
 
 /**
@@ -219,7 +229,58 @@ function buildFlatRow(stop, order) {
     // Campos personalizados
     monto_cobrar: order.custom_3 || order.custom_fields?.custom_3 || '',
     rto:          order.custom_9 || order.custom_fields?.custom_9 || '',
+
+    // Mejora 2: comentario del conductor (viene a nivel stop, no order)
+    comment:  stop.comment || order.comment || '',
+    // Mejora 3: cerca del punto de entrega (viene como string "Si"/"No")
+    near_pod: order.near_pod === 'Si' ? true
+            : order.near_pod === 'No' ? false
+            : (order.near_pod ?? null),
   };
+}
+
+/* ============================================================
+   MEJORA 5 — Filtro de estado de ruta (pills)
+   ============================================================ */
+
+/**
+ * Cambia el filtro de ruta y re-aplica filtros.
+ * @param {'all'|'not_started'|'in_progress'|'finished'} filter
+ */
+function setRouteFilter(filter) {
+  APP_STATE.routeFilter = filter;
+  document.querySelectorAll('.route-pill').forEach(pill => {
+    pill.classList.toggle('active', pill.dataset.filter === filter);
+  });
+  APP_STATE.currentPage = 1;
+  applyFilters();
+}
+
+/* ============================================================
+   MEJORA 6 — Filtrado rápido desde Top10
+   ============================================================ */
+
+/**
+ * Filtra toda la app por conductor (desde click en top10).
+ */
+function filterByDriver(driverName) {
+  const select = document.getElementById('filterConductor');
+  if (select) select.value = driverName;
+  APP_STATE.currentPage = 1;
+  APP_STATE.driversPage = 1;
+  applyFilters();
+  document.getElementById('mainTable')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/**
+ * Filtra toda la app por cliente/proveedor (desde click en top5 clientes).
+ */
+function filterByClient(clientName) {
+  const select = document.getElementById('filterSupplier');
+  if (select) select.value = clientName;
+  APP_STATE.currentPage = 1;
+  applyFilters();
+  document.getElementById('mainTable')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 /** Limpia todos los filtros */
@@ -231,6 +292,11 @@ function clearFilters() {
   });
   const searchInput = document.getElementById('searchCode');
   if (searchInput) searchInput.value = '';
+  // Resetear filtro de ruta (Mejora 5)
+  APP_STATE.routeFilter = 'all';
+  document.querySelectorAll('.route-pill').forEach(pill => {
+    pill.classList.toggle('active', pill.dataset.filter === 'all');
+  });
   populateDependentFilters();
   applyFilters();
 }

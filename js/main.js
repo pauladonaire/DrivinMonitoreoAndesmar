@@ -58,6 +58,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Muestra todas las keys que contengan "phone"
         phone_keys: Object.keys(s).filter(k => k.toLowerCase().includes('phone')),
       });
+      // DEBUG: campos de order[0] — verificar comment y near_pod
+      const firstOrder = (s.orders || [])[0];
+      if (firstOrder) {
+        console.log('[debug order] Todas las keys de orders[0]:', Object.keys(firstOrder));
+        console.log('[debug order] comment:', firstOrder.comment);
+        console.log('[debug order] near_pod:', firstOrder.near_pod);
+        console.log('[debug order] custom_fields:', firstOrder.custom_fields);
+      }
     }
 
     hideErrorBanner();

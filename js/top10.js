@@ -73,7 +73,11 @@ function renderTop10Drivers() {
     const phone       = driverInfo.phone || null;
     const contactHtml = renderContactButtons(phone);
 
-    return `<tr ${isTop1}>
+    // Mejora 6: fila clickeable para filtrar por conductor
+    const driverEsc = esc(item.driver_name).replace(/'/g, "\\'");
+    return `<tr class="top10-row-clickable" ${isTop1}
+              onclick="filterByDriver('${driverEsc}')"
+              title="Click para filtrar por este conductor">
       <td><strong>${idx + 1}</strong></td>
       <td>${esc(item.driver_name)}</td>
       <td class="text-muted">${esc(item.vehicle_code)}</td>
@@ -186,7 +190,11 @@ function renderTop5Clients() {
     const topReason = Object.entries(item.reasons).sort((a, b) => b[1] - a[1])[0];
     const topReasonHtml = topReason ? `${esc(topReason[0])}: <strong>${topReason[1]}</strong>` : '—';
 
-    return `<tr>
+    // Mejora 6: fila clickeable para filtrar por cliente
+    const clientEsc = esc(item.name).replace(/'/g, "\\'");
+    return `<tr class="top10-row-clickable"
+              onclick="filterByClient('${clientEsc}')"
+              title="Click para filtrar por este cliente">
       <td><strong>${idx + 1}</strong></td>
       <td>${esc(item.name)}</td>
       <td><strong style="color:var(--color-danger)">${item.total}</strong></td>

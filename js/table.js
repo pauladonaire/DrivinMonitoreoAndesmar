@@ -6,8 +6,8 @@
 let _lbImages = [];
 let _lbIndex  = 0;
 
-// Número total de columnas de la tabla (para colspans)
-const TABLE_COLS = 20;
+// Número total de columnas de la tabla (para colspans) — Mejoras 2+3 suman 2
+const TABLE_COLS = 22;
 
 /** Inicializa los listeners de ordenamiento en th.sortable */
 function initTableSorting() {
@@ -109,6 +109,13 @@ function buildTableRow(row) {
   const addrPhone       = row.dest_phone || APP_STATE.addressesMap[row.address_name]?.phone || null;
   const addrContactHtml = renderContactButtons(addrPhone);
 
+  // ---- Mejora 3: cerca del punto de entrega ----
+  const nearPodHtml = row.near_pod === true
+    ? '<span class="badge badge--delivered">✓ Cerca</span>'
+    : row.near_pod === false
+      ? '<span class="badge badge--rejected">✗ Lejos</span>'
+      : '—';
+
   // ---- Campos custom ----
   const montoCobrar = row.monto_cobrar ? `$${esc(row.monto_cobrar)}` : '—';
   const rtoHtml     = row.rto
@@ -125,7 +132,7 @@ function buildTableRow(row) {
 
   return `<tr>
     <td>${esc(row.description)}</td>
-    <td class="text-muted">${esc(row.address_name)}</td>
+    <td class="text-muted">${esc(row.alt_code) || '—'}</td>
     <td class="text-muted">${addrTooltip}</td>
     <td>${esc(row.client_name || row.address_customer_name)}</td>
     <td class="text-muted">${esc(row.supplier_name) || '—'}</td>
@@ -140,6 +147,8 @@ function buildTableRow(row) {
     <td class="text-muted">${formatTime(row.eta)}</td>
     <td class="text-muted">${formatTime(row.pod_arrival)}</td>
     <td class="text-muted">${esc(row.reason) || '—'}</td>
+    <td class="text-muted">${esc(row.comment) || '—'}</td>
+    <td>${nearPodHtml}</td>
     <td>${podHtml}</td>
     <td>${imgsHtml}</td>
     <td class="text-muted">${montoCobrar}</td>

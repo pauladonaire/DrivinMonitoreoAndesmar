@@ -23,7 +23,7 @@
 
   /* Layout */
   --header-height:    60px;
-  --filters-height:   56px;
+  --filters-height:   94px; /* 56px filtros + 38px pills (Mejora 5) */
 }
 
 /* ---- Reset y base ---- */

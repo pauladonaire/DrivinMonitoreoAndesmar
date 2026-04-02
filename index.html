@@ -100,6 +100,14 @@
         <button class="btn-secondary" onclick="clearFilters()">Limpiar</button>
       </div>
     </div>
+
+    <!-- Mejora 5: Pills de estado de ruta -->
+    <div class="route-filter-pills" id="routeFilterPills">
+      <button class="route-pill active" data-filter="all"         onclick="setRouteFilter('all')">Todas las rutas</button>
+      <button class="route-pill"        data-filter="not_started" onclick="setRouteFilter('not_started')">⬜ Sin iniciar</button>
+      <button class="route-pill"        data-filter="in_progress" onclick="setRouteFilter('in_progress')">🟡 En curso</button>
+      <button class="route-pill"        data-filter="finished"    onclick="setRouteFilter('finished')">🟢 Finalizadas</button>
+    </div>
   </div>
 
   <!-- ===== CONTENIDO PRINCIPAL ===== -->
@@ -154,6 +162,25 @@
               <div class="kpi-label">% Pendientes <span class="kpi-info">ⓘ</span></div>
               <div class="kpi-value" id="valPendientes">—</div>
               <div class="kpi-tooltip-box">Pendientes ÷ Total órdenes × 100<br><em>Órdenes aún sin gestionar</em><br>🟢 ≤10% · 🟡 10–30% · 🔴 &gt;30%</div>
+            </div>
+          </div>
+
+          <!-- Fila 3: Mejora 4 — Promedios por vehículo + vehículos activos -->
+          <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+            <div class="kpi-card kpi-has-tooltip">
+              <div class="kpi-label">Prom. Bultos x Vehículo <span class="kpi-info">ⓘ</span></div>
+              <div class="kpi-value" id="valAvgBultos">—</div>
+              <div class="kpi-tooltip-box">Promedio de bultos (units_2) por vehículo único<br><em>Suma total de bultos ÷ cantidad de vehículos</em></div>
+            </div>
+            <div class="kpi-card kpi-has-tooltip">
+              <div class="kpi-label">Prom. Kg x Vehículo <span class="kpi-info">ⓘ</span></div>
+              <div class="kpi-value" id="valAvgKg">—</div>
+              <div class="kpi-tooltip-box">Promedio de kg (units_1) por vehículo único<br><em>Suma total de kg ÷ cantidad de vehículos</em></div>
+            </div>
+            <div class="kpi-card kpi-has-tooltip">
+              <div class="kpi-label">Vehículos Activos <span class="kpi-info">ⓘ</span></div>
+              <div class="kpi-value" id="valVehiclesActive">—</div>
+              <div class="kpi-tooltip-box">Cantidad de vehículos únicos con órdenes<br><em>Según los filtros activos</em></div>
             </div>
           </div>
         </div>
@@ -283,7 +310,7 @@
           <thead>
             <tr>
               <th class="sortable" data-col="description">Plan <span class="sort-icon">↕</span></th>
-              <th class="sortable" data-col="address_name">Cód. Dir. <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="alt_code">Cód. Dir. <span class="sort-icon">↕</span></th>
               <th class="sortable" data-col="code">Cód. Orden <span class="sort-icon">↕</span></th>
               <th class="sortable" data-col="client_name">Cliente <span class="sort-icon">↕</span></th>
               <th class="sortable" data-col="supplier_name">Proveedor <span class="sort-icon">↕</span></th>
@@ -298,6 +325,8 @@
               <th class="sortable" data-col="eta">ETA <span class="sort-icon">↕</span></th>
               <th class="sortable" data-col="pod_arrival">Llegada real <span class="sort-icon">↕</span></th>
               <th>Motivo rechazo</th>
+              <th>Comentario conductor</th>
+              <th>Cerca punto</th>
               <th>POD</th>
               <th>Imágenes</th>
               <th>Monto a cobrar</th>
@@ -306,7 +335,7 @@
           </thead>
           <tbody id="mainTableBody">
             <tr>
-              <td colspan="20">
+              <td colspan="22">
                 <div class="empty-state">
                   <div class="empty-icon">📦</div>
                   <div>Cargando datos...</div>
@@ -319,7 +348,17 @@
       <div class="pagination" id="pagination"></div>
     </section>
 
-    <!-- ===== 5. HISTORIAL DE CIERRES ===== -->
+    <!-- ===== 5. ACCIONES OPERATIVAS ===== -->
+    <section class="section">
+      <div class="section-header-row">
+        <h2 class="section-title">ACCIONES</h2>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-primary" onclick="openActionsModal()">+ Generar Acción</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 6. HISTORIAL DE CIERRES ===== -->
     <section class="section">
       <div class="section-header-row">
         <h2 class="section-title">HISTORIAL DE CIERRES</h2>
@@ -381,6 +420,49 @@
     </div>
   </div>
 
+  <!-- ===== MODAL NUEVA ACCIÓN ===== -->
+  <div class="modal-overlay" id="actionsModal" style="display:none;">
+    <div class="modal-box modal-box--actions">
+      <h2 class="modal-title">Generar Acción</h2>
+
+      <div class="action-form">
+        <div class="action-form-group">
+          <label for="actionDeposito">Sucursal / Depósito</label>
+          <select id="actionDeposito"><option value="">— Opcional —</option></select>
+        </div>
+        <div class="action-form-group">
+          <label for="actionCliente">Cliente</label>
+          <select id="actionCliente"><option value="">— Opcional —</option></select>
+        </div>
+        <div class="action-form-group">
+          <label for="actionCodigoOrden">Código de Orden</label>
+          <input type="text" id="actionCodigoOrden" placeholder="Código..." autocomplete="off">
+        </div>
+        <div class="action-form-group">
+          <label for="actionVehiculo">Vehículo</label>
+          <select id="actionVehiculo"><option value="">— Opcional —</option></select>
+        </div>
+        <div class="action-form-group">
+          <label for="actionConductor">Conductor</label>
+          <select id="actionConductor"><option value="">— Opcional —</option></select>
+        </div>
+        <div class="action-form-group action-form-group--full">
+          <label for="actionDescripcion">Descripción / Observación <span style="color:var(--color-danger)">*</span></label>
+          <textarea id="actionDescripcion" placeholder="Describí la acción tomada..."></textarea>
+        </div>
+      </div>
+
+      <div class="actions-list-title">Acciones del día</div>
+      <div id="actionsListContainer"></div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="sendActionsEmail()">Enviar por email</button>
+        <button class="btn-secondary" onclick="closeModal('actionsModal')">Cerrar</button>
+        <button class="btn-primary" onclick="saveAction()">Guardar acción</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== TOOLTIP ===== -->
   <div class="copy-tooltip" id="copyTooltip">¡Copiado!</div>
 
@@ -399,6 +481,8 @@
   <script src="js/top10.js"></script>
   <script src="js/drivers.js"></script>
   <script src="js/closure.js"></script>
+  <script src="js/actions.js"></script>
+  <script src="js/notifications.js"></script>
   <script src="js/refresh.js"></script>
   <script src="js/main.js"></script>
 

@@ -59,6 +59,29 @@ function calcAndRenderKPIs() {
   // % Pendientes: color inverso (más alto = peor)
   setKPI('kpiPendientes', pctPendientes, 'valPendientes', null, '%');
   colorPendientes('kpiPendientes', pctPendientes);
+
+  // ---- Mejora 4: Promedio de bultos y kg por vehículo ----
+  const vehicleBultos = {};
+  const vehicleKg     = {};
+  orders.forEach(o => {
+    const v = o.vehicle_code || '(sin vehículo)';
+    vehicleBultos[v] = (vehicleBultos[v] || 0) + (o.units_2 || 0);
+    vehicleKg[v]     = (vehicleKg[v]     || 0) + (o.units_1 || 0);
+  });
+  const vehicleList = Object.keys(vehicleBultos);
+  const avgBultos = vehicleList.length > 0
+    ? (Object.values(vehicleBultos).reduce((a, b) => a + b, 0) / vehicleList.length).toFixed(1)
+    : '—';
+  const avgKg = vehicleList.length > 0
+    ? (Object.values(vehicleKg).reduce((a, b) => a + b, 0) / vehicleList.length).toFixed(1)
+    : '—';
+
+  const valBultosEl   = document.getElementById('valAvgBultos');
+  const valKgEl       = document.getElementById('valAvgKg');
+  const valVehiclesEl = document.getElementById('valVehiclesActive');
+  if (valBultosEl)   valBultosEl.textContent   = avgBultos;
+  if (valKgEl)       valKgEl.textContent       = avgKg;
+  if (valVehiclesEl) valVehiclesEl.textContent = vehicleList.length || '—';
 }
 
 /**

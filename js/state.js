@@ -19,6 +19,12 @@ const APP_STATE = {
   driversPageSize: 15,
   driversSort:    { col: null, dir: 'asc' },
 
+  // Mejora 5: filtro de estado de ruta ('all' | 'not_started' | 'in_progress' | 'finished')
+  routeFilter: 'all',
+
+  // Mejora 7: códigos de órdenes ya notificados como "Domicilio No Visitado"
+  knownDomicilioNoVisitado: new Set(),
+
   charts: {
     barras: null,
     dona:   null,

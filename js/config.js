@@ -22,5 +22,10 @@ const EMAILJS_SERVICE_ID  = 'service_21rirpz';
 const EMAILJS_TEMPLATE_ID = 'template_c3bxv5v';
 const EMAILJS_PUBLIC_KEY  = 'Uh_jBG6KmjR_F6xuF';
 
+// Template para envío manual de acciones del día (Mejora 1)
+// Variables esperadas: {{date}}, {{actions_summary}}, {{generated_at}}
+// Crear en https://www.emailjs.com → Email Templates → New Template
+const ACTIONS_TEMPLATE_ID = 'template_3jqa29v';
+
 const REFRESH_INTERVAL_MS = 300000; // 5 minutos
 const PAGE_SIZE           = 20;

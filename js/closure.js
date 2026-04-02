@@ -84,6 +84,35 @@ async function closeDayProcedure() {
   // Órdenes pendientes
   const totalPending = orders.filter(o => o.status === 'pending').length;
 
+  // ---- Mejora 8: Resumen por sucursal ----
+  const byDeposito = {};
+  orders.forEach(o => {
+    const dep = o.schema_name || 'Sin sucursal';
+    if (!byDeposito[dep]) {
+      byDeposito[dep] = { total: 0, aprobadas: 0, rechazadas: 0, pending: 0, entregas: 0, retiros: 0 };
+    }
+    const d = byDeposito[dep];
+    d.total++;
+    if (o.category === 'delivery') d.entregas++;
+    if (o.category === 'pickup')   d.retiros++;
+    if (o.status === 'approved')   d.aprobadas++;
+    if (o.status === 'rejected')   d.rechazadas++;
+    if (o.status === 'pending')    d.pending++;
+  });
+  const depositosSummary = Object.entries(byDeposito)
+    .sort((a, b) => b[1].total - a[1].total)
+    .map(([dep, d]) => {
+      const gest = d.total - d.pending;
+      const eff  = gest > 0 ? ((d.aprobadas / gest) * 100).toFixed(1) : '0.0';
+      return `${dep}: ${d.total} órdenes | ✅ ${d.aprobadas} | ❌ ${d.rechazadas} | Ef: ${eff}%`;
+    })
+    .join('\n');
+
+  // ---- Mejora 1: Acciones del día ----
+  const actionsSummary = (typeof getActionsSummaryText === 'function')
+    ? getActionsSummaryText()
+    : 'Sin acciones registradas';
+
   const closedAt = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
   // Objeto de cierre
@@ -102,6 +131,8 @@ async function closeDayProcedure() {
     topRejectionReasons,
     topDriversRejected,
     topClientsRejected,
+    depositosSummary,  // Mejora 8
+    actionsSummary,    // Mejora 1
     closedAt,
   };
 
@@ -147,10 +178,12 @@ async function closeDayProcedure() {
           eff_entregas:    `${effDelivery}%`,
           eff_retiros:     `${effPickup}%`,
           otd:             `${otdPct}%`,
-          top_reasons:     topReasonsText,
-          top_drivers:     topDriversText,
-          top_clients:     topClientsText,
-          closed_at:       closedAt,
+          top_reasons:       topReasonsText,
+          top_drivers:       topDriversText,
+          top_clients:       topClientsText,
+          depositos_summary: depositosSummary,  // Mejora 8
+          actions_summary:   actionsSummary,    // Mejora 1
+          closed_at:         closedAt,
           // Aliases para compatibilidad con template anterior
           effectiveness:   `${effGeneral}%`,
           total_delivered: totalApproved,
@@ -210,6 +243,13 @@ function showClosureModal(data, emailStatus, emailMsg) {
          </div>`
       ).join('');
 
+  // Mejora 8: desglose por sucursal
+  const depositosHtml = data.depositosSummary
+    ? data.depositosSummary.split('\n').map(line =>
+        `<div style="font-size:12px;color:var(--color-text-muted);padding:4px 0;border-bottom:1px solid var(--color-border)">${line}</div>`
+      ).join('')
+    : '<p style="color:#a0b4c8;font-size:12px">Sin datos</p>';
+
   content.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
 
@@ -258,6 +298,10 @@ function showClosureModal(data, emailStatus, emailMsg) {
             <span class="closure-summary-value">${data.closedAt}</span>
           </div>
         </div>
+
+        <!-- Desglose por sucursal (Mejora 8) -->
+        <div style="color:var(--color-cyan);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin:16px 0 8px;">Desglose por sucursal</div>
+        <div>${depositosHtml}</div>
       </div>
 
       <!-- Columna derecha: rankings -->
@@ -298,6 +342,14 @@ function printClosureSummary(storageKey) {
   const topClientsRows = (data.topClientsRejected || [])
     .map((c, i) => `<tr><td>${i + 1}</td><td>${c.client}</td><td><b>${c.count}</b></td></tr>`)
     .join('');
+
+  // Mejora 8: tabla por sucursal en PDF
+  const depositosRows = (data.depositosSummary || '')
+    .split('\n').filter(Boolean)
+    .map(line => {
+      const parts = line.split('|').map(p => p.trim());
+      return `<tr>${parts.map(p => `<td>${p}</td>`).join('')}</tr>`;
+    }).join('');
 
   const html = `<!DOCTYPE html>
 <html lang="es">
@@ -346,6 +398,11 @@ function printClosureSummary(storageKey) {
       <table class="rank">
         <thead><tr><th>#</th><th>Motivo</th><th>Cant.</th></tr></thead>
         <tbody>${topReasonsRows || '<tr><td colspan="3">Sin datos</td></tr>'}</tbody>
+      </table>
+
+      <h2>Resumen por sucursal</h2>
+      <table class="rank">
+        <tbody>${depositosRows || '<tr><td>Sin datos</td></tr>'}</tbody>
       </table>
     </div>
 
