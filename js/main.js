@@ -4,7 +4,6 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
 
-  initEmailJS();
   initLightbox();
   initTableSorting();
   initFilterListeners();
@@ -62,18 +61,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Teléfonos en background deshabilitado: el endpoint v3/pods devuelve 403
   // loadPhonesBackground();
 });
-
-function initEmailJS() {
-  if (!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY.startsWith('[REEMPLAZAR')) {
-    console.warn('[EmailJS] No configurado.');
-    return;
-  }
-  try {
-    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-  } catch (err) {
-    console.warn('[EmailJS] Error al inicializar:', err);
-  }
-}
 
 /**
  * Carga teléfonos desde v3/pods en segundo plano.

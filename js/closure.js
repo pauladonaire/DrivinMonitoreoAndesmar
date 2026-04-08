@@ -1,18 +1,6 @@
 /* ============================================================
-   closure.js — Cierre del día: localStorage, EmailJS y CSV
-   ============================================================
-
-   INSTRUCCIONES EmailJS:
-   1. Crear cuenta en https://www.emailjs.com (plan Free — 200 emails/mes)
-   2. Add New Service → conectar tu cuenta de email (Gmail, Outlook, etc.)
-      Copiar el "Service ID" generado.
-   3. Email Templates → New Template → diseñar el mail con estas variables:
-        {{date}}, {{total_orders}}, {{total_delivered}}, {{total_rejected}},
-        {{effectiveness}}, {{top_reasons}}, {{closed_at}}
-      Copiar el "Template ID".
-   4. Account → copiar Public Key.
-   5. Pegar los tres valores en js/config.js:
-        EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY
+   closure.js — Cierre del día
+   Email enviado via Google Apps Script (GAS).
    ============================================================ */
 
 /**
