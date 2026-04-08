@@ -140,63 +140,36 @@ async function closeDayProcedure() {
   const storageKey = `fleet_closure_${hoy}`;
   localStorage.setItem(storageKey, JSON.stringify(closureData));
 
-  // 2. Enviar email vía EmailJS
-  let emailStatus = 'ok';
-  let emailMsg    = `Email enviado a ${EMAIL_DESTINO}`;
+  // 2. Enviar a Google Sheets + email vía GAS
+  const topReasonsText = topRejectionReasons
+    .map((r, i) => `${i + 1}. ${r.reason}: ${r.count}`)
+    .join('\n');
+  const topDriversText = topDriversRejected
+    .map((d, i) => `${i + 1}. ${d.driver} (${d.vehicle}): ${d.count} rechazadas`)
+    .join('\n');
+  const topClientsText = topClientsRejected
+    .map((c, i) => `${i + 1}. ${c.client}: ${c.count} rechazadas`)
+    .join('\n');
 
-  if (
-    EMAILJS_SERVICE_ID  === '[REEMPLAZAR_CON_SERVICE_ID]'  ||
-    EMAILJS_TEMPLATE_ID === '[REEMPLAZAR_CON_TEMPLATE_ID]' ||
-    EMAILJS_PUBLIC_KEY  === '[REEMPLAZAR_CON_PUBLIC_KEY]'
-  ) {
-    emailStatus = 'err';
-    emailMsg    = '⚠️ EmailJS no configurado. Completar config.js con los datos de la cuenta.';
-  } else {
-    try {
-      const topReasonsText = topRejectionReasons
-        .map((r, i) => `${i + 1}. ${r.reason}: ${r.count}`)
-        .join('\n');
-
-      const topDriversText = topDriversRejected
-        .map((d, i) => `${i + 1}. ${d.driver} (${d.vehicle}): ${d.count} rechazadas`)
-        .join('\n');
-
-      const topClientsText = topClientsRejected
-        .map((c, i) => `${i + 1}. ${c.client}: ${c.count} rechazadas`)
-        .join('\n');
-
-      await emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        {
-          date:            hoy,
-          total_orders:    totalOrders,
-          total_approved:  totalApproved,
-          total_rejected:  totalRejected,
-          total_pending:   totalPending,
-          eff_general:     `${effGeneral}%`,
-          eff_entregas:    `${effDelivery}%`,
-          eff_retiros:     `${effPickup}%`,
-          otd:             `${otdPct}%`,
-          top_reasons:       topReasonsText,
-          top_drivers:       topDriversText,
-          top_clients:       topClientsText,
-          depositos_summary: depositosSummary,  // Mejora 8
-          actions_summary:   actionsSummary,    // Mejora 1
-          closed_at:         closedAt,
-          // Aliases para compatibilidad con template anterior
-          effectiveness:   `${effGeneral}%`,
-          total_delivered: totalApproved,
-        }
-      );
-    } catch (err) {
-      emailStatus = 'err';
-      emailMsg    = `Error al enviar email: ${err.text || err.message || 'desconocido'}`;
-    }
+  let gasStatus = 'ok';
+  let gasMsg    = `Guardado en Sheets y email enviado a ${EMAIL_DESTINO}`;
+  try {
+    await gasPost({
+      action: 'close_day',
+      data: {
+        ...closureData,
+        top_reasons: topReasonsText,
+        top_drivers: topDriversText,
+        top_clients: topClientsText,
+      }
+    });
+  } catch (err) {
+    gasStatus = 'err';
+    gasMsg    = `Error al enviar a Google Sheets: ${err.message}`;
   }
 
   // 3. Mostrar modal de confirmación
-  showClosureModal(closureData, emailStatus, emailMsg);
+  showClosureModal(closureData, gasStatus, gasMsg);
 
   // Actualizar historial
   renderClosureHistory();

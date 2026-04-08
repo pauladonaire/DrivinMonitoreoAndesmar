@@ -1,10 +1,8 @@
 /* ============================================================
    actions.js — Panel de Acciones operativas del día
-   Mejora 1
 
-   EmailJS template para envío manual: ACTIONS_TEMPLATE_ID
-   Variables esperadas en el template:
-     {{date}}, {{actions_summary}}, {{generated_at}}
+   Persistencia: localStorage (caché inmediato) + Google Sheets (fuente de verdad).
+   Email: via Google Apps Script (GAS), no EmailJS.
    ============================================================ */
 
 /** Clave de localStorage para acciones del día actual */
@@ -36,12 +34,24 @@ function saveActions(actions) {
 
 /**
  * Abre el modal de acciones, popula los selects dinámicos
- * y renderiza la lista actual.
+ * y renderiza la lista actual. Sincroniza desde GAS en background
+ * para que todos los usuarios vean las acciones de los demás.
  */
-function openActionsModal() {
+async function openActionsModal() {
   _populateActionsSelects();
-  renderActionsList();
+  renderActionsList(); // inmediato desde localStorage
   document.getElementById('actionsModal').style.display = 'flex';
+
+  // Sincronizar desde Google Sheets (fuente de verdad multi-usuario)
+  try {
+    const result = await gasGet({ action: 'get_actions', date: getTodayString() });
+    if (result && result.status === 'ok' && Array.isArray(result.actions)) {
+      saveActions(result.actions);
+      renderActionsList();
+    }
+  } catch (err) {
+    console.warn('[actions] No se pudo sincronizar con GAS:', err.message);
+  }
 }
 
 /** Puebla los selects del formulario con datos de APP_STATE.rawData */
@@ -102,6 +112,9 @@ function saveAction() {
   });
 
   renderActionsList();
+  // Persistir en Google Sheets (background, no bloquea la UI)
+  gasPost({ action: 'save_action', data: action })
+    .catch(err => console.warn('[actions] Error guardando en GAS:', err.message));
 }
 
 /**
@@ -112,6 +125,9 @@ function deleteAction(id) {
   const actions = loadActions().filter(a => a.id !== id);
   saveActions(actions);
   renderActionsList();
+  // Eliminar en Google Sheets (background)
+  gasPost({ action: 'delete_action', id })
+    .catch(err => console.warn('[actions] Error eliminando en GAS:', err.message));
 }
 
 /**
@@ -171,34 +187,18 @@ function getActionsSummaryText() {
 }
 
 /**
- * Envía las acciones del día por email vía EmailJS (template_3jqa29v).
- * Se dispara desde el botón "Enviar acciones" del modal.
+ * Envía las acciones del día por email vía Google Apps Script.
+ * El GAS lee las acciones del Sheet y envía el correo con el template HTML.
  */
 async function sendActionsEmail() {
-  if (
-    !ACTIONS_TEMPLATE_ID ||
-    ACTIONS_TEMPLATE_ID === '[REEMPLAZAR_CON_ACTIONS_TEMPLATE_ID]'
-  ) {
-    alert('⚠️ Template de acciones no configurado. Crear template_3jqa29v en EmailJS y actualizar ACTIONS_TEMPLATE_ID en config.js.');
-    return;
-  }
-
-  const summary = getActionsSummaryText();
-  if (summary === 'Sin acciones registradas') {
+  if (loadActions().length === 0) {
     alert('No hay acciones registradas hoy para enviar.');
     return;
   }
-
-  const now = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
   try {
-    await emailjs.send(EMAILJS_SERVICE_ID, ACTIONS_TEMPLATE_ID, {
-      date:            getTodayString(),
-      actions_summary: summary,
-      generated_at:    now,
-    });
-    alert('✅ Acciones enviadas por email correctamente.');
+    await gasPost({ action: 'send_actions_email', date: getTodayString() });
+    alert('✅ Correo de acciones enviado correctamente.');
   } catch (err) {
-    alert(`Error al enviar: ${err.text || err.message || 'desconocido'}`);
+    alert('❌ Error al enviar el correo: ' + (err.message || 'Verificar conexión'));
   }
 }

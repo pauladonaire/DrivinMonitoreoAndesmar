@@ -22,10 +22,9 @@ const EMAILJS_SERVICE_ID  = 'service_21rirpz';
 const EMAILJS_TEMPLATE_ID = 'template_c3bxv5v';
 const EMAILJS_PUBLIC_KEY  = 'Uh_jBG6KmjR_F6xuF';
 
-// Template para envío manual de acciones del día (Mejora 1)
-// Variables esperadas: {{date}}, {{actions_summary}}, {{generated_at}}
-// Crear en https://www.emailjs.com → Email Templates → New Template
-const ACTIONS_TEMPLATE_ID = 'template_3jqa29v';
+// Google Apps Script Web App — maneja emails, Sheets y cierre automático
+// Redeploy en script.google.com si el código GAS cambia (misma URL)
+const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycby0MDTJ9-Hvqww_Ze4ILTHUlAYzmc5RUo5UZ8pSnvBUDit1tMGxMFVF3xvyplNOO7h37A/exec';
 
 const REFRESH_INTERVAL_MS = 300000; // 5 minutos
 const PAGE_SIZE           = 20;

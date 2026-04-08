@@ -45,6 +45,7 @@ async function doRefresh() {
     applyFilters(); // también llama a renderAll()
 
     updateRefreshText();
+    updateGASStats(); // actualizar hoja Estadisticas en background
   } catch (err) {
     console.error('[Refresh] Error al actualizar datos:', err);
     showErrorBanner(`Error de red al actualizar: ${err.message}`);
@@ -127,4 +128,77 @@ function showErrorBanner(msg) {
 function hideErrorBanner() {
   const banner = document.getElementById('errorBanner');
   if (banner) banner.style.display = 'none';
+}
+
+/* ============================================================
+   ACTUALIZACIÓN DE ESTADÍSTICAS EN GOOGLE SHEETS
+   ============================================================ */
+
+/**
+ * Calcula las estadísticas actuales desde APP_STATE y las envía
+ * a la hoja Estadisticas via GAS. Fire-and-forget.
+ */
+function updateGASStats() {
+  if (!APP_STATE.filteredOrders.length) return;
+
+  const payload = _buildStatsPayload();
+  if (!payload) return;
+
+  gasPost({ action: 'update_stats', data: payload })
+    .catch(err => console.warn('[refresh] Error actualizando Estadisticas en GAS:', err.message));
+}
+
+/**
+ * Construye el objeto de estadísticas actuales a partir de filteredOrders.
+ */
+function _buildStatsPayload() {
+  const orders = APP_STATE.filteredOrders;
+  if (!orders.length) return null;
+
+  const total    = orders.length;
+  const approved = orders.filter(o => o.status === 'approved').length;
+  const rejected = orders.filter(o => o.status === 'rejected').length;
+  const pending  = orders.filter(o => o.status === 'pending').length;
+  const managed  = orders.filter(o => o.status !== 'pending').length;
+
+  const entMgd = orders.filter(o => o.category === 'delivery' && o.status !== 'pending').length;
+  const entApp = orders.filter(o => o.category === 'delivery' && o.status === 'approved').length;
+  const retMgd = orders.filter(o => o.category === 'pickup'   && o.status !== 'pending').length;
+  const retApp = orders.filter(o => o.category === 'pickup'   && o.status === 'approved').length;
+
+  const effGeneral  = managed > 0 ? ((approved / managed) * 100).toFixed(1) : '0.0';
+  const effEntregas = entMgd  > 0 ? ((entApp   / entMgd)  * 100).toFixed(1) : '0.0';
+  const effRetiros  = retMgd  > 0 ? ((retApp   / retMgd)  * 100).toFixed(1) : '0.0';
+  const otd = total > 0
+    ? ((orders.filter(o => o.is_otd === true).length / total) * 100).toFixed(1)
+    : '0.0';
+
+  // Vehículos activos y promedios
+  const vehicleBultos = {};
+  const vehicleKg     = {};
+  orders.forEach(o => {
+    const v = o.vehicle_code || '(sin vehículo)';
+    vehicleBultos[v] = (vehicleBultos[v] || 0) + (o.units_2 || 0);
+    vehicleKg[v]     = (vehicleKg[v]     || 0) + (o.units_1 || 0);
+  });
+  const vList        = Object.keys(vehicleBultos);
+  const totalBultos  = Object.values(vehicleBultos).reduce((a, b) => a + b, 0);
+  const totalKg      = Object.values(vehicleKg).reduce((a, b) => a + b, 0);
+  const avgBultos    = vList.length > 0 ? (totalBultos / vList.length).toFixed(1) : '0';
+  const avgKg        = vList.length > 0 ? (totalKg     / vList.length).toFixed(1) : '0';
+
+  return {
+    date:            getTodayString(),
+    total_orders:    total,
+    total_approved:  approved,
+    total_rejected:  rejected,
+    total_pending:   pending,
+    eff_general:     effGeneral,
+    eff_entregas:    effEntregas,
+    eff_retiros:     effRetiros,
+    otd,
+    vehicles_active: vList.length,
+    avg_bultos:      avgBultos,
+    avg_kg:          avgKg,
+  };
 }
