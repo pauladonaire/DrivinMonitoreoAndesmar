@@ -15,64 +15,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     const today = getTodayString();
 
-    // ---- Conductores + PODs en PARALELO (más rápido) ----
-    const [driversResult, podsResult] = await Promise.allSettled([
-      fetchDrivers(),
-      fetchPods(today),
-    ]);
-
-    // Procesar conductores (si tuvo éxito)
-    if (driversResult.status === 'fulfilled') {
-      driversResult.value.forEach(d => {
-        if (d.email) {
-          APP_STATE.driversMap[d.email] = {
-            phone:      d.phone      || null,
-            first_name: d.first_name || '',
-            last_name:  d.last_name  || '',
-          };
-        }
-      });
-      console.log(`[main] Conductores cargados: ${driversResult.value.length}`);
-    } else {
-      console.warn('[main] No se pudieron cargar conductores:', driversResult.reason?.message);
-    }
-
-    // Procesar PODs (obligatorio)
-    if (podsResult.status === 'rejected') {
-      throw podsResult.reason;
-    }
-    const stops = podsResult.value;
+    // ---- PODs primero: mostrar datos ni bien llegan ----
+    const stops = await fetchPods(today);
 
     APP_STATE.rawData    = stops;
     APP_STATE.lastUpdate = new Date();
 
-    console.log(`[main] Stops cargados: ${stops.length}`);
-    // DEBUG: identificar campos de teléfono disponibles en v2/pods
-    if (stops.length > 0) {
-      const s = stops[0];
-      console.log('[debug phone] Campos de stop[0]:', {
-        contact_phone:         s.contact_phone,
-        address_contact_phone: s.address_contact_phone,
-        address_phone:         s.address_phone,
-        phone:                 s.phone,
-        // Muestra todas las keys que contengan "phone"
-        phone_keys: Object.keys(s).filter(k => k.toLowerCase().includes('phone')),
-      });
-      // DEBUG: campos de order[0] — verificar comment y near_pod
-      const firstOrder = (s.orders || [])[0];
-      if (firstOrder) {
-        console.log('[debug order] Todas las keys de orders[0]:', Object.keys(firstOrder));
-        console.log('[debug order] comment:', firstOrder.comment);
-        console.log('[debug order] near_pod:', firstOrder.near_pod);
-        console.log('[debug order] custom_fields:', firstOrder.custom_fields);
-      }
-    }
-
     hideErrorBanner();
     populateFilters();
     applyFilters(); // renderiza todo inmediatamente
-
-    console.log(`[main] filteredOrders: ${APP_STATE.filteredOrders.length}`);
 
   } catch (err) {
     console.error('[main] Error en carga inicial:', err);
@@ -91,6 +42,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (e.target === overlay) overlay.style.display = 'none';
     });
   });
+
+  // ---- Conductores en background (no bloquea el render inicial) ----
+  fetchDrivers()
+    .then(drivers => {
+      drivers.forEach(d => {
+        if (d.email) {
+          APP_STATE.driversMap[d.email] = {
+            phone:      d.phone      || null,
+            first_name: d.first_name || '',
+            last_name:  d.last_name  || '',
+          };
+        }
+      });
+    })
+    .catch(err => console.warn('[main] No se pudieron cargar conductores:', err.message));
 
   // Teléfonos en background deshabilitado: el endpoint v3/pods devuelve 403
   // loadPhonesBackground();
