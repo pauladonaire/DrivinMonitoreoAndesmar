@@ -112,9 +112,10 @@ function saveAction() {
   });
 
   renderActionsList();
-  // Persistir en Google Sheets (background, no bloquea la UI)
+  // Persistir en Google Sheets y enviar email (background, no bloquea la UI)
   gasPost({ action: 'save_action', data: action })
-    .catch(err => console.warn('[actions] Error guardando en GAS:', err.message));
+    .then(() => gasPost({ action: 'send_actions_email', date: getTodayString() }))
+    .catch(err => console.warn('[actions] Error guardando/enviando en GAS:', err.message));
 }
 
 /**
