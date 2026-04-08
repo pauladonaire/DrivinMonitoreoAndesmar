@@ -44,7 +44,7 @@ async function openActionsModal() {
 
   // Sincronizar desde Google Sheets (fuente de verdad multi-usuario)
   try {
-    const result = await gasGet({ action: 'get_actions', date: getTodayString() });
+    const result = await gasPost({ action: 'get_actions', date: getTodayString() });
     if (result && result.status === 'ok' && Array.isArray(result.actions)) {
       saveActions(result.actions);
       renderActionsList();

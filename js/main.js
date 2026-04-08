@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     hideErrorBanner();
     populateFilters();
     applyFilters(); // renderiza todo inmediatamente
+    updateGASStats(); // enviar stats iniciales a Sheets (background)
 
   } catch (err) {
     console.error('[main] Error en carga inicial:', err);
