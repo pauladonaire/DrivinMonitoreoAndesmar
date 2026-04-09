@@ -76,12 +76,18 @@ function calcAndRenderKPIs() {
     ? (Object.values(vehicleKg).reduce((a, b) => a + b, 0) / vehicleList.length).toFixed(1)
     : '—';
 
+  const avgOrders = vehicleList.length > 0
+    ? (totalOrdenes / vehicleList.length).toFixed(1)
+    : '—';
+
   const valBultosEl   = document.getElementById('valAvgBultos');
   const valKgEl       = document.getElementById('valAvgKg');
   const valVehiclesEl = document.getElementById('valVehiclesActive');
-  if (valBultosEl)   valBultosEl.textContent   = avgBultos;
-  if (valKgEl)       valKgEl.textContent       = avgKg;
-  if (valVehiclesEl) valVehiclesEl.textContent = vehicleList.length || '—';
+  const valAvgOrdersEl = document.getElementById('valAvgOrders');
+  if (valBultosEl)    valBultosEl.textContent    = avgBultos;
+  if (valKgEl)        valKgEl.textContent        = avgKg;
+  if (valVehiclesEl)  valVehiclesEl.textContent  = vehicleList.length || '—';
+  if (valAvgOrdersEl) valAvgOrdersEl.textContent = avgOrders;
 }
 
 /**

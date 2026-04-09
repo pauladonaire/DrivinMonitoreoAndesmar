@@ -2,13 +2,34 @@
    main.js — Inicialización y orquestación
    ============================================================ */
 
-document.addEventListener('DOMContentLoaded', async () => {
-
+document.addEventListener('DOMContentLoaded', () => {
+  // Inicializar listeners de UI (no requieren datos)
   initLightbox();
   initTableSorting();
   initFilterListeners();
   initDriversTableSorting();
 
+  // Verificar sesión: si ya está logueado, iniciar app; si no, mostrar login
+  if (typeof checkAuth === 'function') {
+    checkAuth();
+    if (typeof isLoggedIn === 'function' && isLoggedIn()) {
+      const session = typeof getSession === 'function' ? getSession() : null;
+      if (session && typeof applyProfileRestrictions === 'function') {
+        applyProfileRestrictions(session);
+      }
+      initApp();
+    }
+  } else {
+    // Sin auth.js, arrancar directamente
+    initApp();
+  }
+});
+
+/**
+ * Inicializa la app principal (carga de datos, render, auto-refresh).
+ * Llamado por auth.js después del login, o directamente en DOMContentLoaded.
+ */
+async function initApp() {
   setLoadingState(true);
 
   try {
@@ -22,6 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     hideErrorBanner();
     populateFilters();
+    if (typeof lockDepositoFilter === 'function') lockDepositoFilter();
     applyFilters(); // renderiza todo inmediatamente
     updateGASStats(); // enviar stats iniciales a Sheets (background)
 
@@ -60,7 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Teléfonos en background deshabilitado: el endpoint v3/pods devuelve 403
   // loadPhonesBackground();
-});
+}
 
 /**
  * Carga teléfonos desde v3/pods en segundo plano.

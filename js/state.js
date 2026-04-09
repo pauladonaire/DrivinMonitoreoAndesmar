@@ -22,6 +22,9 @@ const APP_STATE = {
   // Mejora 5: filtro de estado de ruta ('all' | 'not_started' | 'in_progress' | 'finished')
   routeFilter: 'all',
 
+  // Login: depósitos permitidos para perfil monitoreosuc (null = sin restricción)
+  userDepositos: null,
+
   // Mejora 7: códigos de órdenes ya notificados como "Domicilio No Visitado"
   knownDomicilioNoVisitado: new Set(),
 

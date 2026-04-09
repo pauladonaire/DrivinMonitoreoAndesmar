@@ -87,16 +87,19 @@ function saveAction() {
     return;
   }
 
+  const session = typeof getSession === 'function' ? getSession() : null;
   const action = {
-    id:           Date.now(),
-    timestamp:    new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
-    date:         getTodayString(),
-    deposito:     document.getElementById('actionDeposito')?.value   || '',
-    cliente:      document.getElementById('actionCliente')?.value    || '',
-    codigo_orden: document.getElementById('actionCodigoOrden')?.value.trim() || '',
-    vehiculo:     document.getElementById('actionVehiculo')?.value   || '',
-    conductor:    document.getElementById('actionConductor')?.value  || '',
-    descripcion:  desc,
+    id:              Date.now(),
+    timestamp:       new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+    date:            getTodayString(),
+    deposito:        document.getElementById('actionDeposito')?.value   || '',
+    cliente:         document.getElementById('actionCliente')?.value    || '',
+    codigo_orden:    document.getElementById('actionCodigoOrden')?.value.trim() || '',
+    vehiculo:        document.getElementById('actionVehiculo')?.value   || '',
+    conductor:       document.getElementById('actionConductor')?.value  || '',
+    descripcion:     desc,
+    usuario:         session?.usuario         || '',
+    nombre_completo: session?.nombre_completo || '',
   };
 
   const actions = loadActions();

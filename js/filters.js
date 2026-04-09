@@ -135,6 +135,9 @@ function applyFilters() {
   // Mejora 5: filtro de estado de ruta
   const routeF = APP_STATE.routeFilter || 'all';
 
+  // Login: restricción de depósito para perfil monitoreosuc
+  const userDeps = APP_STATE.userDepositos; // null = sin restricción
+
   const rows = [];
 
   APP_STATE.rawData.forEach(stop => {
@@ -142,6 +145,9 @@ function applyFilters() {
     if (routeF === 'not_started' && stop.route_is_started !== false) return;
     if (routeF === 'in_progress' && !(stop.route_is_started === true && stop.route_is_finished === false)) return;
     if (routeF === 'finished'    && stop.route_is_finished !== true) return;
+
+    // Restricción de perfil: monitoreosuc solo ve sus depósitos
+    if (userDeps && userDeps.length > 0 && !userDeps.includes(stop.schema_name)) return;
 
     if (deposito  && stop.schema_name  !== deposito)  return;
     if (flota     && stop.fleet_name   !== flota)     return;
@@ -236,6 +242,13 @@ function buildFlatRow(stop, order) {
     near_pod: order.near_pod === 'Si' ? true
             : order.near_pod === 'No' ? false
             : (order.near_pod ?? null),
+
+    // Mejora 4 (Login): VISITÓ? — visita al punto
+    visit_arrival: stop.visit_arrival || order.visit_arrival || null,
+    visit_leave:   stop.visit_leave   || order.visit_leave   || null,
+
+    // Mejora 5: PARADA — posición en la ruta
+    position: stop.position ?? order.position ?? null,
   };
 }
 

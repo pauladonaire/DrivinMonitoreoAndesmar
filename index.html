@@ -13,8 +13,38 @@
   <link rel="stylesheet" href="css/tables.css">
   <link rel="stylesheet" href="css/charts.css">
   <link rel="stylesheet" href="css/modal.css">
+  <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
+
+  <!-- ===== PANTALLA DE LOGIN ===== -->
+  <div id="loginScreen" style="display:none;">
+    <div class="login-box">
+      <div class="login-logo-area">
+        <img src="assetslogo_andesmar.png"
+             onerror="this.onerror=null; this.src='assets/logo_andesmar.png';"
+             alt="Andesmar Cargas" class="login-logo">
+        <div class="login-title">MONITOREO DE FLOTA</div>
+      </div>
+      <div class="login-form">
+        <div class="login-field">
+          <label for="loginUsuario">Usuario</label>
+          <input type="text" id="loginUsuario" placeholder="Tu usuario" autocomplete="username"
+                 onkeydown="onLoginKeydown(event)">
+        </div>
+        <div class="login-field">
+          <label for="loginClave">Contraseña</label>
+          <input type="password" id="loginClave" placeholder="Tu contraseña" autocomplete="current-password"
+                 onkeydown="onLoginKeydown(event)">
+        </div>
+        <div class="login-error" id="loginError"></div>
+        <button class="btn-primary login-btn" id="loginBtn" onclick="doLogin()">Ingresar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CONTENIDO DE LA APP (se oculta hasta hacer login) ===== -->
+  <div id="appContent" style="display:none;">
 
   <!-- ===== HEADER ===== -->
   <header class="app-header">
@@ -36,9 +66,19 @@
         <span class="refresh-text" id="refreshText">Iniciando...</span>
         <div class="spinner" id="loadingSpinner" style="display:none;"></div>
       </div>
+      <!-- Bloque de usuario -->
+      <div class="header-user-block">
+        <span class="header-user-name" id="headerUserInfo"></span>
+        <span class="header-user-role" id="headerUserRole"></span>
+      </div>
+      <!-- Gestión usuarios (solo admin) -->
+      <button class="btn-user-mgmt" id="btnUserMgmt" onclick="openUserMgmt()" style="display:none;">
+        Usuarios
+      </button>
       <button class="btn-close-day" id="btnCloseDay" onclick="closeDayProcedure()">
         Cerrar día
       </button>
+      <button class="btn-logout" onclick="doLogout()">Salir</button>
     </div>
   </header>
 
@@ -165,8 +205,13 @@
             </div>
           </div>
 
-          <!-- Fila 3: Mejora 4 — Promedios por vehículo + vehículos activos -->
-          <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+          <!-- Fila 3: Promedios por vehículo + vehículos activos -->
+          <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
+            <div class="kpi-card kpi-has-tooltip">
+              <div class="kpi-label">Prom. Órdenes x Vehículo <span class="kpi-info">ⓘ</span></div>
+              <div class="kpi-value" id="valAvgOrders">—</div>
+              <div class="kpi-tooltip-box">Total de órdenes ÷ cantidad de vehículos activos<br><em>Según los filtros activos</em></div>
+            </div>
             <div class="kpi-card kpi-has-tooltip">
               <div class="kpi-label">Prom. Bultos x Vehículo <span class="kpi-info">ⓘ</span></div>
               <div class="kpi-value" id="valAvgBultos">—</div>
@@ -310,6 +355,7 @@
           <thead>
             <tr>
               <th class="sortable" data-col="description">Plan <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="position">Parada <span class="sort-icon">↕</span></th>
               <th class="sortable" data-col="alt_code">Cód. Dir. <span class="sort-icon">↕</span></th>
               <th class="sortable" data-col="code">Cód. Orden <span class="sort-icon">↕</span></th>
               <th class="sortable" data-col="client_name">Cliente <span class="sort-icon">↕</span></th>
@@ -324,6 +370,7 @@
               <th>Bultos</th>
               <th class="sortable" data-col="eta">ETA <span class="sort-icon">↕</span></th>
               <th class="sortable" data-col="pod_arrival">Llegada real <span class="sort-icon">↕</span></th>
+              <th>VISITÓ?</th>
               <th>Motivo rechazo</th>
               <th>Comentario conductor</th>
               <th>Cerca punto</th>
@@ -335,7 +382,7 @@
           </thead>
           <tbody id="mainTableBody">
             <tr>
-              <td colspan="22">
+              <td colspan="24">
                 <div class="empty-state">
                   <div class="empty-icon">📦</div>
                   <div>Cargando datos...</div>
@@ -462,8 +509,63 @@
     </div>
   </div>
 
+  <!-- ===== MODAL GESTIÓN DE USUARIOS (solo admin) ===== -->
+  <div class="modal-overlay" id="userMgmtModal" style="display:none;">
+    <div class="modal-box modal-box--wide">
+      <h2 class="modal-title">Gestión de Usuarios</h2>
+      <div class="user-mgmt-grid">
+        <!-- Lista de usuarios existentes -->
+        <div class="user-list-section">
+          <div class="user-list-title">Usuarios registrados</div>
+          <div id="userMgmtList">
+            <div style="color:#a0b4c8;padding:12px;">Cargando...</div>
+          </div>
+        </div>
+        <!-- Formulario agregar / editar -->
+        <div class="user-form-section">
+          <div class="user-list-title">Nuevo / Editar usuario</div>
+          <div class="user-form-fields">
+            <div class="user-form-group">
+              <label>Nombre completo</label>
+              <input type="text" id="userFormNombre" placeholder="Nombre completo">
+            </div>
+            <div class="user-form-group">
+              <label>Usuario</label>
+              <input type="text" id="userFormUsuario" placeholder="Nombre de usuario">
+            </div>
+            <div class="user-form-group">
+              <label>Contraseña</label>
+              <input type="text" id="userFormClave" placeholder="Contraseña">
+            </div>
+            <div class="user-form-group">
+              <label>Perfil</label>
+              <select id="userFormPerfil" onchange="_toggleDepositosField()">
+                <option value="monitoreo">Monitoreo</option>
+                <option value="admin">Admin</option>
+                <option value="monitoreosuc">Sucursal</option>
+              </select>
+            </div>
+            <div class="user-form-group" id="userFormDepositosGroup" style="display:none;">
+              <label>Depósitos (separados por coma)</label>
+              <input type="text" id="userFormDepositos" placeholder="Dep1, Dep2, ...">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="btn-secondary" onclick="newUserForm()">Nuevo</button>
+            <button class="btn-primary" onclick="saveUserForm()">Guardar</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-primary" onclick="closeModal('userMgmtModal')">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== TOOLTIP ===== -->
   <div class="copy-tooltip" id="copyTooltip">¡Copiado!</div>
+
+  </div><!-- /#appContent -->
 
   <!-- ===== CDN ===== -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -483,6 +585,7 @@
   <script src="js/actions.js"></script>
   <script src="js/notifications.js"></script>
   <script src="js/refresh.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/main.js"></script>
 
 </body>

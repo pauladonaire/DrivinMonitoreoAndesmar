@@ -6,8 +6,8 @@
 let _lbImages = [];
 let _lbIndex  = 0;
 
-// Número total de columnas de la tabla (para colspans) — Mejoras 2+3 suman 2
-const TABLE_COLS = 22;
+// Número total de columnas de la tabla (para colspans)
+const TABLE_COLS = 24; // +2: PARADA + VISITÓ?
 
 /** Inicializa los listeners de ordenamiento en th.sortable */
 function initTableSorting() {
@@ -130,8 +130,21 @@ function buildTableRow(row) {
     ? `<span class="td-has-tooltip">${esc(row.code)}<span class="td-tooltip-box"><strong>Dirección:</strong> ${addrLine1 || '—'}<br><strong>Localidad:</strong> ${addrCity || '—'}<br><strong>Provincia:</strong> ${addrProv || '—'}</span></span>`
     : esc(row.code);
 
+  // ---- VISITÓ? ----
+  const visitoHtml = row.visit_arrival
+    ? (() => {
+        const llegada = formatTime(row.visit_arrival);
+        const salida  = formatTime(row.visit_leave);
+        return `<span class="td-has-tooltip badge badge--delivered">SI<span class="td-tooltip-box">Llegada: ${llegada}<br>Salida: ${salida}</span></span>`;
+      })()
+    : '<span class="badge badge--rejected">NO</span>';
+
+  // ---- PARADA ----
+  const paradaHtml = row.position != null ? String(row.position) : '—';
+
   return `<tr>
     <td>${esc(row.description)}</td>
+    <td class="text-muted" style="text-align:center;">${paradaHtml}</td>
     <td class="text-muted">${esc(row.alt_code) || '—'}</td>
     <td class="text-muted">${addrTooltip}</td>
     <td>${esc(row.client_name || row.address_customer_name)}</td>
@@ -146,6 +159,7 @@ function buildTableRow(row) {
     <td class="text-muted">${row.units_2 != null ? row.units_2 : '—'}</td>
     <td class="text-muted">${formatTime(row.eta)}</td>
     <td class="text-muted">${formatTime(row.pod_arrival)}</td>
+    <td style="text-align:center;">${visitoHtml}</td>
     <td class="text-muted">${esc(row.reason) || '—'}</td>
     <td class="text-muted">${esc(row.comment) || '—'}</td>
     <td>${nearPodHtml}</td>
