@@ -8,6 +8,8 @@
  * Guarda en localStorage, envía email y muestra modal de confirmación.
  */
 async function closeDayProcedure() {
+  if (!confirm('¿Confirmar cierre del día?\nSe enviará un correo con el resumen operativo.')) return;
+
   const hoy     = getTodayString();
   const orders  = APP_STATE.filteredOrders.length > 0
     ? APP_STATE.filteredOrders
@@ -102,6 +104,7 @@ async function closeDayProcedure() {
     : 'Sin acciones registradas';
 
   const closedAt = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const session  = typeof getSession === 'function' ? getSession() : null;
 
   // Objeto de cierre
   const closureData = {
@@ -122,6 +125,8 @@ async function closeDayProcedure() {
     depositosSummary,  // Mejora 8
     actionsSummary,    // Mejora 1
     closedAt,
+    usuario:         session?.usuario         || '',
+    nombre_completo: session?.nombre_completo || '',
   };
 
   // 1. Guardar en localStorage
