@@ -16,5 +16,5 @@ const USERS_SHEET_ID  = '1-Ygy8Q2aTKHJSw_seauqMObp4GLHPbD-0uds9pfWOr0';
 // Redeploy en script.google.com si el código GAS cambia (misma URL)
 const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycby0MDTJ9-Hvqww_Ze4ILTHUlAYzmc5RUo5UZ8pSnvBUDit1tMGxMFVF3xvyplNOO7h37A/exec';
 
-const REFRESH_INTERVAL_MS = 300000; // 5 minutos
+const REFRESH_INTERVAL_MS = 180000; // 3 minutos
 const PAGE_SIZE           = 20;

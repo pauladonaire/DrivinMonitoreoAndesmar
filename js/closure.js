@@ -3,13 +3,44 @@
    Email enviado via Google Apps Script (GAS).
    ============================================================ */
 
+/* ============================================================
+   [MEJORA 5] — Modal de advertencia previo al cierre del día
+   ============================================================ */
+
+/** Abre el modal de advertencia al hacer click en "Cerrar día". */
+function handleCloseDayClick() {
+  document.getElementById('warning-modal').style.display = 'flex';
+}
+
+/** Limpia filtros, cierra advertencia y continúa con el cierre. */
+function warningLimpiarYContinuar() {
+  clearFilters();
+  cerrarWarningModal();
+  setTimeout(() => abrirModalConfirmacionCierre(), 150);
+}
+
+/** Cierra advertencia y continúa el cierre sin limpiar filtros. */
+function warningContinuarSinLimpiar() {
+  cerrarWarningModal();
+  abrirModalConfirmacionCierre();
+}
+
+/** Cierra el modal de advertencia. */
+function cerrarWarningModal() {
+  document.getElementById('warning-modal').style.display = 'none';
+}
+
+/** Dispara el procedimiento de cierre (reemplaza el confirm nativo). */
+function abrirModalConfirmacionCierre() {
+  closeDayProcedure();
+}
+
 /**
  * Procedimiento completo de cierre del día.
  * Guarda en localStorage, envía email y muestra modal de confirmación.
+ * [MEJORA 5] El confirm nativo fue reemplazado por el warning modal.
  */
 async function closeDayProcedure() {
-  if (!confirm('¿Confirmar cierre del día?\nSe enviará un correo con el resumen operativo.')) return;
-
   const hoy     = getTodayString();
   const orders  = APP_STATE.filteredOrders.length > 0
     ? APP_STATE.filteredOrders
@@ -48,17 +79,11 @@ async function closeDayProcedure() {
     .slice(0, 5)
     .map(([reason, count]) => ({ reason, count }));
 
-  // Top 10 conductores con más rechazadas
-  const driverRejMap = {};
-  orders.filter(o => o.status === 'rejected').forEach(o => {
-    const k = o.driver_name || '(sin conductor)';
-    if (!driverRejMap[k]) driverRejMap[k] = { total: 0, vehicle: o.vehicle_code || '' };
-    driverRejMap[k].total++;
-  });
-  const topDriversRejected = Object.entries(driverRejMap)
-    .sort((a, b) => b[1].total - a[1].total)
-    .slice(0, 10)
-    .map(([driver, d]) => ({ driver, count: d.total, vehicle: d.vehicle }));
+  // [MEJORA 3] Top 10 conductores con más rechazadas — usa calcTop10Conductores
+  // Trabaja sobre rawData para incluir tiempoEnRuta y VD en calle
+  const top10Calc = calcTop10Conductores(APP_STATE.rawData);
+  const topDriversRejected = top10Calc.slice(0, 10)
+    .map(c => ({ driver: c.name, count: c.rechazadas, vehicle: c.vehicle }));
 
   // Top 5 clientes con más rechazadas
   const clientRejMap = {};
@@ -106,6 +131,16 @@ async function closeDayProcedure() {
   const closedAt = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   const session  = typeof getSession === 'function' ? getSession() : null;
 
+  // [MEJORA 7b] Enriquecer objeto con acciones y top10 conductores completo
+  const totalAcciones = typeof loadActions === 'function' ? loadActions().length : 0;
+  const top10Conductores = top10Calc.slice(0, 10).map(c => ({
+    name:         c.name,
+    rechazadas:   c.rechazadas,
+    tiempoEnRuta: c.tiempoEnRuta,
+    motivosStr:   c.motivosStr,
+    vdEnCalle:    c.vdEnCalle,
+  }));
+
   // Objeto de cierre
   const closureData = {
     date:                    hoy,
@@ -124,6 +159,8 @@ async function closeDayProcedure() {
     topClientsRejected,
     depositosSummary,  // Mejora 8
     actionsSummary,    // Mejora 1
+    totalAcciones,     // [MEJORA 7b]
+    top10Conductores,  // [MEJORA 7b]
     closedAt,
     usuario:         session?.usuario         || '',
     nombre_completo: session?.nombre_completo || '',
@@ -137,15 +174,20 @@ async function closeDayProcedure() {
   const topReasonsText = topRejectionReasons
     .map((r, i) => `${i + 1}. ${r.reason}: ${r.count}`)
     .join('\n');
-  const topDriversText = topDriversRejected
-    .map((d, i) => `${i + 1}. ${d.driver} (${d.vehicle}): ${d.count} rechazadas`)
+
+  // [MEJORA 3] Top drivers enriquecido con tiempo en ruta y VD en calle
+  const topDriversText = top10Calc.slice(0, 10)
+    .map((c, i) =>
+      `${i + 1}. ${c.name} | Rechazadas: ${c.rechazadas} | Tiempo en ruta: ${c.tiempoEnRuta} | VD en calle: $${c.vdEnCalle.toLocaleString('es-AR')} | Motivos: ${c.motivosStr}`
+    )
     .join('\n');
+
   const topClientsText = topClientsRejected
     .map((c, i) => `${i + 1}. ${c.client}: ${c.count} rechazadas`)
     .join('\n');
 
   let gasStatus = 'ok';
-  let gasMsg    = `Guardado en Sheets y email enviado a ${EMAIL_DESTINO}`;
+  let gasMsg    = 'Guardado en Sheets y email enviado correctamente';
   try {
     await gasPost({
       action: 'close_day',
@@ -396,43 +438,96 @@ function printClosureSummary(storageKey) {
 }
 
 /**
- * Renderiza la tabla del historial de cierres desde localStorage.
+ * Renderiza la tabla del historial de cierres.
+ * Muestra inmediatamente desde localStorage y sincroniza desde GAS en background.
+ * [MEJORA 7] La fuente de verdad es ResumenDiario en Google Sheets.
  */
-function renderClosureHistory() {
+async function renderClosureHistory() {
+  // Render inmediato desde localStorage (sin esperar red)
+  _renderClosureRows(_getLocalClosureRows());
+
+  // Sincronizar desde GAS (fuente de verdad multi-usuario y multi-sesión)
+  try {
+    const result = await gasPost({ action: 'get_resumen' });
+    if (result?.status === 'ok' && Array.isArray(result.rows) && result.rows.length > 0) {
+      // Guardar en localStorage para que showClosureDetail() pueda leer
+      result.rows.forEach(row => {
+        const key = `fleet_closure_${row.date}`;
+        try {
+          const existing = JSON.parse(localStorage.getItem(key) || '{}');
+          // Preservar campos que solo existen en local (top10Conductores, topRejectionReasons, etc.)
+          const merged = {
+            date:                    row.date,
+            totalOrders:             row.totalOrders       ?? existing.totalOrders,
+            totalApproved:           row.totalApproved     ?? existing.totalApproved,
+            totalRejected:           row.totalRejected     ?? existing.totalRejected,
+            totalPending:            row.totalPending      ?? existing.totalPending,
+            effectivenessGeneral:    String(row.effectivenessGeneral    ?? existing.effectivenessGeneral    ?? '0'),
+            effectivenessDeliveries: String(row.effectivenessDeliveries ?? existing.effectivenessDeliveries ?? '0'),
+            effectivenessPickups:    String(row.effectivenessPickups    ?? existing.effectivenessPickups    ?? '0'),
+            otdPercent:              String(row.otdPercent ?? existing.otdPercent ?? '0'),
+            depositosSummary:        row.depositosSummary  || existing.depositosSummary  || '',
+            actionsSummary:          row.actionsSummary    || existing.actionsSummary    || '',
+            closedAt:                row.closedAt          || existing.closedAt          || '',
+            usuario:                 row.usuario           || existing.usuario           || '',
+            nombre_completo:         row.nombre_completo   || existing.nombre_completo   || '',
+            // Campos locales — no están en el Sheet, se preservan si existen
+            totalAcciones:           existing.totalAcciones      ?? null,
+            top10Conductores:        existing.top10Conductores   ?? null,
+            topRejectionReasons:     existing.topRejectionReasons ?? null,
+            topDriversRejected:      existing.topDriversRejected  ?? null,
+            topClientsRejected:      existing.topClientsRejected  ?? null,
+            totalDeliveries:         existing.totalDeliveries     ?? null,
+            totalPickups:            existing.totalPickups        ?? null,
+          };
+          localStorage.setItem(key, JSON.stringify(merged));
+        } catch { /* ignorar errores de parse */ }
+      });
+      _renderClosureRows(result.rows);
+    }
+  } catch (err) {
+    console.warn('[historial] Sin conexión con GAS, mostrando local:', err.message);
+  }
+}
+
+/** Lee los cierres del localStorage y los devuelve ordenados DESC por fecha. */
+function _getLocalClosureRows() {
+  const rows = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('fleet_closure_')) {
+      try {
+        const data = JSON.parse(localStorage.getItem(key));
+        if (data) rows.push(data);
+      } catch { /* ignorar */ }
+    }
+  }
+  return rows.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+}
+
+/** Renderiza filas de historial en el tbody. Acepta tanto filas locales como de GAS. */
+function _renderClosureRows(rows) {
   const tbody = document.getElementById('closureHistoryBody');
   if (!tbody) return;
 
-  // Obtener todas las claves de cierre del localStorage
-  const keys = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith('fleet_closure_')) keys.push(key);
-  }
-
-  if (keys.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6">
+  if (!rows || rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7">
       <div class="empty-state"><div>Sin cierres registrados</div></div>
     </td></tr>`;
     return;
   }
 
-  // Ordenar por fecha DESC
-  keys.sort().reverse();
-
-  tbody.innerHTML = keys.map(key => {
-    let data;
-    try {
-      data = JSON.parse(localStorage.getItem(key));
-    } catch {
-      return '';
-    }
-    if (!data) return '';
+  tbody.innerHTML = rows.map(data => {
+    // [MEJORA 7c] Columna Acciones
+    const acciones = data.totalAcciones != null ? data.totalAcciones : '—';
+    const key = `fleet_closure_${data.date}`;
 
     return `<tr>
       <td>${data.date || '—'}</td>
       <td>${data.totalOrders ?? '—'}</td>
       <td>${data.effectivenessGeneral ?? '—'}%</td>
       <td style="color:var(--color-danger)">${data.totalRejected ?? '—'}</td>
+      <td>${acciones}</td>
       <td class="text-muted">${data.closedAt || '—'}</td>
       <td>
         <button class="btn-secondary" style="padding:4px 10px;font-size:12px;"
@@ -444,19 +539,74 @@ function renderClosureHistory() {
 
 /**
  * Muestra el modal de detalle de un cierre específico.
+ * [MEJORA 7d] Vista enriquecida con KPIs, top10 conductores y JSON colapsable.
  * @param {string} key — clave en localStorage
  */
 function showClosureDetail(key) {
   const raw = localStorage.getItem(key);
   if (!raw) return;
-  const pre = document.getElementById('closureDetailContent');
-  if (pre) {
-    try {
-      pre.textContent = JSON.stringify(JSON.parse(raw), null, 2);
-    } catch {
-      pre.textContent = raw;
+
+  let data;
+  try { data = JSON.parse(raw); } catch { return; }
+
+  const el = document.getElementById('closureDetailContent');
+  if (el) {
+    // Sección KPIs
+    let html = `<div style="margin-bottom:16px;">
+      <div style="color:var(--color-cyan);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">KPIs del cierre</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <tr><td style="padding:4px 8px;color:var(--color-text-muted);">Fecha</td><td style="padding:4px 8px;font-weight:600;">${data.date || '—'}</td>
+            <td style="padding:4px 8px;color:var(--color-text-muted);">Cerrado a las</td><td style="padding:4px 8px;">${data.closedAt || '—'}</td></tr>
+        <tr><td style="padding:4px 8px;color:var(--color-text-muted);">Total órdenes</td><td style="padding:4px 8px;font-weight:600;">${data.totalOrders ?? '—'}</td>
+            <td style="padding:4px 8px;color:var(--color-text-muted);">Pendientes</td><td style="padding:4px 8px;">${data.totalPending ?? '—'}</td></tr>
+        <tr><td style="padding:4px 8px;color:var(--color-text-muted);">Efectividad</td><td style="padding:4px 8px;font-weight:600;">${data.effectivenessGeneral ?? '—'}%</td>
+            <td style="padding:4px 8px;color:var(--color-text-muted);">OTD</td><td style="padding:4px 8px;">${data.otdPercent ?? '—'}%</td></tr>
+        <tr><td style="padding:4px 8px;color:var(--color-text-muted);">Rechazadas</td><td style="padding:4px 8px;font-weight:600;color:var(--color-danger);">${data.totalRejected ?? '—'}</td>
+            <td style="padding:4px 8px;color:var(--color-text-muted);">Acciones del día</td><td style="padding:4px 8px;">${data.totalAcciones ?? '—'}</td></tr>
+      </table>
+    </div>`;
+
+    // Sección Top 10 Conductores (si existe)
+    if (data.top10Conductores && data.top10Conductores.length > 0) {
+      html += `<div style="margin-bottom:16px;">
+        <div style="color:var(--color-cyan);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Top 10 Conductores</div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead>
+            <tr style="background:rgba(255,255,255,.05);">
+              <th style="padding:5px 8px;text-align:left;">#</th>
+              <th style="padding:5px 8px;text-align:left;">Conductor</th>
+              <th style="padding:5px 8px;text-align:center;">Rechazadas</th>
+              <th style="padding:5px 8px;text-align:left;">Tiempo en ruta</th>
+              <th style="padding:5px 8px;text-align:right;">VD en calle</th>
+              <th style="padding:5px 8px;text-align:left;">Motivos</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.top10Conductores.map((c, i) => {
+              const vd = (c.vdEnCalle || 0).toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
+              return `<tr style="border-bottom:1px solid rgba(255,255,255,.05);">
+                <td style="padding:5px 8px;color:var(--color-text-muted);">${i + 1}</td>
+                <td style="padding:5px 8px;">${esc(c.name)}</td>
+                <td style="padding:5px 8px;text-align:center;color:var(--color-danger);font-weight:600;">${c.rechazadas}</td>
+                <td style="padding:5px 8px;color:var(--color-text-muted);">${esc(c.tiempoEnRuta || '—')}</td>
+                <td style="padding:5px 8px;text-align:right;font-size:11px;">${c.vdEnCalle > 0 ? vd : '—'}</td>
+                <td style="padding:5px 8px;font-size:11px;color:var(--color-text-muted);">${esc(c.motivosStr || '—')}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`;
     }
+
+    // JSON colapsable
+    html += `<details style="margin-top:8px;">
+      <summary style="cursor:pointer;color:var(--color-text-muted);font-size:12px;padding:4px 0;">Ver JSON completo</summary>
+      <pre style="font-size:11px;overflow:auto;max-height:300px;margin-top:8px;padding:10px;background:rgba(0,0,0,.3);border-radius:4px;">${JSON.stringify(data, null, 2)}</pre>
+    </details>`;
+
+    el.innerHTML = html;
   }
+
   const printBtn = document.getElementById('btnPrintDetail');
   if (printBtn) printBtn.onclick = () => printClosureSummary(key);
   document.getElementById('closureDetailModal').style.display = 'flex';

@@ -75,7 +75,8 @@
       <button class="btn-user-mgmt" id="btnUserMgmt" onclick="openUserMgmt()" style="display:none;">
         Usuarios
       </button>
-      <button class="btn-close-day" id="btnCloseDay" onclick="closeDayProcedure()">
+      <!-- [MEJORA 5] Abre modal de advertencia antes del cierre -->
+      <button class="btn-close-day" id="btnCloseDay" onclick="handleCloseDayClick()">
         Cerrar día
       </button>
       <button class="btn-logout" onclick="doLogout()">Salir</button>
@@ -290,6 +291,13 @@
             </table>
           </div>
 
+          <!-- [MEJORA REC4] Botón exportar rechazadas CSV -->
+          <div style="margin-top:10px;text-align:right;">
+            <button class="btn-secondary" onclick="exportarRechazadasCSV()" style="font-size:12px;padding:5px 12px;">
+              ⬇ Exportar rechazadas CSV
+            </button>
+          </div>
+
           <!-- Top 5 clientes con más rechazadas (debajo de motivos) -->
           <div style="margin-top:16px;">
             <div class="subsection-title">Top 5 clientes con más rechazadas</div>
@@ -331,13 +339,17 @@
               <th class="sortable" data-col="retiros">Retiros <span class="sort-icon">↕</span></th>
               <th class="sortable" data-col="aprobadas">Aprobadas <span class="sort-icon">↕</span></th>
               <th class="sortable" data-col="rechazadas">Rechazadas <span class="sort-icon">↕</span></th>
+              <!-- [MEJORA 6] Pendientes sin estado final -->
+              <th title="Órdenes sin estado final (ni entregadas ni rechazadas)">Pend.</th>
               <th class="sortable" data-col="eff">Efectividad % <span class="sort-icon">↕</span></th>
               <th class="sortable" data-col="routeTime">Tiempo en ruta <span class="sort-icon">↕</span></th>
+              <!-- [MEJORA 1a] Valor declarado acumulado del conductor -->
+              <th>VD</th>
               <th>Contacto</th>
             </tr>
           </thead>
           <tbody id="driversTableBody">
-            <tr><td colspan="11"><div class="empty-state"><div>Cargando...</div></div></td></tr>
+            <tr><td colspan="13"><div class="empty-state"><div>Cargando...</div></div></td></tr>
           </tbody>
         </table>
       </div>
@@ -419,12 +431,14 @@
               <th>Total Órdenes</th>
               <th>Efectividad</th>
               <th>Rechazadas</th>
+              <!-- [MEJORA 7c] Columna acciones del día -->
+              <th>Acciones</th>
               <th>Cerrado a las</th>
               <th>Detalle</th>
             </tr>
           </thead>
           <tbody id="closureHistoryBody">
-            <tr><td colspan="6"><div class="empty-state"><div>Sin cierres registrados</div></div></td></tr>
+            <tr><td colspan="7"><div class="empty-state"><div>Sin cierres registrados</div></div></td></tr>
           </tbody>
         </table>
       </div>
@@ -456,10 +470,11 @@
   </div>
 
   <!-- ===== MODAL DETALLE CIERRE ===== -->
+  <!-- [MEJORA 7d] Detalle enriquecido: KPIs, top10, JSON colapsable -->
   <div class="modal-overlay" id="closureDetailModal" style="display:none;">
     <div class="modal-box modal-box--wide">
       <h2 class="modal-title">Detalle del Cierre</h2>
-      <pre id="closureDetailContent" class="closure-detail-pre"></pre>
+      <div id="closureDetailContent" class="closure-detail-pre" style="overflow-y:auto;max-height:65vh;"></div>
       <div class="modal-actions">
         <button class="btn-secondary" id="btnPrintDetail" onclick="">Imprimir / PDF</button>
         <button class="btn-primary" onclick="closeModal('closureDetailModal')">Cerrar</button>
@@ -473,9 +488,11 @@
       <h2 class="modal-title">Generar Acción</h2>
 
       <div class="action-form">
+        <!-- [MEJORA 4a] CND obligatorio con error inline -->
         <div class="action-form-group">
-          <label for="actionDeposito">Sucursal / Depósito</label>
-          <select id="actionDeposito"><option value="">— Opcional —</option></select>
+          <label for="actionDeposito">CND / Depósito <span style="color:var(--color-danger)">*</span></label>
+          <select id="actionDeposito"><option value="">— Seleccioná un CND —</option></select>
+          <span id="actionDepositoError" style="display:none;color:var(--color-danger);font-size:11px;margin-top:3px;">Seleccioná un CND</span>
         </div>
         <div class="action-form-group">
           <label for="actionCliente">Cliente</label>
@@ -558,6 +575,30 @@
       </div>
       <div class="modal-actions">
         <button class="btn-primary" onclick="closeModal('userMgmtModal')">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL ADVERTENCIA CERRAR DÍA ===== -->
+  <!-- [MEJORA 5] Aviso para limpiar filtros antes del cierre -->
+  <div class="modal-overlay" id="warning-modal" style="display:none;">
+    <div class="modal-box" style="max-width:460px;text-align:center;">
+      <div style="font-size:36px;margin-bottom:12px;">⚠️</div>
+      <h2 class="modal-title" style="margin-bottom:12px;">Antes de cerrar el día</h2>
+      <p style="color:var(--color-text-muted);font-size:14px;line-height:1.6;margin-bottom:24px;">
+        Recordá limpiar los filtros antes de cerrar el día
+        para que el resumen incluya <strong>TODAS las órdenes</strong> y no solo las filtradas.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button class="btn-primary" onclick="warningLimpiarYContinuar()" style="width:100%;">
+          🧹 Limpiar filtros y continuar
+        </button>
+        <button class="btn-secondary" onclick="warningContinuarSinLimpiar()" style="width:100%;">
+          Continuar sin limpiar
+        </button>
+        <button class="btn-secondary" onclick="cerrarWarningModal()" style="width:100%;margin-top:4px;">
+          Cancelar
+        </button>
       </div>
     </div>
   </div>

@@ -78,10 +78,21 @@ function _populateActionsSelects() {
 
 /**
  * Guarda una nueva acción desde el formulario del modal.
- * La descripción es obligatoria; el resto son opcionales.
+ * Deposito y descripción son obligatorios.
+ * [MEJORA 4a] CND obligatorio con error inline.
  */
 function saveAction() {
-  const desc = document.getElementById('actionDescripcion')?.value.trim();
+  const desc     = document.getElementById('actionDescripcion')?.value.trim();
+  const deposito = document.getElementById('actionDeposito')?.value || '';
+
+  // Validar CND obligatorio con error inline
+  const errDeposito = document.getElementById('actionDepositoError');
+  if (!deposito) {
+    if (errDeposito) errDeposito.style.display = 'block';
+    return;
+  }
+  if (errDeposito) errDeposito.style.display = 'none';
+
   if (!desc) {
     alert('La descripción / observación es obligatoria.');
     return;
@@ -92,7 +103,7 @@ function saveAction() {
     id:              Date.now(),
     timestamp:       new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
     date:            getTodayString(),
-    deposito:        document.getElementById('actionDeposito')?.value   || '',
+    deposito:        deposito,
     cliente:         document.getElementById('actionCliente')?.value    || '',
     codigo_orden:    document.getElementById('actionCodigoOrden')?.value.trim() || '',
     vehiculo:        document.getElementById('actionVehiculo')?.value   || '',
@@ -158,10 +169,17 @@ function renderActionsList() {
     if (a.conductor)    parts.push(`Cond: ${esc(a.conductor)}`);
     const meta = parts.length > 0 ? parts.join(' | ') : 'General';
 
+    // [MEJORA 4b] Usuario que registró la acción
+    const usuarioStr = a.nombre_completo || a.usuario || '';
+    const usuarioHtml = usuarioStr
+      ? `<span style="font-size:11px;color:var(--color-cyan);">👤 ${esc(usuarioStr)}</span>`
+      : `<span style="font-size:11px;color:var(--text-muted);">👤 Usuario desconocido</span>`;
+
     return `<div class="action-item">
       <div class="action-item-meta">
         <span class="action-item-time">[${a.timestamp}]</span>
         <span class="action-item-ctx" title="${meta}">${meta}</span>
+        ${usuarioHtml}
         <button class="action-delete-btn" onclick="deleteAction(${a.id})" title="Eliminar">✕</button>
       </div>
       <div class="action-item-desc">${esc(a.descripcion)}</div>

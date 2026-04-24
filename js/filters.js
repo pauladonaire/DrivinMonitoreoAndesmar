@@ -235,6 +235,8 @@ function buildFlatRow(stop, order) {
     // Campos personalizados
     monto_cobrar: order.custom_3 || order.custom_fields?.custom_3 || '',
     rto:          order.custom_9 || order.custom_fields?.custom_9 || '',
+    // [MEJORA 1 — Valor declarado en pesos]
+    custom_8:     order.custom_8 ?? null,
 
     // Mejora 2: comentario del conductor (viene a nivel stop, no order)
     comment:  stop.comment || order.comment || '',

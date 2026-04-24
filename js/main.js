@@ -59,6 +59,10 @@ async function initApp() {
   setInterval(checkAutoClosure, 60000);
   renderClosureHistory();
 
+  // [MEJORA 7a — Debug historial] Verificar claves en localStorage
+  const claves = Object.keys(localStorage).filter(k => k.startsWith('fleet_closure_'));
+  console.log('[HISTORIAL] Claves encontradas:', claves);
+
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', e => {
       if (e.target === overlay) overlay.style.display = 'none';

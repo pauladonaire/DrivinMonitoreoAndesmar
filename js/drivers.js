@@ -61,6 +61,8 @@ function buildDriverRows() {
         aprobadas:  0,
         rechazadas: 0,
         pending:    0,
+        pendientes: 0,  // [MEJORA 6] sin estado final
+        vdTotal:    0,  // [MEJORA 1a] valor declarado acumulado
         // Para tiempo en ruta: mapa de rutas únicas por route_started_at
         // { routeKey: { startedMs, maxEndMs, hasEnd } }
         routeMap: {},
@@ -77,6 +79,14 @@ function buildDriverRows() {
     if (o.status === 'approved' || o.status === 'delivered') d.aprobadas++;
     if (o.status === 'rejected')  d.rechazadas++;
     if (o.status === 'pending')   d.pending++;
+
+    // [MEJORA 6] Órdenes sin estado final (ni entregadas ni aprobadas ni rechazadas)
+    if (o.status !== 'delivered' && o.status !== 'approved' && o.status !== 'rejected') {
+      d.pendientes++;
+    }
+
+    // [MEJORA 1a] Valor declarado: todas las órdenes del conductor
+    d.vdTotal += parseFloat(o.custom_8) || 0;
 
     // Acumular tiempo de ruta sin duplicar:
     // Usamos el stop original (_stop) para acceder a TODOS sus pod_arrivals
@@ -161,6 +171,8 @@ function buildDriverRows() {
       retiros:      d.retiros,
       aprobadas:    d.aprobadas,
       rechazadas:   d.rechazadas,
+      pendientes:   d.pendientes,  // [MEJORA 6]
+      vdTotal:      d.vdTotal,     // [MEJORA 1a]
       eff,
       routeTime:    routeTimeStr,
     };
@@ -202,7 +214,7 @@ function renderDriversTable() {
   const pageRows = rows.slice((page - 1) * pageSize, page * pageSize);
 
   if (total === 0) {
-    tbody.innerHTML = `<tr><td colspan="11">
+    tbody.innerHTML = `<tr><td colspan="13">
       <div class="empty-state"><div>Sin conductores para los filtros seleccionados</div></div>
     </td></tr>`;
     renderDriversPagination(0, pageSize, page);
@@ -217,6 +229,21 @@ function renderDriversTable() {
       ? `<span class="badge-en-curso">En curso</span>`
       : esc(row.routeTime);
 
+    // [MEJORA 6] Celda Pendientes con color semántico
+    let pendHtml;
+    if (row.pendientes === 0) {
+      pendHtml = `<td style="color:var(--color-success)">0 ✓</td>`;
+    } else if (row.pendientes <= 3) {
+      pendHtml = `<td style="color:var(--color-warning)">${row.pendientes}</td>`;
+    } else {
+      pendHtml = `<td style="color:var(--color-danger);font-weight:bold">${row.pendientes}</td>`;
+    }
+
+    // [MEJORA 1a] Celda VD en formato moneda argentina
+    const vdFormatted = row.vdTotal > 0
+      ? row.vdTotal.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })
+      : '—';
+
     return `<tr>
       <td>${esc(row.driver_name)}</td>
       <td class="text-muted">${phone ? esc(phone) : '<span class="no-phone">Sin tel.</span>'}</td>
@@ -226,8 +253,10 @@ function renderDriversTable() {
       <td>${row.retiros}</td>
       <td style="color:var(--color-success)">${row.aprobadas}</td>
       <td style="color:var(--color-danger)">${row.rechazadas}</td>
+      ${pendHtml}
       <td><span class="${effClass}">${row.eff}%</span></td>
       <td>${routeHtml}</td>
+      <td class="text-muted" style="font-size:12px;">${vdFormatted}</td>
       <td>${renderContactButtons(phone)}</td>
     </tr>`;
   }).join('');
