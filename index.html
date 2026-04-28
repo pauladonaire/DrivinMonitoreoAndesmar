@@ -75,6 +75,13 @@
       <button class="btn-user-mgmt" id="btnUserMgmt" onclick="openUserMgmt()" style="display:none;">
         Usuarios
       </button>
+      <!-- Análisis histórico -->
+      <button onclick="window.open('analytics.html','_blank')"
+              style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;background:transparent;color:var(--color-cyan);border:1px solid var(--color-cyan);padding:5px 14px;border-radius:5px;cursor:pointer;transition:all .2s;"
+              onmouseover="this.style.background='var(--color-cyan)';this.style.color='var(--color-dark-bg)'"
+              onmouseout="this.style.background='transparent';this.style.color='var(--color-cyan)'">
+        Análisis Histórico
+      </button>
       <!-- [MEJORA 5] Abre modal de advertencia antes del cierre -->
       <button class="btn-close-day" id="btnCloseDay" onclick="handleCloseDayClick()">
         Cerrar día

@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análisis Histórico — Andesmar Cargas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <style>
+    /* ================================================
+       VARIABLES
+    ================================================ */
+    :root {
+      --cyan:      #01feff;
+      --blue-mid:  #004993;
+      --blue-dark: #003481;
+      --dark-bg:   #1E2733;
+      --surface:   #253041;
+      --surface2:  #2d3a4d;
+      --border:    rgba(1,254,255,0.2);
+      --text:      #ffffff;
+      --muted:     #a0b4c8;
+      --success:   #22c55e;
+      --warning:   #eab308;
+      --danger:    #ef4444;
+      --hdr-h:     56px;
+      --nav-h:     42px;
+    }
+
+    /* ================================================
+       RESET
+    ================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 14px; }
+    body {
+      font-family: 'IBM Plex Sans', system-ui, sans-serif;
+      background: var(--dark-bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--dark-bg); }
+    ::-webkit-scrollbar-thumb { background: var(--blue-mid); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
+
+    /* ================================================
+       HEADER
+    ================================================ */
+    .app-header {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: var(--hdr-h);
+      background: var(--blue-mid);
+      border-bottom: 2px solid var(--cyan);
+      display: flex; align-items: center;
+      padding: 0 18px; gap: 14px; z-index: 100;
+    }
+    .brand-wrap { flex-shrink: 0; }
+    .brand-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 16px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+    }
+    .brand-sub {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; color: var(--cyan);
+      letter-spacing: 1.5px; text-transform: uppercase;
+    }
+    .hdr-sep { width: 1px; height: 26px; background: var(--border); flex-shrink: 0; }
+    .hdr-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .lbl { font-size: 10px; color: var(--muted); white-space: nowrap; }
+    .date-in {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); padding: 5px 8px; border-radius: 5px;
+      font-size: 12px; font-family: 'IBM Plex Mono', monospace; cursor: pointer;
+    }
+    .date-in:focus { outline: none; border-color: var(--cyan); }
+    .btn-load {
+      font-family: 'Rajdhani', sans-serif; font-weight: 700;
+      font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase;
+      background: var(--blue-dark); color: var(--cyan);
+      border: 1px solid var(--cyan); padding: 6px 18px;
+      border-radius: 5px; cursor: pointer; transition: all .2s;
+    }
+    .btn-load:hover { background: var(--cyan); color: var(--dark-bg); }
+    .btn-load:disabled { opacity: .5; cursor: not-allowed; }
+    .hdr-status {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; color: var(--muted); white-space: nowrap;
+    }
+    .hdr-status.loading { color: var(--cyan); }
+    .hdr-status.err     { color: var(--danger); }
+    .hdr-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .btn-back {
+      font-size: 12px; color: var(--muted);
+      background: none; border: 1px solid var(--border);
+      padding: 5px 12px; border-radius: 5px; cursor: pointer;
+      transition: all .2s; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-back:hover { border-color: var(--cyan); color: var(--cyan); }
+
+    /* ================================================
+       TAB NAV
+    ================================================ */
+    .tab-nav {
+      position: fixed; top: var(--hdr-h); left: 0; right: 0;
+      height: var(--nav-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: stretch; z-index: 90;
+      overflow-x: auto;
+    }
+    .tab-nav::-webkit-scrollbar { height: 0; }
+    .tab-btn {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      background: none; border: none; color: var(--muted);
+      padding: 0 22px; cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all .2s; white-space: nowrap;
+      margin-bottom: -1px;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+
+    /* ================================================
+       MAIN
+    ================================================ */
+    .main {
+      padding-top: calc(var(--hdr-h) + var(--nav-h) + 18px);
+      padding-bottom: 40px; padding-left: 18px; padding-right: 18px;
+      max-width: 1380px; margin: 0 auto;
+    }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* ================================================
+       LOADING
+    ================================================ */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(30,39,51,.85); z-index: 500;
+      align-items: center; justify-content: center; flex-direction: column; gap: 14px;
+    }
+    .overlay.on { display: flex; }
+    .spinner {
+      width: 38px; height: 38px;
+      border: 3px solid var(--border);
+      border-top-color: var(--cyan);
+      border-radius: 50%; animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin-msg { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--cyan); letter-spacing: 1px; }
+
+    /* ================================================
+       ERROR BANNER
+    ================================================ */
+    .err-banner {
+      display: none; background: rgba(239,68,68,.12);
+      border: 1px solid var(--danger); border-radius: 6px;
+      padding: 10px 16px; margin-bottom: 14px;
+      color: var(--danger); font-size: 13px;
+    }
+    .err-banner.on { display: block; }
+
+    /* ================================================
+       KPI GRID
+    ================================================ */
+    .kpi-grid {
+      display: grid; grid-template-columns: repeat(4,1fr);
+      gap: 12px; margin-bottom: 16px;
+    }
+    @media (max-width:960px) { .kpi-grid { grid-template-columns: repeat(2,1fr); } }
+    .kpi {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px 18px;
+      border-top: 2px solid transparent;
+    }
+    .kpi.c { border-top-color: var(--cyan); }
+    .kpi.g { border-top-color: var(--success); }
+    .kpi.r { border-top-color: var(--danger); }
+    .kpi.y { border-top-color: var(--warning); }
+    .kpi-label {
+      font-size: 10px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--muted); margin-bottom: 5px;
+    }
+    .kpi-val {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 26px; font-weight: 500; line-height: 1;
+    }
+    .kpi.c .kpi-val { color: var(--cyan); }
+    .kpi.g .kpi-val { color: var(--success); }
+    .kpi.r .kpi-val { color: var(--danger); }
+    .kpi.y .kpi-val { color: var(--warning); }
+    .kpi-sub { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+    /* ================================================
+       SECTION / CARD
+    ================================================ */
+    .sec { margin-bottom: 16px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 16px;
+    }
+    .card-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--cyan); margin-bottom: 14px;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+
+    /* ================================================
+       CHARTS
+    ================================================ */
+    .ch-row { display: grid; gap: 12px; margin-bottom: 16px; }
+    .ch-row.c2 { grid-template-columns: 1fr 1fr; }
+    .ch-row.c3 { grid-template-columns: 1fr 1fr 1fr; }
+    .ch-row.c1 { grid-template-columns: 1fr; }
+    @media (max-width:960px) {
+      .ch-row.c2, .ch-row.c3 { grid-template-columns: 1fr; }
+    }
+    .ch-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px;
+    }
+    .ch-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px;
+    }
+    .ch-wrap { position: relative; width: 100%; }
+
+    /* ================================================
+       SPLIT (chart left + table right)
+    ================================================ */
+    .split {
+      display: grid; grid-template-columns: 360px 1fr;
+      gap: 12px; margin-bottom: 16px; min-width: 0;
+    }
+    .split > * { min-width: 0; }
+    @media (max-width:1100px) { .split { grid-template-columns: 1fr; } }
+
+    /* ================================================
+       TABLES
+    ================================================ */
+    .tbl-wrap { overflow-x: auto; border-radius: 6px; border: .5px solid var(--border); }
+    .data-tbl { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
+    .data-tbl thead tr { background: var(--blue-dark); }
+    .data-tbl th {
+      color: var(--cyan); font-weight: 600; font-size: 11px;
+      padding: 9px 10px; text-align: left;
+      border-bottom: 1px solid var(--border);
+      user-select: none; white-space: nowrap;
+    }
+    .data-tbl th.s { cursor: pointer; }
+    .data-tbl th.s:hover { color: var(--text); }
+    .si { opacity: .5; font-size: 10px; }
+    .data-tbl th.asc .si, .data-tbl th.desc .si { opacity: 1; color: var(--cyan); }
+
+    .data-tbl tbody tr:nth-child(even) { background: rgba(1,74,147,.07); }
+    .data-tbl tbody tr:nth-child(odd)  { background: transparent; }
+    .data-tbl tbody tr:hover           { background: rgba(1,254,255,.07); }
+    .data-tbl td {
+      padding: 8px 10px; border-bottom: 1px solid var(--border);
+      color: var(--text); vertical-align: middle;
+    }
+    .data-tbl tbody tr:last-child td { border-bottom: none; }
+
+    .tm   { color: var(--muted); }
+    .td   { color: var(--danger); font-weight: 600; }
+    .tg   { color: var(--success); font-weight: 600; }
+    .tw   { color: var(--warning); font-weight: 600; }
+    .tc   { color: var(--cyan); }
+    .mono { font-family: 'IBM Plex Mono', monospace; }
+
+    .eff-d { color: var(--danger);  font-weight: 600; }
+    .eff-w { color: var(--warning); font-weight: 600; }
+    .eff-g { color: var(--success); font-weight: 600; }
+
+    .bar-c { width: 70px; height: 5px; background: rgba(255,255,255,.1); border-radius: 3px; overflow: hidden; }
+    .bar-f { height: 100%; border-radius: 3px; transition: width .4s; }
+    .bar-d { background: var(--danger); }
+    .bar-g { background: var(--success); }
+    .bar-c2 { background: var(--cyan); }
+
+    .tbl-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; flex-wrap: wrap; }
+    .tbl-cnt { font-size: 11px; color: var(--muted); }
+
+    /* ================================================
+       PAGINATION
+    ================================================ */
+    .pag { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 10px; flex-wrap: wrap; }
+    .pg {
+      background: var(--surface); color: var(--muted);
+      border: 1px solid var(--border); padding: 4px 9px;
+      border-radius: 4px; cursor: pointer; font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace; transition: all .2s;
+    }
+    .pg:hover    { border-color: var(--cyan); color: var(--cyan); }
+    .pg.act      { background: var(--blue-mid); border-color: var(--cyan); color: var(--cyan); font-weight: 600; }
+    .pg:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ================================================
+       BADGES
+    ================================================ */
+    .badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+    .b-delivered, .b-approved { background: #14532d; color: #86efac; }
+    .b-rejected  { background: #450a0a; color: #fca5a5; }
+    .b-pending   { background: #451a03; color: #fed7aa; }
+    .b-delivery  { background: #1e3a8a; color: #93c5fd; }
+    .b-pickup    { background: #431407; color: #fdba74; }
+    .b-other     { background: #1e3a5f; color: #93c5fd; }
+
+    /* ================================================
+       FILTERS (Tab Acciones)
+    ================================================ */
+    .f-row { display: flex; align-items: flex-end; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+    .f-grp { display: flex; flex-direction: column; gap: 4px; }
+    .f-grp label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .f-sel {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); padding: 5px 10px; border-radius: 5px;
+      font-size: 12px; cursor: pointer; min-width: 140px;
+    }
+    .f-sel:focus { outline: none; border-color: var(--cyan); }
+
+    /* ================================================
+       EXPORT BTN
+    ================================================ */
+    .btn-exp {
+      font-family: 'Rajdhani', sans-serif; font-weight: 700;
+      font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+      background: var(--surface); color: var(--success);
+      border: 1px solid var(--success); padding: 5px 12px;
+      border-radius: 5px; cursor: pointer; transition: all .2s;
+    }
+    .btn-exp:hover { background: var(--success); color: var(--dark-bg); }
+
+    /* ================================================
+       EMPTY STATE
+    ================================================ */
+    .empty { text-align: center; padding: 32px 16px; color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div class="overlay" id="overlay">
+  <div class="spinner"></div>
+  <div class="spin-msg">CARGANDO DATOS...</div>
+</div>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="brand-wrap">
+    <div class="brand-title">Andesmar Cargas</div>
+    <div class="brand-sub">Análisis Histórico</div>
+  </div>
+  <div class="hdr-sep"></div>
+  <div class="hdr-controls">
+    <span class="lbl">Desde</span>
+    <input type="date" id="inDesde" class="date-in">
+    <span class="lbl">Hasta</span>
+    <input type="date" id="inHasta" class="date-in">
+    <button class="btn-load" id="btnLoad" onclick="loadData()">Cargar</button>
+  </div>
+  <div class="hdr-right">
+    <span class="hdr-status" id="hdrSt">Sin datos</span>
+    <a href="index.html" class="btn-back">← Monitoreo</a>
+  </div>
+</header>
+
+<!-- TAB NAV -->
+<nav class="tab-nav">
+  <button class="tab-btn active" data-tab="general"     onclick="switchTab('general')">General</button>
+  <button class="tab-btn"        data-tab="pordia"      onclick="switchTab('pordia')">Por Día</button>
+  <button class="tab-btn"        data-tab="conductores" onclick="switchTab('conductores')">Conductores</button>
+  <button class="tab-btn"        data-tab="depositos"   onclick="switchTab('depositos')">Depósitos</button>
+  <button class="tab-btn"        data-tab="rechazos"    onclick="switchTab('rechazos')">Rechazos</button>
+  <button class="tab-btn"        data-tab="acciones"    onclick="switchTab('acciones')">Acciones</button>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <div class="err-banner" id="errBanner"></div>
+
+  <!-- ========================================
+       TAB: GENERAL
+  ======================================== -->
+  <div id="tab-general" class="tab-pane active">
+    <div class="kpi-grid">
+      <div class="kpi c">
+        <div class="kpi-label">Total Órdenes</div>
+        <div class="kpi-val" id="kTotal">—</div>
+        <div class="kpi-sub" id="kTotalSub">—</div>
+      </div>
+      <div class="kpi g">
+        <div class="kpi-label">Efectividad General</div>
+        <div class="kpi-val" id="kEff">—</div>
+        <div class="kpi-sub" id="kEffSub">—</div>
+      </div>
+      <div class="kpi r">
+        <div class="kpi-label">Rechazadas</div>
+        <div class="kpi-val" id="kRej">—</div>
+        <div class="kpi-sub" id="kRejSub">—</div>
+      </div>
+      <div class="kpi y">
+        <div class="kpi-label">Pendientes</div>
+        <div class="kpi-val" id="kPend">—</div>
+        <div class="kpi-sub" id="kPendSub">—</div>
+      </div>
+    </div>
+
+    <div class="ch-row c2 sec">
+      <div class="ch-box">
+        <div class="ch-title">Efectividad diaria (%)</div>
+        <div class="ch-wrap" style="height:210px"><canvas id="cEfDiaria"></canvas></div>
+      </div>
+      <div class="ch-box">
+        <div class="ch-title">Distribución de estados</div>
+        <div class="ch-wrap" style="height:210px"><canvas id="cEstados"></canvas></div>
+      </div>
+    </div>
+
+    <div class="ch-row c2 sec">
+      <div class="ch-box">
+        <div class="ch-title">Órdenes totales por depósito</div>
+        <div class="ch-wrap" style="height:210px"><canvas id="cDepTotales"></canvas></div>
+      </div>
+      <div class="ch-box">
+        <div class="ch-title">Tendencia rechazadas vs entregadas (acumulado)</div>
+        <div class="ch-wrap" style="height:210px"><canvas id="cTendencia"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       TAB: POR DÍA
+  ======================================== -->
+  <div id="tab-pordia" class="tab-pane">
+    <div class="ch-box sec">
+      <div class="ch-title">Órdenes por día — Entregadas / Rechazadas / Pendientes</div>
+      <div class="ch-wrap" style="height:230px"><canvas id="cPorDia"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span>Resumen diario</span>
+        <span id="cntPorDia" class="tbl-cnt"></span>
+      </div>
+      <div class="tbl-wrap">
+        <table class="data-tbl" id="tPorDia">
+          <thead><tr>
+            <th class="s" data-col="fecha"       data-tbl="pordia">Fecha <span class="si">↕</span></th>
+            <th class="s" data-col="total"       data-tbl="pordia">Total <span class="si">↕</span></th>
+            <th class="s" data-col="entregadas"  data-tbl="pordia">Entregadas <span class="si">↕</span></th>
+            <th class="s" data-col="rechazadas"  data-tbl="pordia">Rechazadas <span class="si">↕</span></th>
+            <th class="s" data-col="pendientes"  data-tbl="pordia">Pendientes <span class="si">↕</span></th>
+            <th class="s" data-col="eff"         data-tbl="pordia">Efectividad <span class="si">↕</span></th>
+          </tr></thead>
+          <tbody id="bPorDia"></tbody>
+        </table>
+      </div>
+      <div class="pag" id="pagPorDia"></div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       TAB: CONDUCTORES
+  ======================================== -->
+  <div id="tab-conductores" class="tab-pane">
+    <div class="split">
+      <div class="ch-box">
+        <div class="ch-title">Top 15 — rechazadas por conductor</div>
+        <div class="ch-wrap" style="height:390px"><canvas id="cConductores"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          <span>Ranking conductores</span>
+          <span id="cntCond" class="tbl-cnt"></span>
+        </div>
+        <div class="tbl-wrap">
+          <table class="data-tbl" id="tConductores">
+            <thead><tr>
+              <th>#</th>
+              <th class="s" data-col="conductor"  data-tbl="conductores">Conductor <span class="si">↕</span></th>
+              <th class="s" data-col="total"      data-tbl="conductores">Total <span class="si">↕</span></th>
+              <th class="s" data-col="entregadas" data-tbl="conductores">Entregadas <span class="si">↕</span></th>
+              <th class="s" data-col="rechazadas" data-tbl="conductores">Rechazadas <span class="si">↕</span></th>
+              <th class="s" data-col="eff"        data-tbl="conductores">Efect. <span class="si">↕</span></th>
+            </tr></thead>
+            <tbody id="bCond"></tbody>
+          </table>
+        </div>
+        <div class="pag" id="pagCond"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       TAB: DEPÓSITOS
+  ======================================== -->
+  <div id="tab-depositos" class="tab-pane">
+    <div class="split">
+      <div class="ch-box">
+        <div class="ch-title">Efectividad por depósito (%)</div>
+        <div class="ch-wrap" style="height:390px"><canvas id="cDepositos"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          <span>Resumen por depósito</span>
+          <span id="cntDep" class="tbl-cnt"></span>
+        </div>
+        <div class="tbl-wrap">
+          <table class="data-tbl" id="tDepositos">
+            <thead><tr>
+              <th class="s" data-col="deposito"   data-tbl="depositos">Depósito <span class="si">↕</span></th>
+              <th class="s" data-col="total"      data-tbl="depositos">Total <span class="si">↕</span></th>
+              <th class="s" data-col="entregadas" data-tbl="depositos">Entregadas <span class="si">↕</span></th>
+              <th class="s" data-col="rechazadas" data-tbl="depositos">Rechazadas <span class="si">↕</span></th>
+              <th class="s" data-col="pendientes" data-tbl="depositos">Pendientes <span class="si">↕</span></th>
+              <th class="s" data-col="eff"        data-tbl="depositos">Efect. <span class="si">↕</span></th>
+            </tr></thead>
+            <tbody id="bDep"></tbody>
+          </table>
+        </div>
+        <div class="pag" id="pagDep"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       TAB: RECHAZOS
+  ======================================== -->
+  <div id="tab-rechazos" class="tab-pane">
+    <div class="ch-row c2 sec">
+      <div class="ch-box">
+        <div class="ch-title">Top 10 motivos de rechazo</div>
+        <div class="ch-wrap" style="height:240px"><canvas id="cMotivos"></canvas></div>
+      </div>
+      <div class="ch-box">
+        <div class="ch-title">Rechazadas por día</div>
+        <div class="ch-wrap" style="height:240px"><canvas id="cRechDia"></canvas></div>
+      </div>
+    </div>
+
+    <div class="ch-row c2">
+      <div class="card">
+        <div class="card-title">
+          <span>Ranking de motivos</span>
+          <button class="btn-exp" onclick="exportRechCSV()">↓ CSV Rechazadas</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="data-tbl" id="tMotivos">
+            <thead><tr>
+              <th>#</th>
+              <th class="s" data-col="motivo"    data-tbl="motivos">Motivo <span class="si">↕</span></th>
+              <th class="s" data-col="categoria" data-tbl="motivos">Cat. <span class="si">↕</span></th>
+              <th class="s" data-col="total"     data-tbl="motivos">Total <span class="si">↕</span></th>
+              <th class="s" data-col="pct"       data-tbl="motivos">% <span class="si">↕</span></th>
+            </tr></thead>
+            <tbody id="bMotivos"></tbody>
+          </table>
+        </div>
+        <div class="pag" id="pagMotivos"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Top clientes con rechazadas</div>
+        <div class="tbl-wrap">
+          <table class="data-tbl" id="tClRech">
+            <thead><tr>
+              <th>#</th>
+              <th class="s" data-col="cliente" data-tbl="clrech">Cliente <span class="si">↕</span></th>
+              <th class="s" data-col="total"   data-tbl="clrech">Rechazadas <span class="si">↕</span></th>
+              <th class="s" data-col="pct"     data-tbl="clrech">% <span class="si">↕</span></th>
+              <th>Top Motivo</th>
+            </tr></thead>
+            <tbody id="bClRech"></tbody>
+          </table>
+        </div>
+        <div class="pag" id="pagClRech"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       TAB: ACCIONES
+  ======================================== -->
+  <div id="tab-acciones" class="tab-pane">
+    <div class="f-row">
+      <div class="f-grp">
+        <label>Depósito</label>
+        <select class="f-sel" id="fAccDep"  onchange="renderAcciones()"><option value="">Todos</option></select>
+      </div>
+      <div class="f-grp">
+        <label>Usuario</label>
+        <select class="f-sel" id="fAccUser" onchange="renderAcciones()"><option value="">Todos</option></select>
+      </div>
+      <div style="margin-left:auto;align-self:flex-end">
+        <button class="btn-exp" onclick="exportAccCSV()">↓ CSV Acciones</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span>Registro de acciones</span>
+        <span id="cntAcc" class="tbl-cnt"></span>
+      </div>
+      <div class="tbl-wrap">
+        <table class="data-tbl" id="tAcciones">
+          <thead><tr>
+            <th class="s" data-col="date"            data-tbl="acciones">Fecha <span class="si">↕</span></th>
+            <th class="s" data-col="timestamp"       data-tbl="acciones">Hora <span class="si">↕</span></th>
+            <th class="s" data-col="deposito"        data-tbl="acciones">Depósito <span class="si">↕</span></th>
+            <th class="s" data-col="conductor"       data-tbl="acciones">Conductor <span class="si">↕</span></th>
+            <th class="s" data-col="vehiculo"        data-tbl="acciones">Vehículo <span class="si">↕</span></th>
+            <th>Descripción</th>
+            <th class="s" data-col="nombre_completo" data-tbl="acciones">Usuario <span class="si">↕</span></th>
+          </tr></thead>
+          <tbody id="bAcc"></tbody>
+        </table>
+      </div>
+      <div class="pag" id="pagAcc"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+/* ============================================================
+   CONSTANTES
+============================================================ */
+const GAS_URL   = 'https://script.google.com/macros/s/AKfycby0MDTJ9-Hvqww_Ze4ILTHUlAYzmc5RUo5UZ8pSnvBUDit1tMGxMFVF3xvyplNOO7h37A/exec';
+const PAGE_SZ   = 20;
+
+/* ============================================================
+   ESTADO GLOBAL
+============================================================ */
+let RAW     = [];   // historico rows from GAS
+let ACTIONS = [];   // actions rows from GAS
+
+const SORT = {};    // { tblKey: { col, dir } }
+const PAGE = {};    // { bodyId: currentPage }
+const CH   = {};    // Chart.js instances
+
+// Derived datasets (recomputed on each tab render)
+let D_PORDIA     = [];
+let D_COND       = [];
+let D_DEP        = [];
+let D_MOTIVOS    = [];
+let D_CLRECH     = [];
+
+/* ============================================================
+   CHART.JS DEFAULTS (antes de cualquier new Chart())
+============================================================ */
+Chart.defaults.color                          = '#a0b4c8';
+Chart.defaults.font.family                    = "'IBM Plex Sans', system-ui, sans-serif";
+Chart.defaults.plugins.tooltip.backgroundColor = '#1E2733';
+Chart.defaults.plugins.tooltip.borderColor    = 'rgba(1,254,255,0.3)';
+Chart.defaults.plugins.tooltip.borderWidth    = 1;
+Chart.defaults.plugins.tooltip.titleColor     = '#01feff';
+Chart.defaults.plugins.tooltip.bodyColor      = '#a0b4c8';
+Chart.defaults.plugins.tooltip.padding        = 10;
+
+/* ============================================================
+   HELPERS
+============================================================ */
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function isoToday() {
+  const d = new Date();
+  return fmtISO(d);
+}
+
+function fmtISO(dt) {
+  return [dt.getFullYear(), String(dt.getMonth()+1).padStart(2,'0'), String(dt.getDate()).padStart(2,'0')].join('-');
+}
+
+function effCls(pct) {
+  if (pct >= 85) return 'eff-g';
+  if (pct >= 65) return 'eff-w';
+  return 'eff-d';
+}
+
+function killChart(id) {
+  if (CH[id]) { CH[id].destroy(); CH[id] = null; }
+}
+
+function axisOpts(rotate) {
+  return { ticks: { color: '#a0b4c8', font: { size: 10 }, maxRotation: rotate || 0 }, grid: { color: 'rgba(1,254,255,0.06)' } };
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  // Default: últimos 30 días
+  const hoy   = new Date();
+  const desde = new Date(hoy);
+  desde.setDate(desde.getDate() - 29);
+  document.getElementById('inDesde').value = fmtISO(desde);
+  document.getElementById('inHasta').value = fmtISO(hoy);
+
+  // Attach sort listeners (once, for all sortable headers)
+  document.querySelectorAll('th.s').forEach(th => {
+    th.addEventListener('click', () => handleSort(th.dataset.tbl, th.dataset.col));
+  });
+
+  // Auto-load
+  loadData();
+});
+
+/* ============================================================
+   DATA LOADING
+============================================================ */
+async function loadData() {
+  const desde = document.getElementById('inDesde').value;
+  const hasta = document.getElementById('inHasta').value;
+  if (!desde || !hasta) { showErr('Seleccionar rango de fechas.'); return; }
+
+  showOverlay(true);
+  hideErr();
+  setSt('Cargando...', 'loading');
+  document.getElementById('btnLoad').disabled = true;
+
+  try {
+    const [histRes, actRes] = await Promise.all([
+      fetch(`${GAS_URL}?action=get_historico&desde=${encodeURIComponent(desde)}&hasta=${encodeURIComponent(hasta)}`).then(r => r.json()),
+      gasPost({ action: 'get_actions_range', desde, hasta })
+    ]);
+
+    RAW     = histRes.rows    || [];
+    ACTIONS = actRes.actions  || [];
+
+    const dias = new Set(RAW.map(r => r.fecha)).size;
+    setSt(`${RAW.length.toLocaleString('es-AR')} órdenes · ${dias} días · ${ACTIONS.length} acciones`, '');
+
+    renderTab(activeTab());
+  } catch(err) {
+    showErr('Error al cargar datos: ' + err.message);
+    setSt('Error de conexión', 'err');
+  } finally {
+    showOverlay(false);
+    document.getElementById('btnLoad').disabled = false;
+  }
+}
+
+async function gasPost(payload) {
+  const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+  if (!res.ok) throw new Error(`GAS HTTP ${res.status}`);
+  return res.json();
+}
+
+/* ============================================================
+   TAB SWITCHING
+============================================================ */
+function activeTab() {
+  return document.querySelector('.tab-btn.active')?.dataset.tab || 'general';
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b  => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab));
+  renderTab(tab);
+}
+
+function renderTab(tab) {
+  switch(tab) {
+    case 'general':     renderGeneral();     break;
+    case 'pordia':      renderPorDia();      break;
+    case 'conductores': renderConductores(); break;
+    case 'depositos':   renderDepositos();   break;
+    case 'rechazos':    renderRechazos();    break;
+    case 'acciones':    renderAcciones();    break;
+  }
+}
+
+/* ============================================================
+   DERIVED DATA
+============================================================ */
+function stats(rows) {
+  const total      = rows.length;
+  const entregadas = rows.filter(r => r.status === 'delivered' || r.status === 'approved').length;
+  const rechazadas = rows.filter(r => r.status === 'rejected').length;
+  const pendientes = total - entregadas - rechazadas;
+  const eff        = total > 0 ? entregadas / total * 100 : 0;
+  return { total, entregadas, rechazadas, pendientes, eff };
+}
+
+function groupByDay(rows) {
+  const m = {};
+  rows.forEach(r => { if (!m[r.fecha]) m[r.fecha] = []; m[r.fecha].push(r); });
+  return Object.entries(m)
+    .sort((a,b) => a[0].localeCompare(b[0]))
+    .map(([fecha, items]) => ({ fecha, ...stats(items) }));
+}
+
+function groupByKey(rows, field) {
+  const m = {};
+  rows.forEach(r => {
+    const k = r[field] || '(sin datos)';
+    if (!m[k]) m[k] = [];
+    m[k].push(r);
+  });
+  return Object.entries(m)
+    .map(([key, items]) => ({ key, ...stats(items) }))
+    .sort((a,b) => b.total - a.total);
+}
+
+/* ============================================================
+   TAB 1 — GENERAL
+============================================================ */
+function renderGeneral() {
+  if (!RAW.length) { clearKPIs(); return; }
+
+  const s = stats(RAW);
+  const dias = new Set(RAW.map(r => r.fecha)).size;
+
+  // KPIs
+  el('kTotal').textContent   = s.total.toLocaleString('es-AR');
+  el('kTotalSub').textContent = dias + ' días en el período';
+  el('kEff').textContent     = s.eff.toFixed(1) + '%';
+  el('kEffSub').textContent  = s.entregadas.toLocaleString('es-AR') + ' entregadas';
+  el('kRej').textContent     = s.rechazadas.toLocaleString('es-AR');
+  el('kRejSub').textContent  = s.total > 0 ? (s.rechazadas/s.total*100).toFixed(1) + '% del total' : '';
+  el('kPend').textContent    = s.pendientes.toLocaleString('es-AR');
+  el('kPendSub').textContent = s.total > 0 ? (s.pendientes/s.total*100).toFixed(1) + '% del total' : '';
+
+  const byDay = groupByDay(RAW);
+
+  // Chart: efectividad diaria
+  killChart('cEfDiaria');
+  CH['cEfDiaria'] = new Chart(el('cEfDiaria'), {
+    type: 'line',
+    data: {
+      labels: byDay.map(d => d.fecha),
+      datasets: [{
+        label: 'Efectividad %',
+        data:  byDay.map(d => +d.eff.toFixed(1)),
+        borderColor: '#01feff', backgroundColor: 'rgba(1,254,255,0.07)',
+        fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: '#01feff',
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw + '%' } } },
+      scales: { x: axisOpts(45), y: { ...axisOpts(), min: 0, max: 100, ticks: { color: '#a0b4c8', font: { size: 10 }, callback: v => v + '%' } } }
+    }
+  });
+
+  // Chart: distribución estados (doughnut)
+  killChart('cEstados');
+  CH['cEstados'] = new Chart(el('cEstados'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Entregadas','Rechazadas','Pendientes'],
+      datasets: [{
+        data: [s.entregadas, s.rechazadas, s.pendientes],
+        backgroundColor: ['#22c55e','#ef4444','#eab308'],
+        borderWidth: 2, borderColor: '#253041',
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '60%',
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#a0b4c8', font: { size: 11 }, padding: 12 } },
+        tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw} (${s.total > 0 ? (c.raw/s.total*100).toFixed(1) : 0}%)` } }
+      }
+    }
+  });
+
+  // Chart: órdenes por depósito (stacked bar horizontal)
+  const byDep = groupByKey(RAW, 'deposito').slice(0,15);
+  killChart('cDepTotales');
+  CH['cDepTotales'] = new Chart(el('cDepTotales'), {
+    type: 'bar',
+    data: {
+      labels: byDep.map(d => d.key),
+      datasets: [
+        { label:'Entregadas', data: byDep.map(d => d.entregadas), backgroundColor:'rgba(34,197,94,0.75)' },
+        { label:'Rechazadas', data: byDep.map(d => d.rechazadas), backgroundColor:'rgba(239,68,68,0.75)' },
+        { label:'Pendientes', data: byDep.map(d => d.pendientes), backgroundColor:'rgba(234,179,8,0.75)' },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { labels: { color: '#a0b4c8', font: { size: 10 } } } },
+      scales: { x: { ...axisOpts(), stacked: true }, y: { ...axisOpts(), stacked: true } }
+    }
+  });
+
+  // Chart: tendencia acumulada (líneas entregadas vs rechazadas)
+  let acumEnt = 0, acumRech = 0;
+  const acumData = byDay.map(d => {
+    acumEnt  += d.entregadas;
+    acumRech += d.rechazadas;
+    return { fecha: d.fecha, ent: acumEnt, rech: acumRech };
+  });
+  killChart('cTendencia');
+  CH['cTendencia'] = new Chart(el('cTendencia'), {
+    type: 'line',
+    data: {
+      labels: acumData.map(d => d.fecha),
+      datasets: [
+        { label:'Entregadas acum.', data: acumData.map(d => d.ent),  borderColor:'#22c55e', backgroundColor:'rgba(34,197,94,0.07)',  fill:true, tension:0.3, pointRadius:2, pointBackgroundColor:'#22c55e' },
+        { label:'Rechazadas acum.', data: acumData.map(d => d.rech), borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.07)', fill:true, tension:0.3, pointRadius:2, pointBackgroundColor:'#ef4444' },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#a0b4c8', font: { size: 10 } } } },
+      scales: { x: axisOpts(45), y: axisOpts() }
+    }
+  });
+}
+
+function clearKPIs() {
+  ['kTotal','kEff','kRej','kPend'].forEach(id => el(id).textContent = '—');
+  ['kTotalSub','kEffSub','kRejSub','kPendSub'].forEach(id => el(id).textContent = '');
+}
+
+/* ============================================================
+   TAB 2 — POR DÍA
+============================================================ */
+function renderPorDia() {
+  D_PORDIA = groupByDay(RAW);
+
+  killChart('cPorDia');
+  CH['cPorDia'] = new Chart(el('cPorDia'), {
+    type: 'bar',
+    data: {
+      labels: D_PORDIA.map(d => d.fecha),
+      datasets: [
+        { label:'Entregadas', data: D_PORDIA.map(d => d.entregadas), backgroundColor:'rgba(34,197,94,0.75)' },
+        { label:'Rechazadas', data: D_PORDIA.map(d => d.rechazadas), backgroundColor:'rgba(239,68,68,0.75)' },
+        { label:'Pendientes', data: D_PORDIA.map(d => d.pendientes), backgroundColor:'rgba(234,179,8,0.75)' },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#a0b4c8', font: { size: 10 } } } },
+      scales: { x: { ...axisOpts(45), stacked: true }, y: { ...axisOpts(), stacked: true } }
+    }
+  });
+
+  sortAndRender_pordia();
+}
+
+function sortAndRender_pordia() {
+  const { col, dir } = SORT['pordia'] || { col: 'fecha', dir: 'asc' };
+  const sorted = [...D_PORDIA].sort((a,b) => cmp(a,b,col,dir));
+  renderPaged('bPorDia','pagPorDia','cntPorDia', sorted, (item) => `<tr>
+    <td class="mono">${esc(item.fecha)}</td>
+    <td><strong>${item.total}</strong></td>
+    <td class="tg">${item.entregadas}</td>
+    <td class="td">${item.rechazadas}</td>
+    <td class="tw">${item.pendientes}</td>
+    <td><span class="${effCls(item.eff)}">${item.eff.toFixed(1)}%</span></td>
+  </tr>`);
+  updSortIcons('tPorDia', col, dir);
+}
+
+/* ============================================================
+   TAB 3 — CONDUCTORES
+============================================================ */
+function renderConductores() {
+  D_COND = groupByKey(RAW, 'conductor').map(d => ({
+    conductor: d.key, total: d.total, entregadas: d.entregadas,
+    rechazadas: d.rechazadas, pendientes: d.pendientes, eff: d.eff,
+  }));
+
+  const top15 = [...D_COND].sort((a,b) => b.rechazadas - a.rechazadas).slice(0,15);
+  killChart('cConductores');
+  CH['cConductores'] = new Chart(el('cConductores'), {
+    type: 'bar',
+    data: {
+      labels: top15.map(d => d.conductor),
+      datasets: [{ label:'Rechazadas', data: top15.map(d => d.rechazadas), backgroundColor:'rgba(239,68,68,0.7)', borderColor:'#ef4444', borderWidth:1 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: { x: axisOpts(), y: axisOpts() }
+    }
+  });
+
+  sortAndRender_conductores();
+}
+
+function sortAndRender_conductores() {
+  const { col, dir } = SORT['conductores'] || { col: 'rechazadas', dir: 'desc' };
+  const sorted = [...D_COND].sort((a,b) => cmp(a,b,col,dir));
+  renderPaged('bCond','pagCond','cntCond', sorted, (item, idx, offset) => `<tr>
+    <td class="tm">${idx + offset + 1}</td>
+    <td>${esc(item.conductor)}</td>
+    <td>${item.total}</td>
+    <td class="tg">${item.entregadas}</td>
+    <td class="td">${item.rechazadas}</td>
+    <td><span class="${effCls(item.eff)}">${item.eff.toFixed(1)}%</span></td>
+  </tr>`);
+  updSortIcons('tConductores', col, dir);
+}
+
+/* ============================================================
+   TAB 4 — DEPÓSITOS
+============================================================ */
+function renderDepositos() {
+  D_DEP = groupByKey(RAW, 'deposito').map(d => ({
+    deposito: d.key, total: d.total, entregadas: d.entregadas,
+    rechazadas: d.rechazadas, pendientes: d.pendientes, eff: d.eff,
+  }));
+
+  const byEff = [...D_DEP].sort((a,b) => b.eff - a.eff);
+  killChart('cDepositos');
+  CH['cDepositos'] = new Chart(el('cDepositos'), {
+    type: 'bar',
+    data: {
+      labels: byEff.map(d => d.deposito),
+      datasets: [{
+        label: 'Efectividad %',
+        data:  byEff.map(d => +d.eff.toFixed(1)),
+        backgroundColor: byEff.map(d => d.eff >= 85 ? 'rgba(34,197,94,0.7)' : d.eff >= 65 ? 'rgba(234,179,8,0.7)' : 'rgba(239,68,68,0.7)'),
+        borderColor:     byEff.map(d => d.eff >= 85 ? '#22c55e'             : d.eff >= 65 ? '#eab308'             : '#ef4444'),
+        borderWidth: 1,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw + '%' } } },
+      scales: { x: { ...axisOpts(), min: 0, max: 100, ticks: { color: '#a0b4c8', font:{ size:10 }, callback: v => v+'%' } }, y: axisOpts() }
+    }
+  });
+
+  sortAndRender_depositos();
+}
+
+function sortAndRender_depositos() {
+  const { col, dir } = SORT['depositos'] || { col: 'total', dir: 'desc' };
+  const sorted = [...D_DEP].sort((a,b) => cmp(a,b,col,dir));
+  renderPaged('bDep','pagDep','cntDep', sorted, item => {
+    const barW  = Math.round(item.eff);
+    const barCl = item.eff >= 85 ? 'bar-g' : 'bar-d';
+    return `<tr>
+      <td>${esc(item.deposito)}</td>
+      <td>${item.total}</td>
+      <td class="tg">${item.entregadas}</td>
+      <td class="td">${item.rechazadas}</td>
+      <td class="tw">${item.pendientes}</td>
+      <td>
+        <span class="${effCls(item.eff)}">${item.eff.toFixed(1)}%</span>
+        <div class="bar-c" style="margin-top:3px"><div class="bar-f ${barCl}" style="width:${barW}%"></div></div>
+      </td>
+    </tr>`;
+  });
+  updSortIcons('tDepositos', col, dir);
+}
+
+/* ============================================================
+   TAB 5 — RECHAZOS
+============================================================ */
+function renderRechazos() {
+  const rech      = RAW.filter(r => r.status === 'rejected');
+  const totalRech = rech.length;
+
+  // Motivos
+  const mMap = {};
+  rech.forEach(r => {
+    const k = (r.motivo_rechazo || 'Sin motivo') + '|||' + (r.categoria || 'sin categoría');
+    mMap[k] = (mMap[k] || 0) + 1;
+  });
+  D_MOTIVOS = Object.entries(mMap)
+    .map(([k,cnt]) => { const [motivo,categoria] = k.split('|||'); return { motivo, categoria, total: cnt, pct: totalRech > 0 ? cnt/totalRech*100 : 0 }; })
+    .sort((a,b) => b.total - a.total);
+
+  // Clientes
+  const cMap = {};
+  rech.forEach(r => {
+    const k = r.cliente || r.proveedor || '(sin cliente)';
+    if (!cMap[k]) cMap[k] = { total: 0, motivos: {} };
+    cMap[k].total++;
+    const m = r.motivo_rechazo || 'Sin motivo';
+    cMap[k].motivos[m] = (cMap[k].motivos[m] || 0) + 1;
+  });
+  D_CLRECH = Object.entries(cMap)
+    .map(([cliente, d]) => ({
+      cliente, total: d.total,
+      pct: totalRech > 0 ? d.total/totalRech*100 : 0,
+      topMotivo: Object.entries(d.motivos).sort((a,b) => b[1]-a[1])[0]?.[0] || '—',
+    }))
+    .sort((a,b) => b.total - a.total);
+
+  // Chart motivos (top 10)
+  const top10m = D_MOTIVOS.slice(0,10);
+  killChart('cMotivos');
+  CH['cMotivos'] = new Chart(el('cMotivos'), {
+    type: 'bar',
+    data: {
+      labels: top10m.map(d => d.motivo.length > 32 ? d.motivo.slice(0,30)+'…' : d.motivo),
+      datasets: [{ label:'Rechazadas', data: top10m.map(d => d.total), backgroundColor:'rgba(234,179,8,0.7)', borderColor:'#eab308', borderWidth:1 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: { x: axisOpts(), y: axisOpts() }
+    }
+  });
+
+  // Chart rechazadas por día
+  const byDay = groupByDay(RAW);
+  killChart('cRechDia');
+  CH['cRechDia'] = new Chart(el('cRechDia'), {
+    type: 'line',
+    data: {
+      labels: byDay.map(d => d.fecha),
+      datasets: [{
+        label: 'Rechazadas',
+        data:  byDay.map(d => d.rechazadas),
+        borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.1)',
+        fill:true, tension:0.3, pointRadius:3, pointBackgroundColor:'#ef4444',
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: axisOpts(45), y: axisOpts() }
+    }
+  });
+
+  sortAndRender_motivos();
+  sortAndRender_clrech();
+}
+
+function sortAndRender_motivos() {
+  const { col, dir } = SORT['motivos'] || { col: 'total', dir: 'desc' };
+  const sorted = [...D_MOTIVOS].sort((a,b) => cmp(a,b,col,dir));
+  renderPaged('bMotivos','pagMotivos', null, sorted, (item, idx, offset) => {
+    const cat = item.categoria;
+    const badgeCl = cat === 'delivery' ? 'b-delivery' : cat === 'pickup' ? 'b-pickup' : 'b-other';
+    return `<tr>
+      <td class="tm">${idx + offset + 1}</td>
+      <td>${esc(item.motivo)}</td>
+      <td><span class="badge ${badgeCl}">${esc(item.categoria)}</span></td>
+      <td><strong>${item.total}</strong></td>
+      <td class="tm">${item.pct.toFixed(1)}%</td>
+    </tr>`;
+  });
+  updSortIcons('tMotivos', col, dir);
+}
+
+function sortAndRender_clrech() {
+  const { col, dir } = SORT['clrech'] || { col: 'total', dir: 'desc' };
+  const sorted = [...D_CLRECH].sort((a,b) => cmp(a,b,col,dir));
+  renderPaged('bClRech','pagClRech', null, sorted, (item, idx, offset) => `<tr>
+    <td class="tm">${idx + offset + 1}</td>
+    <td>${esc(item.cliente)}</td>
+    <td class="td"><strong>${item.total}</strong></td>
+    <td class="tm">${item.pct.toFixed(1)}%</td>
+    <td class="tm" style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${esc(item.topMotivo)}</td>
+  </tr>`);
+  updSortIcons('tClRech', col, dir);
+}
+
+/* ============================================================
+   TAB 6 — ACCIONES
+============================================================ */
+function renderAcciones() {
+  const depSel  = el('fAccDep');
+  const userSel = el('fAccUser');
+
+  // Rebuild selects preserving current selection
+  const prevDep  = depSel.value;
+  const prevUser = userSel.value;
+  const deps  = [...new Set(ACTIONS.map(a => a.deposito).filter(Boolean))].sort();
+  const users = [...new Set(ACTIONS.map(a => (a.nombre_completo || a.usuario)).filter(Boolean))].sort();
+  depSel.innerHTML  = '<option value="">Todos</option>';
+  userSel.innerHTML = '<option value="">Todos</option>';
+  deps.forEach(d  => depSel.add(new Option(d, d)));
+  users.forEach(u => userSel.add(new Option(u, u)));
+  depSel.value  = prevDep;
+  userSel.value = prevUser;
+
+  let filtered = ACTIONS;
+  if (depSel.value)  filtered = filtered.filter(a => a.deposito === depSel.value);
+  if (userSel.value) filtered = filtered.filter(a => (a.nombre_completo || a.usuario) === userSel.value);
+
+  const { col, dir } = SORT['acciones'] || { col: 'date', dir: 'desc' };
+  const sorted = [...filtered].sort((a,b) => cmp(a,b,col,dir));
+
+  renderPaged('bAcc','pagAcc','cntAcc', sorted, item => {
+    const hora = item.timestamp ? String(item.timestamp).substring(0,8) : '—';
+    return `<tr>
+      <td class="mono">${esc(item.date)}</td>
+      <td class="mono tm">${esc(hora)}</td>
+      <td>${esc(item.deposito)}</td>
+      <td>${esc(item.conductor)}</td>
+      <td class="tm">${esc(item.vehiculo)}</td>
+      <td style="white-space:normal;min-width:200px;max-width:340px;line-height:1.4">${esc(item.descripcion)}</td>
+      <td class="tm">${esc(item.nombre_completo || item.usuario)}</td>
+    </tr>`;
+  });
+  updSortIcons('tAcciones', col, dir);
+}
+
+/* ============================================================
+   SORTING
+============================================================ */
+function handleSort(tblKey, col) {
+  const curr = SORT[tblKey];
+  SORT[tblKey] = (curr && curr.col === col)
+    ? { col, dir: curr.dir === 'asc' ? 'desc' : 'asc' }
+    : { col, dir: 'asc' };
+  PAGE['b' + capitalize(tblKey)] = 1;
+
+  const rerender = {
+    pordia:      sortAndRender_pordia,
+    conductores: sortAndRender_conductores,
+    depositos:   sortAndRender_depositos,
+    motivos:     sortAndRender_motivos,
+    clrech:      sortAndRender_clrech,
+    acciones:    renderAcciones,
+  };
+  if (rerender[tblKey]) rerender[tblKey]();
+}
+
+function cmp(a, b, col, dir) {
+  let va = a[col] ?? '';
+  let vb = b[col] ?? '';
+  if (typeof va === 'string') va = va.toLowerCase();
+  if (typeof vb === 'string') vb = vb.toLowerCase();
+  if (va < vb) return dir === 'asc' ? -1 : 1;
+  if (va > vb) return dir === 'asc' ?  1 : -1;
+  return 0;
+}
+
+function updSortIcons(tableId, activeCol, dir) {
+  const tbl = el(tableId);
+  if (!tbl) return;
+  tbl.querySelectorAll('th.s').forEach(th => {
+    th.classList.remove('asc','desc');
+    const ico = th.querySelector('.si');
+    if (th.dataset.col === activeCol) {
+      th.classList.add(dir === 'asc' ? 'asc' : 'desc');
+      if (ico) ico.textContent = dir === 'asc' ? '↑' : '↓';
+    } else {
+      if (ico) ico.textContent = '↕';
+    }
+  });
+}
+
+function capitalize(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/* ============================================================
+   PAGINATION
+============================================================ */
+function renderPaged(bodyId, pagId, cntId, data, rowFn) {
+  const key   = bodyId;
+  if (!PAGE[key]) PAGE[key] = 1;
+
+  const total = data.length;
+  const pages = Math.max(1, Math.ceil(total / PAGE_SZ));
+  if (PAGE[key] > pages) PAGE[key] = pages;
+
+  const start = (PAGE[key] - 1) * PAGE_SZ;
+  const end   = Math.min(start + PAGE_SZ, total);
+  const slice = data.slice(start, end);
+
+  const tbody = el(bodyId);
+  if (!tbody) return;
+  tbody.innerHTML = total === 0
+    ? `<tr><td colspan="20"><div class="empty">Sin datos para el período seleccionado</div></td></tr>`
+    : slice.map((item, idx) => rowFn(item, idx, start)).join('');
+
+  if (cntId) {
+    const ce = el(cntId);
+    if (ce) ce.textContent = total > 0 ? `${start+1}–${end} de ${total}` : '0 resultados';
+  }
+
+  if (pagId) renderPagEl(pagId, key, PAGE[key], pages);
+}
+
+function renderPagEl(pagId, key, page, pages) {
+  const el2 = el(pagId);
+  if (!el2) return;
+  if (pages <= 1) { el2.innerHTML = ''; return; }
+
+  const range = buildRange(page, pages);
+  let h = `<button class="pg" ${page===1?'disabled':''} onclick="goPage('${key}',${page-1})">‹</button>`;
+  range.forEach(p => {
+    h += p === '…'
+      ? `<button class="pg" disabled>…</button>`
+      : `<button class="pg${p===page?' act':''}" onclick="goPage('${key}',${p})">${p}</button>`;
+  });
+  h += `<button class="pg" ${page===pages?'disabled':''} onclick="goPage('${key}',${page+1})">›</button>`;
+  el2.innerHTML = h;
+}
+
+function buildRange(cur, total) {
+  if (total <= 7) return Array.from({length: total}, (_,i) => i+1);
+  const r = [1];
+  if (cur > 3) r.push('…');
+  for (let p = Math.max(2, cur-1); p <= Math.min(total-1, cur+1); p++) r.push(p);
+  if (cur < total-2) r.push('…');
+  r.push(total);
+  return r;
+}
+
+function goPage(key, page) {
+  PAGE[key] = page;
+  const map = {
+    bPorDia:      sortAndRender_pordia,
+    bCond:        sortAndRender_conductores,
+    bDep:         sortAndRender_depositos,
+    bMotivos:     sortAndRender_motivos,
+    bClRech:      sortAndRender_clrech,
+    bAcc:         renderAcciones,
+  };
+  if (map[key]) map[key]();
+}
+
+/* ============================================================
+   CSV EXPORTS
+============================================================ */
+function exportRechCSV() {
+  const rech = RAW.filter(r => r.status === 'rejected');
+  if (!rech.length) { alert('Sin rechazadas en el período.'); return; }
+  const hdr = ['Fecha','Plan','Cód.Orden','Cód.Dirección','Depósito','Flota','Conductor','Vehículo','Categoría','Estado','Motivo','Cliente','Proveedor','Kg','Bultos','VD'];
+  const rows = rech.map(r => [
+    r.fecha, r.plan, r.codigo_orden, r.codigo_direccion,
+    r.deposito, r.flota, r.conductor, r.vehiculo,
+    r.categoria, r.status, r.motivo_rechazo,
+    r.cliente, r.proveedor, r.kg, r.bultos, r.valor_declarado,
+  ].map(v => `"${String(v??'').replace(/"/g,'""')}"`));
+  dlCSV([hdr.map(h => `"${h}"`), ...rows], 'rechazadas_historico.csv');
+}
+
+function exportAccCSV() {
+  if (!ACTIONS.length) { alert('Sin acciones en el período.'); return; }
+  const hdr = ['Fecha','Hora','Depósito','Conductor','Vehículo','Descripción','Usuario','Nombre'];
+  const rows = ACTIONS.map(a => [
+    a.date, a.timestamp, a.deposito, a.conductor, a.vehiculo,
+    a.descripcion, a.usuario, a.nombre_completo,
+  ].map(v => `"${String(v??'').replace(/"/g,'""')}"`));
+  dlCSV([hdr.map(h => `"${h}"`), ...rows], 'acciones_historico.csv');
+}
+
+function dlCSV(rows, filename) {
+  const csv  = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+/* ============================================================
+   UI HELPERS
+============================================================ */
+function el(id) { return document.getElementById(id); }
+
+function showOverlay(v) { el('overlay').classList.toggle('on', v); }
+
+function showErr(msg) { const e = el('errBanner'); e.textContent = msg; e.classList.add('on'); }
+function hideErr()    { el('errBanner').classList.remove('on'); }
+
+function setSt(msg, cls) {
+  const e = el('hdrSt');
+  e.textContent = msg;
+  e.className   = 'hdr-status' + (cls ? ' ' + cls : '');
+}
+</script>
+</body>
+</html>
