@@ -1,74 +1,78 @@
-// api.js — Wrapper fetch hacia GAS Web App + utilidades de sesión
+/* ============================================================
+   api.js — Funciones de acceso a la API de Drivin
+   ============================================================ */
 
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxqymlzy5_IUBkgXEDIppgg7QG4kNzrlmlGqriiFbBoWJPookVJMHnSSt-JCyVGDx8AFg/exec';  // reemplazar con la URL real al deployar
-
-async function gasCall(action, params = {}) {
-  const token = getToken();
-  const body  = JSON.stringify({ action, token, ...params });
-  const res   = await fetch(GAS_URL, {
-    method:  'POST',
-    body,
-    headers: { 'Content-Type': 'text/plain' }
-    // text/plain evita el preflight CORS en GAS
-  });
-  if (!res.ok) throw new Error('Error de red: ' + res.status);
-  return res.json();
+/**
+ * Retorna la fecha de hoy en formato YYYY-MM-DD (hora local).
+ */
+function getTodayString() {
+  const hoy  = new Date();
+  const yyyy = hoy.getFullYear();
+  const mm   = String(hoy.getMonth() + 1).padStart(2, '0');
+  const dd   = String(hoy.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
 }
 
-function getToken()   { return localStorage.getItem('troncales_token'); }
-function getSession() { return JSON.parse(localStorage.getItem('troncales_session') || 'null'); }
-
-function saveSession(token, usuario) {
-  localStorage.setItem('troncales_token', token);
-  localStorage.setItem('troncales_session', JSON.stringify(usuario));
+/**
+ * Obtiene los PODs del día indicado.
+ * @param {string} dateStr — formato YYYY-MM-DD
+ * @returns {Promise<Array>}
+ */
+async function fetchPods(dateStr) {
+  const url      = `${PODS_ENDPOINT}?start_date=${dateStr}&end_date=${dateStr}`;
+  const response = await fetch(url, { headers: { 'x-api-key': API_KEY } });
+  if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  const json = await response.json();
+  return json.response || [];
 }
 
-function clearSession() {
-  localStorage.removeItem('troncales_token');
-  localStorage.removeItem('troncales_session');
+/**
+ * Obtiene el listado de conductores (rol driver).
+ * Se llama UNA SOLA VEZ al iniciar la aplicación.
+ * @returns {Promise<Array>}
+ */
+async function fetchDrivers() {
+  const response = await fetch(USERS_ENDPOINT, { headers: { 'x-api-key': API_KEY } });
+  if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  const json = await response.json();
+  return json.response || [];
 }
 
-function requireSession() {
-  const session = getSession();
-  if (!session || !getToken()) {
-    window.location.href = 'index.html';
-    return null;
+/**
+ * Obtiene teléfonos de destino desde v3/pods usando address_code[].
+ * Se llama en background después del render inicial.
+ * @param {string[]} addressCodes — array de códigos de dirección únicos
+ * @returns {Promise<Object>} mapa { addressCode: { phone } }
+ */
+async function fetchPhonesBatch(addressCodes) {
+  const BATCH = 50;
+  const phonesMap = {};
+
+  for (let i = 0; i < addressCodes.length; i += BATCH) {
+    const batch = addressCodes.slice(i, i + BATCH);
+    try {
+      const qs  = batch.map(c => `address_code[]=${encodeURIComponent(c)}`).join('&');
+      const res = await fetch(`${PODS_V3_ENDPOINT}?${qs}`, {
+        headers: { 'x-api-key': API_KEY }
+      });
+      if (!res.ok) {
+        console.warn(`[phones] lote ${i}: HTTP ${res.status}`);
+        continue;
+      }
+      const json = await res.json();
+      (json.response || []).forEach(stop => {
+        const phone = stop.contact_phone
+          || stop.address?.contact_phone
+          || stop.address_contact_phone
+          || null;
+        if (stop.address_name && phone) {
+          phonesMap[stop.address_name] = { phone };
+        }
+      });
+    } catch (e) {
+      console.warn('[phones] error en lote:', e.message);
+    }
   }
-  return session;
-}
 
-function requireRole(rolesPermitidos) {
-  const session = requireSession();
-  if (!session) return null;
-  if (!rolesPermitidos.includes(session.rol)) {
-    window.location.href = 'dashboard.html';
-    return null;
-  }
-  return session;
-}
-
-function setLoading(btn, loading) {
-  if (loading) {
-    btn.disabled = true;
-    btn.dataset.originalText = btn.innerHTML;
-    btn.innerHTML = '<span class="spinner"></span>';
-  } else {
-    btn.disabled  = false;
-    btn.innerHTML = btn.dataset.originalText || btn.innerHTML;
-  }
-}
-
-function escapeHtml(str) {
-  const d = document.createElement('div');
-  d.textContent = String(str ?? '');
-  return d.innerHTML;
-}
-
-async function handleLogout() {
-  const token = getToken();
-  if (token) {
-    try { await gasCall('logout'); } catch (e) { /* ignorar errores de red al cerrar sesión */ }
-  }
-  clearSession();
-  window.location.href = 'index.html';
+  return phonesMap;
 }
