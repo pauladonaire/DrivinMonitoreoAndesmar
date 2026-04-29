@@ -346,6 +346,45 @@
        EMPTY STATE
     ================================================ */
     .empty { text-align: center; padding: 32px 16px; color: var(--muted); font-size: 13px; }
+
+    /* ================================================
+       V2 ADDITIONS
+    ================================================ */
+    .filter-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-bottom: 14px; display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+    .f-inp { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 5px 10px; border-radius: 5px; font-size: 12px; min-width: 160px; font-family: 'IBM Plex Mono', monospace; }
+    .f-inp:focus { outline: none; border-color: var(--cyan); }
+    .btn-nav { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 13px; background: var(--surface); color: var(--muted); border: 1px solid var(--border); padding: 5px 12px; border-radius: 5px; cursor: pointer; transition: all .2s; }
+    .btn-nav:hover { border-color: var(--cyan); color: var(--cyan); }
+    .kpi-delta { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; margin-left: 5px; vertical-align: middle; }
+    .delta-up { color: var(--success); }
+    .delta-dn { color: var(--danger); }
+    .delta-eq { color: var(--muted); }
+    .kpi.o { border-top-color: #f97316; }
+    .kpi.o .kpi-val { color: #f97316; }
+    .kpi-grid-8 { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
+    @media (max-width:960px) { .kpi-grid-8 { grid-template-columns: repeat(2,1fr); } }
+    .kpi-sm { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; border-top: 2px solid transparent; }
+    .kpi-sm.c { border-top-color: var(--cyan); }
+    .kpi-sm.g { border-top-color: var(--success); }
+    .kpi-sm.r { border-top-color: var(--danger); }
+    .kpi-sm.y { border-top-color: var(--warning); }
+    .kpi-sm.o { border-top-color: #f97316; }
+    .kpi-sm .kpi-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 4px; }
+    .kpi-sm .kpi-val { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 500; line-height: 1; }
+    .kpi-sm.c .kpi-val { color: var(--cyan); }
+    .kpi-sm.g .kpi-val { color: var(--success); }
+    .kpi-sm.r .kpi-val { color: var(--danger); }
+    .kpi-sm.y .kpi-val { color: var(--warning); }
+    .kpi-sm.o .kpi-val { color: #f97316; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    @media (max-width:1100px) { .grid-3 { grid-template-columns: 1fr; } }
+    .data-tbl tbody tr.row-active { background: rgba(1,254,255,0.12) !important; }
+    .cond-detail { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin: 0 0 6px; }
+    .week-grid-inner { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; max-width: 700px; }
+    .week-day-lbl { text-align: center; font-size: 9px; color: var(--muted); padding: 2px; text-transform: uppercase; letter-spacing: 1px; }
+    .week-cell { aspect-ratio: 1; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: rgba(30,39,51,.9); cursor: default; font-family: 'IBM Plex Mono', monospace; }
+    .dep-view-detail { display: none; }
+    .mini-kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
   </style>
 </head>
 <body>
@@ -439,18 +478,59 @@
         <div class="ch-wrap" style="height:210px"><canvas id="cTendencia"></canvas></div>
       </div>
     </div>
+
+    <div class="grid-3 sec">
+      <div class="card">
+        <div class="card-title">
+          <span>Top motivos de rechazo</span>
+          <button class="btn-exp" onclick="exportCSV_generalMotivos()">↓ CSV</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="data-tbl" id="tGenMotivos">
+            <thead><tr><th>#</th><th>Motivo</th><th>Total</th><th>%</th></tr></thead>
+            <tbody id="bGenMotivos"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          <span>Top conductores rechazados</span>
+          <button class="btn-exp" onclick="exportCSV_generalConductores()">↓ CSV</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="data-tbl" id="tGenCond">
+            <thead><tr><th>#</th><th>Conductor</th><th>Rech.</th><th>Efect.</th></tr></thead>
+            <tbody id="bGenCond"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          <span>Top proveedores rechazados</span>
+          <button class="btn-exp" onclick="exportCSV_generalProveedores()">↓ CSV</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="data-tbl" id="tGenProv">
+            <thead><tr><th>#</th><th>Proveedor</th><th>Rech.</th><th>%</th></tr></thead>
+            <tbody id="bGenProv"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ========================================
        TAB: POR DÍA
   ======================================== -->
   <div id="tab-pordia" class="tab-pane">
+    <!-- Overview chart (todo el período) -->
     <div class="ch-box sec">
       <div class="ch-title">Órdenes por día — Entregadas / Rechazadas / Pendientes</div>
-      <div class="ch-wrap" style="height:230px"><canvas id="cPorDia"></canvas></div>
+      <div class="ch-wrap" style="height:200px"><canvas id="cPorDia"></canvas></div>
     </div>
 
-    <div class="card">
+    <!-- Resumen diario (tabla overview) -->
+    <div class="card sec">
       <div class="card-title">
         <span>Resumen diario</span>
         <span id="cntPorDia" class="tbl-cnt"></span>
@@ -470,31 +550,106 @@
       </div>
       <div class="pag" id="pagPorDia"></div>
     </div>
+
+    <!-- Detalle de día seleccionado -->
+    <div class="card sec">
+      <div class="card-title" style="margin-bottom:12px">
+        <span>Detalle del día</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn-nav" onclick="navDia(-1)">‹</button>
+          <input type="date" id="selFecha" class="f-inp" style="min-width:140px" onchange="onFechaChange()">
+          <button class="btn-nav" onclick="navDia(1)">›</button>
+          <button class="btn-exp" onclick="exportCSV_diaSeleccionado()">↓ CSV Día</button>
+          <button class="btn-exp" onclick="exportCSV_resumenDiario()">↓ CSV Resumen</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid-8" id="diaKpis">
+        <div class="kpi-sm c"><div class="kpi-label">Total</div><div class="kpi-val" id="dkTotal">—</div></div>
+        <div class="kpi-sm g"><div class="kpi-label">Entregadas</div><div class="kpi-val" id="dkEnt">—</div></div>
+        <div class="kpi-sm r"><div class="kpi-label">Rechazadas</div><div class="kpi-val" id="dkRech">—</div></div>
+        <div class="kpi-sm y"><div class="kpi-label">Pendientes</div><div class="kpi-val" id="dkPend">—</div></div>
+        <div class="kpi-sm g"><div class="kpi-label">Efectividad</div><div class="kpi-val" id="dkEff">—</div></div>
+        <div class="kpi-sm c"><div class="kpi-label">Conductores</div><div class="kpi-val" id="dkCond">—</div></div>
+        <div class="kpi-sm o"><div class="kpi-label">Depósitos</div><div class="kpi-val" id="dkDep">—</div></div>
+        <div class="kpi-sm y"><div class="kpi-label">Retiros</div><div class="kpi-val" id="dkRetiros">—</div></div>
+      </div>
+
+      <div class="ch-row c2 sec">
+        <div class="ch-box">
+          <div class="ch-title">Por depósito (stacked)</div>
+          <div class="ch-wrap" style="height:200px"><canvas id="cDiaBar"></canvas></div>
+        </div>
+        <div class="ch-box">
+          <div class="ch-title">Timeline de entregas (hora vs conductor)</div>
+          <div class="ch-wrap" style="height:200px"><canvas id="cDiaTimeline"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card-title" style="margin-top:4px;margin-bottom:8px">
+        <span>Órdenes del día</span>
+        <span id="cntDiaDet" class="tbl-cnt"></span>
+      </div>
+      <div class="tbl-wrap">
+        <table class="data-tbl" id="tDiaDet">
+          <thead><tr>
+            <th class="s" data-col="conductor"  data-tbl="diadet">Conductor <span class="si">↕</span></th>
+            <th class="s" data-col="deposito"   data-tbl="diadet">Depósito <span class="si">↕</span></th>
+            <th class="s" data-col="codigo_orden" data-tbl="diadet">Orden <span class="si">↕</span></th>
+            <th class="s" data-col="status"     data-tbl="diadet">Estado <span class="si">↕</span></th>
+            <th class="s" data-col="categoria"  data-tbl="diadet">Cat. <span class="si">↕</span></th>
+            <th>Motivo</th>
+            <th class="s" data-col="proveedor"  data-tbl="diadet">Proveedor <span class="si">↕</span></th>
+          </tr></thead>
+          <tbody id="bDiaDet"></tbody>
+        </table>
+      </div>
+      <div class="pag" id="pagDiaDet"></div>
+    </div>
   </div>
 
   <!-- ========================================
        TAB: CONDUCTORES
   ======================================== -->
   <div id="tab-conductores" class="tab-pane">
+    <div class="filter-panel">
+      <div class="f-grp">
+        <label class="lbl">Depósito</label>
+        <select class="f-sel f-inp" id="filtroCondDep" onchange="applyCondFilters()"><option value="">Todos</option></select>
+      </div>
+      <div class="f-grp">
+        <label class="lbl">Buscar conductor</label>
+        <input type="text" class="f-inp" id="filtroCondTxt" placeholder="nombre..." oninput="debounceCondFilter()">
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn-exp" onclick="exportCSV_conductores()">↓ CSV Ranking</button>
+        <button class="btn-exp" onclick="exportCSV_conductoresDetalle()">↓ CSV Detalle</button>
+      </div>
+    </div>
+
     <div class="split">
       <div class="ch-box">
         <div class="ch-title">Top 15 — rechazadas por conductor</div>
-        <div class="ch-wrap" style="height:390px"><canvas id="cConductores"></canvas></div>
+        <div class="ch-wrap" style="height:420px"><canvas id="cConductores"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title">
           <span>Ranking conductores</span>
           <span id="cntCond" class="tbl-cnt"></span>
         </div>
+        <div id="condDetailPanel"></div>
         <div class="tbl-wrap">
           <table class="data-tbl" id="tConductores">
             <thead><tr>
               <th>#</th>
               <th class="s" data-col="conductor"  data-tbl="conductores">Conductor <span class="si">↕</span></th>
               <th class="s" data-col="total"      data-tbl="conductores">Total <span class="si">↕</span></th>
-              <th class="s" data-col="entregadas" data-tbl="conductores">Entregadas <span class="si">↕</span></th>
-              <th class="s" data-col="rechazadas" data-tbl="conductores">Rechazadas <span class="si">↕</span></th>
+              <th class="s" data-col="rechazadas" data-tbl="conductores">Rech. <span class="si">↕</span></th>
               <th class="s" data-col="eff"        data-tbl="conductores">Efect. <span class="si">↕</span></th>
+              <th class="s" data-col="dias"       data-tbl="conductores">Días <span class="si">↕</span></th>
+              <th class="s" data-col="retiros"    data-tbl="conductores">Retiros <span class="si">↕</span></th>
+              <th class="s" data-col="top10"      data-tbl="conductores">Top10↓ <span class="si">↕</span></th>
+              <th class="s" data-col="rutaAvg"    data-tbl="conductores">T.Ruta <span class="si">↕</span></th>
             </tr></thead>
             <tbody id="bCond"></tbody>
           </table>
@@ -508,30 +663,89 @@
        TAB: DEPÓSITOS
   ======================================== -->
   <div id="tab-depositos" class="tab-pane">
-    <div class="split">
-      <div class="ch-box">
-        <div class="ch-title">Efectividad por depósito (%)</div>
-        <div class="ch-wrap" style="height:390px"><canvas id="cDepositos"></canvas></div>
+    <div class="filter-panel">
+      <div class="f-grp">
+        <label class="lbl">Ver depósito</label>
+        <select class="f-sel f-inp" id="filtroDeposito" onchange="onDepFiltroChange()"><option value="">Todos (resumen)</option></select>
       </div>
-      <div class="card">
-        <div class="card-title">
-          <span>Resumen por depósito</span>
-          <span id="cntDep" class="tbl-cnt"></span>
+    </div>
+
+    <!-- Vista todos -->
+    <div id="depViewAll">
+      <div class="split">
+        <div class="ch-box">
+          <div class="ch-title">Efectividad por depósito (%)</div>
+          <div class="ch-wrap" style="height:390px"><canvas id="cDepositos"></canvas></div>
         </div>
-        <div class="tbl-wrap">
-          <table class="data-tbl" id="tDepositos">
-            <thead><tr>
-              <th class="s" data-col="deposito"   data-tbl="depositos">Depósito <span class="si">↕</span></th>
-              <th class="s" data-col="total"      data-tbl="depositos">Total <span class="si">↕</span></th>
-              <th class="s" data-col="entregadas" data-tbl="depositos">Entregadas <span class="si">↕</span></th>
-              <th class="s" data-col="rechazadas" data-tbl="depositos">Rechazadas <span class="si">↕</span></th>
-              <th class="s" data-col="pendientes" data-tbl="depositos">Pendientes <span class="si">↕</span></th>
-              <th class="s" data-col="eff"        data-tbl="depositos">Efect. <span class="si">↕</span></th>
-            </tr></thead>
-            <tbody id="bDep"></tbody>
-          </table>
+        <div class="card">
+          <div class="card-title">
+            <span>Resumen por depósito</span>
+            <span id="cntDep" class="tbl-cnt"></span>
+          </div>
+          <div class="tbl-wrap">
+            <table class="data-tbl" id="tDepositos">
+              <thead><tr>
+                <th class="s" data-col="deposito"   data-tbl="depositos">Depósito <span class="si">↕</span></th>
+                <th class="s" data-col="total"      data-tbl="depositos">Total <span class="si">↕</span></th>
+                <th class="s" data-col="entregadas" data-tbl="depositos">Entregadas <span class="si">↕</span></th>
+                <th class="s" data-col="rechazadas" data-tbl="depositos">Rechazadas <span class="si">↕</span></th>
+                <th class="s" data-col="pendientes" data-tbl="depositos">Pendientes <span class="si">↕</span></th>
+                <th class="s" data-col="eff"        data-tbl="depositos">Efect. <span class="si">↕</span></th>
+              </tr></thead>
+              <tbody id="bDep"></tbody>
+            </table>
+          </div>
+          <div class="pag" id="pagDep"></div>
         </div>
-        <div class="pag" id="pagDep"></div>
+      </div>
+    </div>
+
+    <!-- Vista detalle depósito -->
+    <div id="depViewDetail" class="dep-view-detail">
+      <div class="mini-kpi-row" id="depDetKpis">
+        <div class="kpi-sm c"><div class="kpi-label">Total</div><div class="kpi-val" id="ddkTotal">—</div></div>
+        <div class="kpi-sm g"><div class="kpi-label">Efectividad</div><div class="kpi-val" id="ddkEff">—</div></div>
+        <div class="kpi-sm r"><div class="kpi-label">Rechazadas</div><div class="kpi-val" id="ddkRech">—</div></div>
+        <div class="kpi-sm c"><div class="kpi-label">Conductores</div><div class="kpi-val" id="ddkCond">—</div></div>
+      </div>
+      <div class="ch-row c2 sec">
+        <div class="ch-box">
+          <div class="ch-title">Efectividad diaria</div>
+          <div class="ch-wrap" style="height:200px"><canvas id="cDepDia"></canvas></div>
+        </div>
+        <div class="ch-box">
+          <div class="ch-title">Top motivos de rechazo</div>
+          <div class="ch-wrap" style="height:200px"><canvas id="cDepMotivos"></canvas></div>
+        </div>
+      </div>
+      <div class="grid-3 sec">
+        <div class="card">
+          <div class="card-title">Top conductores (rech.)</div>
+          <div class="tbl-wrap">
+            <table class="data-tbl" id="tDepCond">
+              <thead><tr><th>#</th><th>Conductor</th><th>Rech.</th><th>Efect.</th></tr></thead>
+              <tbody id="bDepCond"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Top motivos</div>
+          <div class="tbl-wrap">
+            <table class="data-tbl" id="tDepMotivos">
+              <thead><tr><th>#</th><th>Motivo</th><th>Total</th></tr></thead>
+              <tbody id="bDepMotivos"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Últimos 7 días</div>
+          <div class="tbl-wrap">
+            <table class="data-tbl" id="tDepUltimos">
+              <thead><tr><th>Fecha</th><th>Total</th><th>Efect.</th></tr></thead>
+              <tbody id="bDepUltimos"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -555,7 +769,13 @@
       <div class="card">
         <div class="card-title">
           <span>Ranking de motivos</span>
-          <button class="btn-exp" onclick="exportRechCSV()">↓ CSV Rechazadas</button>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn-exp" onclick="exportCSV_rechMotivos()">↓ Motivos</button>
+            <button class="btn-exp" onclick="exportCSV_rechConductores()">↓ Conductores</button>
+            <button class="btn-exp" onclick="exportCSV_rechProveedores()">↓ Proveedores</button>
+            <button class="btn-exp" onclick="exportCSV_rechDomicilios()">↓ Domicilios</button>
+            <button class="btn-exp" onclick="exportCSV_rechDetalle()">↓ Detalle</button>
+          </div>
         </div>
         <div class="tbl-wrap">
           <table class="data-tbl" id="tMotivos">
@@ -573,14 +793,14 @@
       </div>
 
       <div class="card">
-        <div class="card-title">Top clientes con rechazadas</div>
+        <div class="card-title">Top proveedores con rechazadas</div>
         <div class="tbl-wrap">
           <table class="data-tbl" id="tClRech">
             <thead><tr>
               <th>#</th>
-              <th class="s" data-col="cliente" data-tbl="clrech">Cliente <span class="si">↕</span></th>
-              <th class="s" data-col="total"   data-tbl="clrech">Rechazadas <span class="si">↕</span></th>
-              <th class="s" data-col="pct"     data-tbl="clrech">% <span class="si">↕</span></th>
+              <th class="s" data-col="proveedor" data-tbl="provrech">Proveedor <span class="si">↕</span></th>
+              <th class="s" data-col="total"     data-tbl="provrech">Rechazadas <span class="si">↕</span></th>
+              <th class="s" data-col="pct"       data-tbl="provrech">% <span class="si">↕</span></th>
               <th>Top Motivo</th>
             </tr></thead>
             <tbody id="bClRech"></tbody>
@@ -595,20 +815,78 @@
        TAB: ACCIONES
   ======================================== -->
   <div id="tab-acciones" class="tab-pane">
-    <div class="f-row">
+
+    <!-- KPIs resumen acciones -->
+    <div class="kpi-grid-8 sec">
+      <div class="kpi-sm c"><div class="kpi-label">Total Acciones</div><div class="kpi-val" id="akTotal">—</div></div>
+      <div class="kpi-sm g"><div class="kpi-label">Conductores activos</div><div class="kpi-val" id="akCond">—</div></div>
+      <div class="kpi-sm y"><div class="kpi-label">Usuarios operadores</div><div class="kpi-val" id="akUsers">—</div></div>
+      <div class="kpi-sm o"><div class="kpi-label">Depósitos con acción</div><div class="kpi-val" id="akDeps">—</div></div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filter-panel sec">
       <div class="f-grp">
-        <label>Depósito</label>
+        <label class="lbl">Depósito</label>
         <select class="f-sel" id="fAccDep"  onchange="renderAcciones()"><option value="">Todos</option></select>
       </div>
       <div class="f-grp">
-        <label>Usuario</label>
+        <label class="lbl">Usuario</label>
         <select class="f-sel" id="fAccUser" onchange="renderAcciones()"><option value="">Todos</option></select>
       </div>
-      <div style="margin-left:auto;align-self:flex-end">
-        <button class="btn-exp" onclick="exportAccCSV()">↓ CSV Acciones</button>
+      <div class="f-grp">
+        <label class="lbl">Conductor</label>
+        <select class="f-sel" id="fAccCond" onchange="renderAcciones()"><option value="">Todos</option></select>
+      </div>
+      <div style="margin-left:auto;align-self:flex-end;display:flex;gap:6px">
+        <button class="btn-exp" onclick="exportCSV_acciones()">↓ CSV Acciones</button>
       </div>
     </div>
 
+    <!-- Charts rankings + evolución -->
+    <div class="grid-3 sec">
+      <div class="card">
+        <div class="card-title">Top usuarios por acciones</div>
+        <div class="tbl-wrap">
+          <table class="data-tbl">
+            <thead><tr><th>#</th><th>Usuario</th><th>Acciones</th><th>%</th></tr></thead>
+            <tbody id="bAccUsers"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Top conductores gestionados</div>
+        <div class="tbl-wrap">
+          <table class="data-tbl">
+            <thead><tr><th>#</th><th>Conductor</th><th>Acciones</th><th>%</th></tr></thead>
+            <tbody id="bAccConds"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="ch-box">
+        <div class="ch-title">Acciones por día</div>
+        <div class="ch-wrap" style="height:220px"><canvas id="cAccEvol"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Week grid actividad -->
+    <div class="card sec">
+      <div class="card-title">Mapa de actividad semanal</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+        <span style="font-size:10px;color:var(--muted)">Menos</span>
+        <div style="display:flex;gap:3px">
+          <div style="width:12px;height:12px;border-radius:2px;background:rgba(1,254,255,0.08)"></div>
+          <div style="width:12px;height:12px;border-radius:2px;background:rgba(1,254,255,0.25)"></div>
+          <div style="width:12px;height:12px;border-radius:2px;background:rgba(1,254,255,0.50)"></div>
+          <div style="width:12px;height:12px;border-radius:2px;background:rgba(1,254,255,0.75)"></div>
+          <div style="width:12px;height:12px;border-radius:2px;background:#01feff"></div>
+        </div>
+        <span style="font-size:10px;color:var(--muted)">Más</span>
+      </div>
+      <div id="accWeekGrid"></div>
+    </div>
+
+    <!-- Log completo -->
     <div class="card">
       <div class="card-title">
         <span>Registro de acciones</span>
@@ -657,6 +935,14 @@ let D_COND       = [];
 let D_DEP        = [];
 let D_MOTIVOS    = [];
 let D_CLRECH     = [];
+// v2
+let D_DIADET        = [];
+let D_COND_FILTERED = [];
+let D_PROVRECH      = [];
+let _top10Map       = {};
+let _selFecha       = null;
+let _condDetailName = null;
+let _condDebTimer   = null;
 
 /* ============================================================
    CHART.JS DEFAULTS (antes de cualquier new Chart())
@@ -820,6 +1106,69 @@ function groupByKey(rows, field) {
 }
 
 /* ============================================================
+   DATA BUILDERS v2
+============================================================ */
+function buildTop10Map(rows) {
+  const byDay = groupByDay(rows);
+  const m = {};
+  byDay.forEach(day => {
+    const condData = groupByKey(rows.filter(r => r.fecha === day.fecha), 'conductor')
+      .map(d => ({ conductor: d.key, eff: d.eff }))
+      .sort((a, b) => a.eff - b.eff);
+    const bottom10 = condData.slice(0, 10);
+    bottom10.forEach(c => { m[c.conductor] = (m[c.conductor] || 0) + 1; });
+  });
+  return m;
+}
+
+function buildCondData(rows) {
+  const condMap = {};
+  rows.forEach(r => {
+    const k = r.conductor || '(sin conductor)';
+    if (!condMap[k]) condMap[k] = { conductor: k, total: 0, entregadas: 0, rechazadas: 0, pendientes: 0, dias: new Set(), retiros: 0, tiempos: [] };
+    condMap[k].total++;
+    if (r.status === 'delivered' || r.status === 'approved') condMap[k].entregadas++;
+    else if (r.status === 'rejected') condMap[k].rechazadas++;
+    else condMap[k].pendientes++;
+    if (r.fecha) condMap[k].dias.add(r.fecha);
+    if (r.categoria === 'pickup') condMap[k].retiros++;
+    const min = tsToMinAR(r.timestamp_inicio || r.timestamp);
+    if (min != null) condMap[k].tiempos.push(min);
+  });
+  return Object.values(condMap).map(c => ({
+    conductor:  c.conductor,
+    total:      c.total,
+    entregadas: c.entregadas,
+    rechazadas: c.rechazadas,
+    pendientes: c.pendientes,
+    eff:        c.total > 0 ? c.entregadas / c.total * 100 : 0,
+    dias:       c.dias.size,
+    retiros:    c.retiros,
+    rutaAvg:    c.tiempos.length > 0 ? c.tiempos.reduce((s, v) => s + v, 0) / c.tiempos.length : null,
+    top10:      _top10Map[c.conductor] || 0,
+  }));
+}
+
+function buildProvData(rows) {
+  const rech = rows.filter(r => r.status === 'rejected');
+  const total = rech.length;
+  const pMap = {};
+  rech.forEach(r => {
+    const k = r.proveedor || r.cliente || '(sin proveedor)';
+    if (!pMap[k]) pMap[k] = { total: 0, motivos: {} };
+    pMap[k].total++;
+    const m = r.motivo_rechazo || 'Sin motivo';
+    pMap[k].motivos[m] = (pMap[k].motivos[m] || 0) + 1;
+  });
+  return Object.entries(pMap).map(([proveedor, d]) => ({
+    proveedor,
+    total: d.total,
+    pct:   total > 0 ? d.total / total * 100 : 0,
+    topMotivo: Object.entries(d.motivos).sort((a, b) => b[1] - a[1])[0]?.[0] || '—',
+  })).sort((a, b) => b.total - a.total);
+}
+
+/* ============================================================
    TAB 1 — GENERAL
 ============================================================ */
 function renderGeneral() {
@@ -924,6 +1273,41 @@ function renderGeneral() {
       scales: { x: axisOpts(45), y: axisOpts() }
     }
   });
+
+  // Tab1 v2: Top motivos / conductores / proveedores
+  const rech = RAW.filter(r => r.status === 'rejected');
+  const totalRech = rech.length;
+
+  // motivos
+  const mMap2 = {};
+  rech.forEach(r => { const k = r.motivo_rechazo || 'Sin motivo'; mMap2[k] = (mMap2[k] || 0) + 1; });
+  const motList = Object.entries(mMap2).sort((a,b) => b[1]-a[1]).slice(0,15);
+  const bGM = el('bGenMotivos');
+  if (bGM) bGM.innerHTML = motList.map(([m, n], i) => `<tr>
+    <td class="tm">${i+1}</td><td>${esc(m)}</td>
+    <td><strong>${n}</strong></td>
+    <td class="tm">${totalRech > 0 ? (n/totalRech*100).toFixed(1) : 0}%</td>
+  </tr>`).join('') || '<tr><td colspan="4"><div class="empty">Sin rechazadas</div></td></tr>';
+
+  // conductores más rechazados
+  const condRechMap = {};
+  rech.forEach(r => { const k = r.conductor || '(sin conductor)'; condRechMap[k] = (condRechMap[k] || 0) + 1; });
+  const condList = Object.entries(condRechMap).sort((a,b) => b[1]-a[1]).slice(0,15);
+  const bGC = el('bGenCond');
+  if (bGC) bGC.innerHTML = condList.map(([c, n], i) => `<tr>
+    <td class="tm">${i+1}</td><td>${esc(c)}</td>
+    <td class="td"><strong>${n}</strong></td>
+    <td class="tm">${totalRech > 0 ? (n/totalRech*100).toFixed(1) : 0}%</td>
+  </tr>`).join('') || '<tr><td colspan="4"><div class="empty">Sin rechazadas</div></td></tr>';
+
+  // proveedores con más rechazadas
+  const provList = buildProvData(RAW).slice(0, 15);
+  const bGP = el('bGenProv');
+  if (bGP) bGP.innerHTML = provList.map((p, i) => `<tr>
+    <td class="tm">${i+1}</td><td>${esc(p.proveedor)}</td>
+    <td class="td"><strong>${p.total}</strong></td>
+    <td class="tm">${p.pct.toFixed(1)}%</td>
+  </tr>`).join('') || '<tr><td colspan="4"><div class="empty">Sin rechazadas</div></td></tr>';
 }
 
 function clearKPIs() {
@@ -961,7 +1345,8 @@ function renderPorDia() {
 function sortAndRender_pordia() {
   const { col, dir } = SORT['pordia'] || { col: 'fecha', dir: 'asc' };
   const sorted = [...D_PORDIA].sort((a,b) => cmp(a,b,col,dir));
-  renderPaged('bPorDia','pagPorDia','cntPorDia', sorted, (item) => `<tr>
+  renderPaged('bPorDia','pagPorDia','cntPorDia', sorted, (item) => `<tr
+    style="cursor:pointer" onclick="selectDia('${item.fecha}')">
     <td class="mono">${esc(item.fecha)}</td>
     <td><strong>${item.total}</strong></td>
     <td class="tg">${item.entregadas}</td>
@@ -972,14 +1357,132 @@ function sortAndRender_pordia() {
   updSortIcons('tPorDia', col, dir);
 }
 
+function selectDia(fecha) {
+  const inp = el('selFecha');
+  if (inp) inp.value = fecha;
+  renderDiaDetalle(fecha);
+}
+
+function onFechaChange() {
+  const fecha = el('selFecha')?.value;
+  if (fecha) renderDiaDetalle(fecha);
+}
+
+function navDia(dir) {
+  const inp = el('selFecha');
+  if (!inp || !inp.value) return;
+  const d = new Date(inp.value + 'T00:00:00');
+  d.setDate(d.getDate() + dir);
+  inp.value = fmtISO(d);
+  renderDiaDetalle(inp.value);
+}
+
+function renderDiaDetalle(fecha) {
+  _selFecha = fecha;
+  const rows = RAW.filter(r => r.fecha === fecha);
+  D_DIADET  = rows;
+
+  // Resaltar fila en tabla resumen
+  document.querySelectorAll('#bPorDia tr').forEach(tr => {
+    const cell = tr.querySelector('td');
+    tr.classList.toggle('row-active', cell && cell.textContent.trim() === fecha);
+  });
+
+  // KPIs del día
+  const s      = stats(rows);
+  const conds  = new Set(rows.map(r => r.conductor).filter(Boolean)).size;
+  const deps   = new Set(rows.map(r => r.deposito).filter(Boolean)).size;
+  const retiros = rows.filter(r => r.categoria === 'pickup').length;
+
+  const setKpi = (id, val) => { const e = el(id); if (e) e.textContent = val; };
+  setKpi('dkTotal',   s.total);
+  setKpi('dkEnt',     s.entregadas);
+  setKpi('dkRech',    s.rechazadas);
+  setKpi('dkPend',    s.pendientes);
+  setKpi('dkEff',     s.eff.toFixed(1) + '%');
+  setKpi('dkCond',    conds);
+  setKpi('dkDep',     deps);
+  setKpi('dkRetiros', retiros);
+
+  // Chart stacked bar por depósito
+  const byDep = groupByKey(rows, 'deposito');
+  killChart('cDiaBar');
+  CH['cDiaBar'] = new Chart(el('cDiaBar'), {
+    type: 'bar',
+    data: {
+      labels: byDep.map(d => d.key),
+      datasets: [
+        { label:'Entregadas', data: byDep.map(d => d.entregadas), backgroundColor:'rgba(34,197,94,0.75)' },
+        { label:'Rechazadas', data: byDep.map(d => d.rechazadas), backgroundColor:'rgba(239,68,68,0.75)' },
+        { label:'Pendientes', data: byDep.map(d => d.pendientes), backgroundColor:'rgba(234,179,8,0.75)' },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { labels: { color:'#a0b4c8', font:{ size:10 } } } },
+      scales: { x: { ...axisOpts(), stacked:true }, y: { ...axisOpts(), stacked:true } }
+    }
+  });
+
+  // Chart timeline scatter (hora → índice orden)
+  const pts = rows.map((r, i) => {
+    const min = tsToMinAR(r.timestamp_inicio || r.hora_inicio || r.timestamp);
+    return { x: min, y: i + 1, status: r.status };
+  }).filter(p => p.x != null);
+  const colorPt = p => p.status === 'delivered' || p.status === 'approved' ? '#22c55e'
+    : p.status === 'rejected' ? '#ef4444' : '#eab308';
+  killChart('cDiaTimeline');
+  CH['cDiaTimeline'] = new Chart(el('cDiaTimeline'), {
+    type: 'scatter',
+    data: { datasets: [{ label:'Órdenes', data: pts, backgroundColor: pts.map(colorPt), pointRadius: 4 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend:{ display:false }, tooltip:{ callbacks:{ label: c => `Orden ${c.raw.y} — ${fmtMin(c.raw.x)}` } } },
+      scales: {
+        x: { ...axisOpts(), title:{ display:true, text:'Hora inicio', color:'#a0b4c8' }, ticks:{ callback: v => fmtMin(v), color:'#a0b4c8', font:{size:9} } },
+        y: { ...axisOpts(), title:{ display:true, text:'Índice', color:'#a0b4c8' } }
+      }
+    }
+  });
+
+  sortAndRender_diadet();
+}
+
+function sortAndRender_diadet() {
+  const { col, dir } = SORT['diadet'] || { col: 'conductor', dir: 'asc' };
+  const sorted = [...D_DIADET].sort((a,b) => cmp(a,b,col,dir));
+  renderPaged('bDiaDet','pagDiaDet','cntDiaDet', sorted, item => {
+    const stCl = (item.status === 'delivered' || item.status === 'approved') ? 'b-delivered' : item.status === 'rejected' ? 'b-rejected' : 'b-pending';
+    const catCl = item.categoria === 'delivery' ? 'b-delivery' : 'b-pickup';
+    return `<tr>
+      <td>${esc(item.conductor)}</td>
+      <td class="tm">${esc(item.deposito)}</td>
+      <td class="mono tm">${esc(item.codigo_orden)}</td>
+      <td><span class="badge ${stCl}">${esc(item.status)}</span></td>
+      <td><span class="badge ${catCl}">${esc(item.categoria)}</span></td>
+      <td class="tm" style="max-width:180px;overflow:hidden;text-overflow:ellipsis">${esc(item.motivo_rechazo || '—')}</td>
+      <td class="tm">${esc(item.proveedor || item.cliente || '—')}</td>
+    </tr>`;
+  });
+  updSortIcons('tDiaDet', col, dir);
+}
+
 /* ============================================================
    TAB 3 — CONDUCTORES
 ============================================================ */
 function renderConductores() {
-  D_COND = groupByKey(RAW, 'conductor').map(d => ({
-    conductor: d.key, total: d.total, entregadas: d.entregadas,
-    rechazadas: d.rechazadas, pendientes: d.pendientes, eff: d.eff,
-  }));
+  _top10Map = buildTop10Map(RAW);
+  D_COND    = buildCondData(RAW);
+
+  // Poblar filtro depósito
+  const depSel = el('filtroCondDep');
+  if (depSel) {
+    const prev = depSel.value;
+    const deps = [...new Set(RAW.map(r => r.deposito).filter(Boolean))].sort();
+    depSel.innerHTML = '<option value="">Todos los depósitos</option>';
+    deps.forEach(d => depSel.add(new Option(d, d)));
+    depSel.value = prev;
+  }
 
   const top15 = [...D_COND].sort((a,b) => b.rechazadas - a.rechazadas).slice(0,15);
   killChart('cConductores');
@@ -996,21 +1499,83 @@ function renderConductores() {
     }
   });
 
+  applyCondFilters();
+}
+
+function applyCondFilters() {
+  const dep = el('filtroCondDep')?.value || '';
+  const txt = (el('filtroCondTxt')?.value || '').toLowerCase().trim();
+  D_COND_FILTERED = D_COND.filter(c => {
+    if (dep) {
+      const condRows = RAW.filter(r => r.conductor === c.conductor);
+      if (!condRows.some(r => r.deposito === dep)) return false;
+    }
+    if (txt && !c.conductor.toLowerCase().includes(txt)) return false;
+    return true;
+  });
   sortAndRender_conductores();
+}
+
+function debounceCondFilter() {
+  clearTimeout(_condDebTimer);
+  _condDebTimer = setTimeout(applyCondFilters, 300);
 }
 
 function sortAndRender_conductores() {
   const { col, dir } = SORT['conductores'] || { col: 'rechazadas', dir: 'desc' };
-  const sorted = [...D_COND].sort((a,b) => cmp(a,b,col,dir));
-  renderPaged('bCond','pagCond','cntCond', sorted, (item, idx, offset) => `<tr>
+  const src = D_COND_FILTERED.length > 0 || el('filtroCondTxt')?.value || el('filtroCondDep')?.value
+    ? D_COND_FILTERED : D_COND;
+  const sorted = [...src].sort((a,b) => cmp(a,b,col,dir));
+  renderPaged('bCond','pagCond','cntCond', sorted, (item, idx, offset) => `<tr
+    style="cursor:pointer" onclick="showCondDetail('${esc(item.conductor).replace(/'/g,"\\'")}')">
     <td class="tm">${idx + offset + 1}</td>
     <td>${esc(item.conductor)}</td>
     <td>${item.total}</td>
     <td class="tg">${item.entregadas}</td>
     <td class="td">${item.rechazadas}</td>
     <td><span class="${effCls(item.eff)}">${item.eff.toFixed(1)}%</span></td>
+    <td class="tm">${item.dias}</td>
+    <td class="tm">${item.retiros}</td>
+    <td class="tm ${item.top10 > 0 ? 'td' : ''}">${item.top10 > 0 ? item.top10 : '—'}</td>
+    <td class="tm">${item.rutaAvg != null ? fmtMin(item.rutaAvg) : '—'}</td>
   </tr>`);
   updSortIcons('tConductores', col, dir);
+}
+
+function showCondDetail(conductor) {
+  _condDetailName = conductor;
+  const panel = el('condDetailPanel');
+  if (!panel) return;
+
+  const condRows = RAW.filter(r => r.conductor === conductor);
+  const s = stats(condRows);
+  const dias = [...new Set(condRows.map(r => r.fecha))].sort();
+  const rech = condRows.filter(r => r.status === 'rejected');
+  const mMap = {};
+  rech.forEach(r => { const k = r.motivo_rechazo || 'Sin motivo'; mMap[k] = (mMap[k] || 0) + 1; });
+  const topMotivos = Object.entries(mMap).sort((a,b) => b[1]-a[1]).slice(0,5);
+
+  panel.innerHTML = `
+  <div class="cond-detail">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <strong style="color:var(--cyan);font-family:'Rajdhani',sans-serif;font-size:14px;letter-spacing:1px">${esc(conductor)}</strong>
+      <button class="btn-nav" onclick="el('condDetailPanel').innerHTML=''">✕ Cerrar</button>
+    </div>
+    <div class="mini-kpi-row">
+      <div class="kpi-sm c"><div class="kpi-label">Total órdenes</div><div class="kpi-val">${s.total}</div></div>
+      <div class="kpi-sm g"><div class="kpi-label">Efectividad</div><div class="kpi-val">${s.eff.toFixed(1)}%</div></div>
+      <div class="kpi-sm r"><div class="kpi-label">Rechazadas</div><div class="kpi-val">${s.rechazadas}</div></div>
+      <div class="kpi-sm y"><div class="kpi-label">Días trabajados</div><div class="kpi-val">${dias.length}</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Top motivos de rechazo:</div>
+    ${topMotivos.length ? topMotivos.map(([m,n]) => `<div style="font-size:12px;padding:3px 0;border-bottom:1px solid var(--border)"><span style="color:var(--danger);font-family:'IBM Plex Mono',monospace;margin-right:8px">${n}</span>${esc(m)}</div>`).join('') : '<div class="empty">Sin rechazadas</div>'}
+  </div>`;
+
+  // Marcar fila activa
+  document.querySelectorAll('#bCond tr').forEach(tr => {
+    const cell = tr.querySelectorAll('td')[1];
+    tr.classList.toggle('row-active', cell && cell.textContent.trim() === conductor);
+  });
 }
 
 /* ============================================================
@@ -1022,6 +1587,34 @@ function renderDepositos() {
     rechazadas: d.rechazadas, pendientes: d.pendientes, eff: d.eff,
   }));
 
+  // Poblar select filtro depósito
+  const depSel = el('filtroDeposito');
+  if (depSel) {
+    const prev = depSel.value;
+    depSel.innerHTML = '<option value="">— Vista general —</option>';
+    D_DEP.forEach(d => depSel.add(new Option(d.deposito, d.deposito)));
+    depSel.value = prev;
+  }
+
+  onDepFiltroChange();
+}
+
+function onDepFiltroChange() {
+  const dep = el('filtroDeposito')?.value || '';
+  const allDiv  = el('depViewAll');
+  const detDiv  = el('depViewDetail');
+  if (dep) {
+    if (allDiv) allDiv.style.display = 'none';
+    if (detDiv) detDiv.style.display = 'block';
+    renderDepDetail(dep);
+  } else {
+    if (allDiv) allDiv.style.display = '';
+    if (detDiv) detDiv.style.display = 'none';
+    renderDepAll();
+  }
+}
+
+function renderDepAll() {
   const byEff = [...D_DEP].sort((a,b) => b.eff - a.eff);
   killChart('cDepositos');
   CH['cDepositos'] = new Chart(el('cDepositos'), {
@@ -1042,7 +1635,6 @@ function renderDepositos() {
       scales: { x: { ...axisOpts(), min: 0, max: 100, ticks: { color: '#a0b4c8', font:{ size:10 }, callback: v => v+'%' } }, y: axisOpts() }
     }
   });
-
   sortAndRender_depositos();
 }
 
@@ -1052,7 +1644,7 @@ function sortAndRender_depositos() {
   renderPaged('bDep','pagDep','cntDep', sorted, item => {
     const barW  = Math.round(item.eff);
     const barCl = item.eff >= 85 ? 'bar-g' : 'bar-d';
-    return `<tr>
+    return `<tr style="cursor:pointer" onclick="el('filtroDeposito').value='${esc(item.deposito).replace(/'/g,"\\'")}';onDepFiltroChange()">
       <td>${esc(item.deposito)}</td>
       <td>${item.total}</td>
       <td class="tg">${item.entregadas}</td>
@@ -1065,6 +1657,85 @@ function sortAndRender_depositos() {
     </tr>`;
   });
   updSortIcons('tDepositos', col, dir);
+}
+
+function renderDepDetail(deposito) {
+  const rows   = RAW.filter(r => r.deposito === deposito);
+  const s      = stats(rows);
+  const rech   = rows.filter(r => r.status === 'rejected');
+  const conds  = new Set(rows.map(r => r.conductor).filter(Boolean)).size;
+
+  // Mini KPIs
+  const setK = (id, v) => { const e = el(id); if (e) e.textContent = v; };
+  setK('ddkTotal', s.total);
+  setK('ddkEff',   s.eff.toFixed(1) + '%');
+  setK('ddkRech',  s.rechazadas);
+  setK('ddkCond',  conds);
+
+  // Chart: efectividad por día
+  const byDay = groupByDay(rows);
+  killChart('cDepDia');
+  CH['cDepDia'] = new Chart(el('cDepDia'), {
+    type: 'line',
+    data: {
+      labels: byDay.map(d => d.fecha),
+      datasets: [{ label:'Efectividad %', data: byDay.map(d => +d.eff.toFixed(1)), borderColor:'#01feff', backgroundColor:'rgba(1,254,255,0.07)', fill:true, tension:0.3, pointRadius:3, pointBackgroundColor:'#01feff' }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend:{ display:false } },
+      scales: { x: axisOpts(45), y: { ...axisOpts(), min:0, max:100, ticks:{ callback: v => v+'%', color:'#a0b4c8', font:{size:10} } } }
+    }
+  });
+
+  // Chart: top motivos de rechazo del depósito
+  const mMap = {};
+  rech.forEach(r => { const k = r.motivo_rechazo || 'Sin motivo'; mMap[k] = (mMap[k] || 0) + 1; });
+  const topM = Object.entries(mMap).sort((a,b) => b[1]-a[1]).slice(0,10);
+  killChart('cDepMotivos');
+  CH['cDepMotivos'] = new Chart(el('cDepMotivos'), {
+    type: 'bar',
+    data: { labels: topM.map(([m]) => m.length>28 ? m.slice(0,26)+'…' : m), datasets: [{ label:'Rechazadas', data: topM.map(([,n]) => n), backgroundColor:'rgba(234,179,8,0.7)', borderColor:'#eab308', borderWidth:1 }] },
+    options: { responsive: true, maintainAspectRatio: false, indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x: axisOpts(), y: axisOpts() } }
+  });
+
+  // Tabla conductores del depósito
+  const condDep = buildCondData(rows).sort((a,b) => b.rechazadas - a.rechazadas);
+  const bDC = el('bDepCond');
+  if (bDC) {
+    bDC.innerHTML = condDep.slice(0,20).map((c, i) => `<tr>
+      <td class="tm">${i+1}</td><td>${esc(c.conductor)}</td>
+      <td>${c.total}</td><td class="tg">${c.entregadas}</td>
+      <td class="td">${c.rechazadas}</td>
+      <td><span class="${effCls(c.eff)}">${c.eff.toFixed(1)}%</span></td>
+    </tr>`).join('') || '<tr><td colspan="6"><div class="empty">Sin datos</div></td></tr>';
+  }
+
+  // Tabla motivos del depósito
+  const bDM = el('bDepMotivos');
+  if (bDM) {
+    bDM.innerHTML = topM.map(([m, n], i) => `<tr>
+      <td class="tm">${i+1}</td><td>${esc(m)}</td>
+      <td class="td"><strong>${n}</strong></td>
+      <td class="tm">${rech.length > 0 ? (n/rech.length*100).toFixed(1) : 0}%</td>
+    </tr>`).join('') || '<tr><td colspan="4"><div class="empty">Sin rechazadas</div></td></tr>';
+  }
+
+  // Últimas órdenes del depósito
+  const ultimos = [...rows].sort((a,b) => (b.fecha||'').localeCompare(a.fecha||'')).slice(0,20);
+  const bDU = el('bDepUltimos');
+  if (bDU) {
+    bDU.innerHTML = ultimos.map(r => {
+      const stCl = (r.status === 'delivered' || r.status === 'approved') ? 'b-delivered' : r.status === 'rejected' ? 'b-rejected' : 'b-pending';
+      return `<tr>
+        <td class="mono tm">${esc(r.fecha)}</td>
+        <td>${esc(r.conductor)}</td>
+        <td class="mono tm">${esc(r.codigo_orden)}</td>
+        <td><span class="badge ${stCl}">${esc(r.status)}</span></td>
+        <td class="tm" style="max-width:150px;overflow:hidden;text-overflow:ellipsis">${esc(r.motivo_rechazo || '—')}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="5"><div class="empty">Sin datos</div></td></tr>';
+  }
 }
 
 /* ============================================================
@@ -1084,22 +1755,8 @@ function renderRechazos() {
     .map(([k,cnt]) => { const [motivo,categoria] = k.split('|||'); return { motivo, categoria, total: cnt, pct: totalRech > 0 ? cnt/totalRech*100 : 0 }; })
     .sort((a,b) => b.total - a.total);
 
-  // Clientes
-  const cMap = {};
-  rech.forEach(r => {
-    const k = r.cliente || r.proveedor || '(sin cliente)';
-    if (!cMap[k]) cMap[k] = { total: 0, motivos: {} };
-    cMap[k].total++;
-    const m = r.motivo_rechazo || 'Sin motivo';
-    cMap[k].motivos[m] = (cMap[k].motivos[m] || 0) + 1;
-  });
-  D_CLRECH = Object.entries(cMap)
-    .map(([cliente, d]) => ({
-      cliente, total: d.total,
-      pct: totalRech > 0 ? d.total/totalRech*100 : 0,
-      topMotivo: Object.entries(d.motivos).sort((a,b) => b[1]-a[1])[0]?.[0] || '—',
-    }))
-    .sort((a,b) => b.total - a.total);
+  // Proveedores
+  D_PROVRECH = buildProvData(RAW);
 
   // Chart motivos (top 10)
   const top10m = D_MOTIVOS.slice(0,10);
@@ -1139,7 +1796,7 @@ function renderRechazos() {
   });
 
   sortAndRender_motivos();
-  sortAndRender_clrech();
+  sortAndRender_provrech();
 }
 
 function sortAndRender_motivos() {
@@ -1159,12 +1816,12 @@ function sortAndRender_motivos() {
   updSortIcons('tMotivos', col, dir);
 }
 
-function sortAndRender_clrech() {
-  const { col, dir } = SORT['clrech'] || { col: 'total', dir: 'desc' };
-  const sorted = [...D_CLRECH].sort((a,b) => cmp(a,b,col,dir));
+function sortAndRender_provrech() {
+  const { col, dir } = SORT['provrech'] || { col: 'total', dir: 'desc' };
+  const sorted = [...D_PROVRECH].sort((a,b) => cmp(a,b,col,dir));
   renderPaged('bClRech','pagClRech', null, sorted, (item, idx, offset) => `<tr>
     <td class="tm">${idx + offset + 1}</td>
-    <td>${esc(item.cliente)}</td>
+    <td>${esc(item.proveedor)}</td>
     <td class="td"><strong>${item.total}</strong></td>
     <td class="tm">${item.pct.toFixed(1)}%</td>
     <td class="tm" style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${esc(item.topMotivo)}</td>
@@ -1178,26 +1835,82 @@ function sortAndRender_clrech() {
 function renderAcciones() {
   const depSel  = el('fAccDep');
   const userSel = el('fAccUser');
+  const condSel = el('fAccCond');
 
   // Rebuild selects preserving current selection
-  const prevDep  = depSel.value;
-  const prevUser = userSel.value;
+  const prevDep  = depSel?.value  || '';
+  const prevUser = userSel?.value || '';
+  const prevCond = condSel?.value || '';
+
   const deps  = [...new Set(ACTIONS.map(a => a.deposito).filter(Boolean))].sort();
   const users = [...new Set(ACTIONS.map(a => (a.nombre_completo || a.usuario)).filter(Boolean))].sort();
-  depSel.innerHTML  = '<option value="">Todos</option>';
-  userSel.innerHTML = '<option value="">Todos</option>';
-  deps.forEach(d  => depSel.add(new Option(d, d)));
-  users.forEach(u => userSel.add(new Option(u, u)));
-  depSel.value  = prevDep;
-  userSel.value = prevUser;
+  const conds = [...new Set(ACTIONS.map(a => a.conductor).filter(Boolean))].sort();
+
+  if (depSel)  { depSel.innerHTML  = '<option value="">Todos</option>'; deps.forEach(d  => depSel.add(new Option(d, d)));  depSel.value  = prevDep; }
+  if (userSel) { userSel.innerHTML = '<option value="">Todos</option>'; users.forEach(u => userSel.add(new Option(u, u))); userSel.value = prevUser; }
+  if (condSel) { condSel.innerHTML = '<option value="">Todos</option>'; conds.forEach(c => condSel.add(new Option(c, c))); condSel.value = prevCond; }
 
   let filtered = ACTIONS;
-  if (depSel.value)  filtered = filtered.filter(a => a.deposito === depSel.value);
-  if (userSel.value) filtered = filtered.filter(a => (a.nombre_completo || a.usuario) === userSel.value);
+  if (depSel?.value)  filtered = filtered.filter(a => a.deposito === depSel.value);
+  if (userSel?.value) filtered = filtered.filter(a => (a.nombre_completo || a.usuario) === userSel.value);
+  if (condSel?.value) filtered = filtered.filter(a => a.conductor === condSel.value);
 
+  // KPIs
+  const uniqConds = new Set(filtered.map(a => a.conductor).filter(Boolean)).size;
+  const uniqUsers = new Set(filtered.map(a => (a.nombre_completo || a.usuario)).filter(Boolean)).size;
+  const uniqDeps  = new Set(filtered.map(a => a.deposito).filter(Boolean)).size;
+  const setK = (id, v) => { const e = el(id); if (e) e.textContent = v; };
+  setK('akTotal', filtered.length.toLocaleString('es-AR'));
+  setK('akCond',  uniqConds);
+  setK('akUsers', uniqUsers);
+  setK('akDeps',  uniqDeps);
+
+  // Chart evolución por día
+  const accByDay = {};
+  filtered.forEach(a => { const d = a.date || ''; if (d) accByDay[d] = (accByDay[d] || 0) + 1; });
+  const accDays = Object.entries(accByDay).sort((a,b) => a[0].localeCompare(b[0]));
+  killChart('cAccEvol');
+  CH['cAccEvol'] = new Chart(el('cAccEvol'), {
+    type: 'bar',
+    data: {
+      labels: accDays.map(([d]) => d),
+      datasets: [{ label:'Acciones', data: accDays.map(([,n]) => n), backgroundColor:'rgba(1,254,255,0.5)', borderColor:'#01feff', borderWidth:1 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend:{ display:false } },
+      scales: { x: axisOpts(45), y: axisOpts() }
+    }
+  });
+
+  // Ranking usuarios
+  const userMap = {};
+  filtered.forEach(a => { const k = a.nombre_completo || a.usuario || '(desconocido)'; userMap[k] = (userMap[k] || 0) + 1; });
+  const userRank = Object.entries(userMap).sort((a,b) => b[1]-a[1]).slice(0,15);
+  const bAU = el('bAccUsers');
+  if (bAU) bAU.innerHTML = userRank.map(([u, n], i) => `<tr>
+    <td class="tm">${i+1}</td><td>${esc(u)}</td>
+    <td class="tc"><strong>${n}</strong></td>
+    <td class="tm">${filtered.length > 0 ? (n/filtered.length*100).toFixed(1) : 0}%</td>
+  </tr>`).join('') || '<tr><td colspan="4"><div class="empty">Sin acciones</div></td></tr>';
+
+  // Ranking conductores
+  const condMap2 = {};
+  filtered.forEach(a => { const k = a.conductor || '(sin conductor)'; condMap2[k] = (condMap2[k] || 0) + 1; });
+  const condRank = Object.entries(condMap2).sort((a,b) => b[1]-a[1]).slice(0,15);
+  const bAC = el('bAccConds');
+  if (bAC) bAC.innerHTML = condRank.map(([c, n], i) => `<tr>
+    <td class="tm">${i+1}</td><td>${esc(c)}</td>
+    <td class="tc"><strong>${n}</strong></td>
+    <td class="tm">${filtered.length > 0 ? (n/filtered.length*100).toFixed(1) : 0}%</td>
+  </tr>`).join('') || '<tr><td colspan="4"><div class="empty">Sin acciones</div></td></tr>';
+
+  // Week grid
+  renderWeekGrid(filtered);
+
+  // Tabla log
   const { col, dir } = SORT['acciones'] || { col: 'date', dir: 'desc' };
   const sorted = [...filtered].sort((a,b) => cmp(a,b,col,dir));
-
   renderPaged('bAcc','pagAcc','cntAcc', sorted, item => {
     const hora = item.timestamp ? String(item.timestamp).substring(0,8) : '—';
     return `<tr>
@@ -1213,23 +1926,73 @@ function renderAcciones() {
   updSortIcons('tAcciones', col, dir);
 }
 
+function renderWeekGrid(actions) {
+  const grid = el('accWeekGrid');
+  if (!grid) return;
+
+  // Contar acciones por fecha
+  const byDate = {};
+  actions.forEach(a => { if (a.date) byDate[a.date] = (byDate[a.date] || 0) + 1; });
+  if (!Object.keys(byDate).length) { grid.innerHTML = '<div class="empty">Sin acciones</div>'; return; }
+
+  const maxVal = Math.max(...Object.values(byDate));
+  const dates  = Object.keys(byDate).sort();
+  const firstDate = new Date(dates[0] + 'T00:00:00');
+  const lastDate  = new Date(dates[dates.length - 1] + 'T00:00:00');
+
+  // Alinear al lunes anterior del primer día
+  const startDay = new Date(firstDate);
+  startDay.setDate(startDay.getDate() - ((startDay.getDay() + 6) % 7));
+
+  const days = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+  let html = '<div class="week-grid-inner">';
+  days.forEach(d => { html += `<div class="week-day-lbl">${d}</div>`; });
+
+  let cur = new Date(startDay);
+  while (cur <= lastDate) {
+    const iso = fmtISO(cur);
+    const n   = byDate[iso] || 0;
+    const intensity = n === 0 ? 0.08 : Math.max(0.2, Math.min(1, n / maxVal));
+    const bg  = n === 0 ? 'rgba(1,254,255,0.06)' : `rgba(1,254,255,${intensity.toFixed(2)})`;
+    html += `<div class="week-cell" style="background:${bg}" title="${iso}: ${n} acción${n !== 1 ? 'es' : ''}">${n > 0 ? n : ''}</div>`;
+    cur.setDate(cur.getDate() + 1);
+  }
+  html += '</div>';
+  grid.innerHTML = html;
+}
+
 /* ============================================================
    SORTING
 ============================================================ */
+const TBLKEY_TO_BODYID = {
+  pordia:      'bPorDia',
+  conductores: 'bCond',
+  depositos:   'bDep',
+  motivos:     'bMotivos',
+  provrech:    'bClRech',
+  acciones:    'bAcc',
+  diadet:      'bDiaDet',
+  depcond:     'bDepCond',
+  depmotivos:  'bDepMotivos',
+  depultimos:  'bDepUltimos',
+};
+
 function handleSort(tblKey, col) {
   const curr = SORT[tblKey];
   SORT[tblKey] = (curr && curr.col === col)
     ? { col, dir: curr.dir === 'asc' ? 'desc' : 'asc' }
     : { col, dir: 'asc' };
-  PAGE['b' + capitalize(tblKey)] = 1;
+  const bodyId = TBLKEY_TO_BODYID[tblKey];
+  if (bodyId) PAGE[bodyId] = 1;
 
   const rerender = {
     pordia:      sortAndRender_pordia,
     conductores: sortAndRender_conductores,
     depositos:   sortAndRender_depositos,
     motivos:     sortAndRender_motivos,
-    clrech:      sortAndRender_clrech,
+    provrech:    sortAndRender_provrech,
     acciones:    renderAcciones,
+    diadet:      sortAndRender_diadet,
   };
   if (rerender[tblKey]) rerender[tblKey]();
 }
@@ -1261,6 +2024,45 @@ function updSortIcons(tableId, activeCol, dir) {
 
 function capitalize(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/* ---- v2 helpers ---- */
+function cv(v) { return '"' + String(v ?? '').replace(/"/g, '""') + '"'; }
+
+function csvFilename(sec, filtro) {
+  const desde = document.getElementById('inDesde').value || '';
+  const hasta = document.getElementById('inHasta').value || '';
+  const rng   = (desde && hasta) ? `_${desde}_${hasta}` : '';
+  return `${sec}${filtro ? '_' + filtro : ''}${rng}.csv`;
+}
+
+function fmtMin(min) {
+  if (min == null || isNaN(min)) return '—';
+  const h = Math.floor(min / 60);
+  const m = Math.round(min % 60);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
+function deltaBadge(delta) {
+  if (delta == null) return '';
+  if (delta > 0)  return `<span class="kpi-delta delta-up">↑${delta.toFixed(1)}</span>`;
+  if (delta < 0)  return `<span class="kpi-delta delta-dn">↓${Math.abs(delta).toFixed(1)}</span>`;
+  return `<span class="kpi-delta delta-eq">—</span>`;
+}
+
+function tsToMinAR(ts) {
+  if (!ts) return null;
+  const s = String(ts).trim();
+  // HH:MM:SS or HH:MM
+  const m = s.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+  if (m) return parseInt(m[1]) * 60 + parseInt(m[2]);
+  return null;
+}
+
+function getDiaAnterior(fecha) {
+  const d = new Date(fecha + 'T00:00:00');
+  d.setDate(d.getDate() - 1);
+  return fmtISO(d);
 }
 
 /* ============================================================
@@ -1325,8 +2127,9 @@ function goPage(key, page) {
     bCond:        sortAndRender_conductores,
     bDep:         sortAndRender_depositos,
     bMotivos:     sortAndRender_motivos,
-    bClRech:      sortAndRender_clrech,
+    bClRech:      sortAndRender_provrech,
     bAcc:         renderAcciones,
+    bDiaDet:      sortAndRender_diadet,
   };
   if (map[key]) map[key]();
 }
@@ -1334,27 +2137,123 @@ function goPage(key, page) {
 /* ============================================================
    CSV EXPORTS
 ============================================================ */
-function exportRechCSV() {
+function exportRechCSV() { exportCSV_rechDetalle(); }
+function exportAccCSV()  { exportCSV_acciones(); }
+
+/* --- Tab 1 --- */
+function exportCSV_generalMotivos() {
+  const rech = RAW.filter(r => r.status === 'rejected');
+  if (!rech.length) { alert('Sin rechazadas en el período.'); return; }
+  const mMap = {};
+  rech.forEach(r => { const k = r.motivo_rechazo || 'Sin motivo'; mMap[k] = (mMap[k] || 0) + 1; });
+  const list = Object.entries(mMap).sort((a,b) => b[1]-a[1]);
+  const hdr  = ['Motivo','Total','Pct'];
+  const rows = list.map(([m, n]) => [cv(m), n, rech.length > 0 ? (n/rech.length*100).toFixed(1)+'%' : '0%']);
+  dlCSV([[...hdr.map(cv)], ...rows.map(r => r.map(String))], csvFilename('general_motivos', ''));
+}
+
+function exportCSV_generalConductores() {
+  const rech = RAW.filter(r => r.status === 'rejected');
+  if (!rech.length) { alert('Sin rechazadas en el período.'); return; }
+  const m = {};
+  rech.forEach(r => { const k = r.conductor || '(sin conductor)'; m[k] = (m[k] || 0) + 1; });
+  const list = Object.entries(m).sort((a,b) => b[1]-a[1]);
+  dlCSV([[cv('Conductor'), cv('Rechazadas'), cv('%')], ...list.map(([c, n]) => [cv(c), n, rech.length > 0 ? (n/rech.length*100).toFixed(1)+'%' : '0%'].map(String))], csvFilename('general_conductores_rech', ''));
+}
+
+function exportCSV_generalProveedores() {
+  if (!D_PROVRECH.length) { alert('Sin rechazadas en el período.'); return; }
+  const hdr = [cv('Proveedor'), cv('Rechazadas'), cv('%'), cv('Top motivo')];
+  const rows = D_PROVRECH.map(p => [cv(p.proveedor), p.total, p.pct.toFixed(1)+'%', cv(p.topMotivo)].map(String));
+  dlCSV([hdr, ...rows], csvFilename('general_proveedores_rech', ''));
+}
+
+/* --- Tab 2 --- */
+function exportCSV_diaSeleccionado() {
+  if (!D_DIADET.length) { alert('Sin datos del día seleccionado.'); return; }
+  const hdr = ['Conductor','Depósito','Cód.Orden','Estado','Categoría','Motivo','Proveedor','Kg','Bultos'];
+  const rows = D_DIADET.map(r => [r.conductor, r.deposito, r.codigo_orden, r.status, r.categoria, r.motivo_rechazo, r.proveedor || r.cliente, r.kg, r.bultos].map(cv));
+  dlCSV([hdr.map(cv), ...rows], csvFilename('dia_detalle', _selFecha || ''));
+}
+
+function exportCSV_resumenDiario() {
+  if (!D_PORDIA.length) { alert('Sin datos para exportar.'); return; }
+  const hdr = ['Fecha','Total','Entregadas','Rechazadas','Pendientes','Efectividad'];
+  const rows = D_PORDIA.map(d => [d.fecha, d.total, d.entregadas, d.rechazadas, d.pendientes, d.eff.toFixed(1)+'%'].map(String));
+  dlCSV([hdr.map(cv), ...rows], csvFilename('resumen_diario', ''));
+}
+
+/* --- Tab 3 --- */
+function exportCSV_conductores() {
+  const data = D_COND_FILTERED.length > 0 ? D_COND_FILTERED : D_COND;
+  if (!data.length) { alert('Sin datos para exportar.'); return; }
+  const hdr = ['Conductor','Total','Entregadas','Rechazadas','Pendientes','Efectividad','Días','Retiros','Días top10↓'];
+  const rows = data.map(c => [c.conductor, c.total, c.entregadas, c.rechazadas, c.pendientes, c.eff.toFixed(1)+'%', c.dias, c.retiros, c.top10].map(String).map((v, i) => i === 0 ? cv(c.conductor) : v));
+  dlCSV([hdr.map(cv), ...rows], csvFilename('conductores', ''));
+}
+
+function exportCSV_conductoresDetalle() {
+  const rech = RAW.filter(r => r.status === 'rejected');
+  if (!rech.length) { alert('Sin rechazadas en el período.'); return; }
+  const hdr = ['Conductor','Fecha','Cód.Orden','Depósito','Motivo','Proveedor'];
+  const rows = rech.map(r => [r.conductor, r.fecha, r.codigo_orden, r.deposito, r.motivo_rechazo, r.proveedor || r.cliente].map(cv));
+  dlCSV([hdr.map(cv), ...rows], csvFilename('conductores_rechazadas', ''));
+}
+
+/* --- Tab 5 --- */
+function exportCSV_rechMotivos() {
+  if (!D_MOTIVOS.length) { alert('Sin datos para exportar.'); return; }
+  const hdr = ['Motivo','Categoría','Total','%'];
+  const rows = D_MOTIVOS.map(m => [cv(m.motivo), cv(m.categoria), m.total, m.pct.toFixed(1)+'%'].map(String));
+  dlCSV([hdr.map(cv), ...rows], csvFilename('rechazos_motivos', ''));
+}
+
+function exportCSV_rechConductores() {
+  const rech = RAW.filter(r => r.status === 'rejected');
+  const m = {};
+  rech.forEach(r => { const k = r.conductor || '(sin conductor)'; m[k] = (m[k] || 0) + 1; });
+  const list = Object.entries(m).sort((a,b) => b[1]-a[1]);
+  if (!list.length) { alert('Sin rechazadas en el período.'); return; }
+  dlCSV([[cv('Conductor'), cv('Rechazadas'), cv('%')], ...list.map(([c, n]) => [cv(c), n, rech.length > 0 ? (n/rech.length*100).toFixed(1)+'%' : '0%'].map(String))], csvFilename('rechazos_conductores', ''));
+}
+
+function exportCSV_rechProveedores() {
+  if (!D_PROVRECH.length) { alert('Sin rechazadas en el período.'); return; }
+  const hdr = ['Proveedor','Rechazadas','%','Top motivo'];
+  const rows = D_PROVRECH.map(p => [cv(p.proveedor), p.total, p.pct.toFixed(1)+'%', cv(p.topMotivo)].map(String));
+  dlCSV([hdr.map(cv), ...rows], csvFilename('rechazos_proveedores', ''));
+}
+
+function exportCSV_rechDomicilios() {
+  const rech = RAW.filter(r => r.status === 'rejected');
+  if (!rech.length) { alert('Sin rechazadas en el período.'); return; }
+  const m = {};
+  rech.forEach(r => { const k = r.codigo_direccion || r.direccion || '(sin dirección)'; m[k] = (m[k] || 0) + 1; });
+  const list = Object.entries(m).sort((a,b) => b[1]-a[1]);
+  dlCSV([[cv('Domicilio / Cód.Dir'), cv('Rechazadas')], ...list.map(([d, n]) => [cv(d), n].map(String))], csvFilename('rechazos_domicilios', ''));
+}
+
+function exportCSV_rechDetalle() {
   const rech = RAW.filter(r => r.status === 'rejected');
   if (!rech.length) { alert('Sin rechazadas en el período.'); return; }
   const hdr = ['Fecha','Plan','Cód.Orden','Cód.Dirección','Depósito','Flota','Conductor','Vehículo','Categoría','Estado','Motivo','Cliente','Proveedor','Kg','Bultos','VD'];
-  const rows = rech.map(r => [
-    r.fecha, r.plan, r.codigo_orden, r.codigo_direccion,
-    r.deposito, r.flota, r.conductor, r.vehiculo,
-    r.categoria, r.status, r.motivo_rechazo,
-    r.cliente, r.proveedor, r.kg, r.bultos, r.valor_declarado,
-  ].map(v => `"${String(v??'').replace(/"/g,'""')}"`));
-  dlCSV([hdr.map(h => `"${h}"`), ...rows], 'rechazadas_historico.csv');
+  const rows = rech.map(r => [r.fecha, r.plan, r.codigo_orden, r.codigo_direccion, r.deposito, r.flota, r.conductor, r.vehiculo, r.categoria, r.status, r.motivo_rechazo, r.cliente, r.proveedor, r.kg, r.bultos, r.valor_declarado].map(cv));
+  dlCSV([hdr.map(cv), ...rows], csvFilename('rechazadas_detalle', ''));
 }
 
-function exportAccCSV() {
+/* --- Tab 6 --- */
+function exportCSV_acciones() {
   if (!ACTIONS.length) { alert('Sin acciones en el período.'); return; }
-  const hdr = ['Fecha','Hora','Depósito','Conductor','Vehículo','Descripción','Usuario','Nombre'];
-  const rows = ACTIONS.map(a => [
-    a.date, a.timestamp, a.deposito, a.conductor, a.vehiculo,
-    a.descripcion, a.usuario, a.nombre_completo,
-  ].map(v => `"${String(v??'').replace(/"/g,'""')}"`));
-  dlCSV([hdr.map(h => `"${h}"`), ...rows], 'acciones_historico.csv');
+  const dep  = el('fAccDep')?.value  || '';
+  const user = el('fAccUser')?.value || '';
+  const cond = el('fAccCond')?.value || '';
+  let data = ACTIONS;
+  if (dep)  data = data.filter(a => a.deposito === dep);
+  if (user) data = data.filter(a => (a.nombre_completo || a.usuario) === user);
+  if (cond) data = data.filter(a => a.conductor === cond);
+  const hdr  = ['Fecha','Hora','Depósito','Conductor','Vehículo','Descripción','Usuario','Nombre'];
+  const rows = data.map(a => [a.date, a.timestamp, a.deposito, a.conductor, a.vehiculo, a.descripcion, a.usuario, a.nombre_completo].map(cv));
+  dlCSV([hdr.map(cv), ...rows], csvFilename('acciones', dep || user || cond || ''));
 }
 
 function dlCSV(rows, filename) {
