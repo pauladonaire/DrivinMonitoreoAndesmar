@@ -499,7 +499,7 @@
         </div>
         <div class="tbl-wrap">
           <table class="data-tbl" id="tGenCond">
-            <thead><tr><th>#</th><th>Conductor</th><th>Rech.</th><th>Efect.</th></tr></thead>
+            <thead><tr><th>#</th><th>Conductor</th><th>Rech.</th><th title="Participación sobre fallidas" style="cursor:help">% ⓘ</th></tr></thead>
             <tbody id="bGenCond"></tbody>
           </table>
         </div>
@@ -644,6 +644,7 @@
               <th>#</th>
               <th class="s" data-col="conductor"  data-tbl="conductores">Conductor <span class="si">↕</span></th>
               <th class="s" data-col="total"      data-tbl="conductores">Total <span class="si">↕</span></th>
+              <th class="s" data-col="entregadas" data-tbl="conductores">Entreg. <span class="si">↕</span></th>
               <th class="s" data-col="rechazadas" data-tbl="conductores">Rech. <span class="si">↕</span></th>
               <th class="s" data-col="eff"        data-tbl="conductores">Efect. <span class="si">↕</span></th>
               <th class="s" data-col="dias"       data-tbl="conductores">Días <span class="si">↕</span></th>
@@ -655,6 +656,23 @@
           </table>
         </div>
         <div class="pag" id="pagCond"></div>
+      </div>
+    </div>
+
+    <!-- Top 10 Peor Efectividad -->
+    <div class="card sec" style="margin-top:14px">
+      <div class="card-title">Top 10 — Peor Efectividad <span style="font-size:10px;color:var(--muted);font-weight:400">(mín. 5 órdenes · respeta filtro de depósito)</span></div>
+      <div class="tbl-wrap">
+        <table class="data-tbl" id="tTop10PeorEff">
+          <thead><tr>
+            <th>#</th>
+            <th>Conductor</th>
+            <th>Total</th>
+            <th>Rech.</th>
+            <th>Efectividad %</th>
+          </tr></thead>
+          <tbody id="bTop10PeorEff"></tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -723,7 +741,7 @@
           <div class="card-title">Top conductores (rech.)</div>
           <div class="tbl-wrap">
             <table class="data-tbl" id="tDepCond">
-              <thead><tr><th>#</th><th>Conductor</th><th>Rech.</th><th>Efect.</th></tr></thead>
+              <thead><tr><th>#</th><th>Conductor</th><th>Total</th><th>Entreg.</th><th>Rech.</th><th>Efect.</th><th>Acciones</th></tr></thead>
               <tbody id="bDepCond"></tbody>
             </table>
           </div>
@@ -738,10 +756,10 @@
           </div>
         </div>
         <div class="card">
-          <div class="card-title">Últimos 7 días</div>
+          <div class="card-title">Top proveedores (últimos 7 días)</div>
           <div class="tbl-wrap">
             <table class="data-tbl" id="tDepUltimos">
-              <thead><tr><th>Fecha</th><th>Total</th><th>Efect.</th></tr></thead>
+              <thead><tr><th>#</th><th>Proveedor</th><th>Rech.</th><th>%</th></tr></thead>
               <tbody id="bDepUltimos"></tbody>
             </table>
           </div>
@@ -763,6 +781,30 @@
         <div class="ch-title">Rechazadas por día</div>
         <div class="ch-wrap" style="height:240px"><canvas id="cRechDia"></canvas></div>
       </div>
+    </div>
+
+    <!-- Análisis: Nadie en el Domicilio -->
+    <div class="card sec">
+      <div class="card-title">Análisis: Nadie en el Domicilio</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:6px">
+        <div class="kpi-sm r" style="cursor:pointer" onclick="toggleNadieDetail('sin_gps')">
+          <div class="kpi-label">Sin registro GPS</div>
+          <div class="kpi-val" id="nadieN_sin_gps">—</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">El conductor no pasó por ahí según GPS</div>
+        </div>
+        <div class="kpi-sm y" style="cursor:pointer" onclick="toggleNadieDetail('dudosa')">
+          <div class="kpi-label">Parada dudosa (&lt; 3 min)</div>
+          <div class="kpi-val" id="nadieN_dudosa">—</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">Tiempo insuficiente en el domicilio</div>
+        </div>
+        <div class="kpi-sm g" style="cursor:pointer" onclick="toggleNadieDetail('ok')">
+          <div class="kpi-label">Parada OK (≥ 3 min)</div>
+          <div class="kpi-val" id="nadieN_ok">—</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">Tiempo de espera aceptable</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:10px">Click en cada tarjeta para ver el detalle de pedidos.</div>
+      <div id="nadieDetailContainer"></div>
     </div>
 
     <div class="ch-row c2">
@@ -918,6 +960,7 @@
 ============================================================ */
 const GAS_URL   = 'https://script.google.com/macros/s/AKfycby0MDTJ9-Hvqww_Ze4ILTHUlAYzmc5RUo5UZ8pSnvBUDit1tMGxMFVF3xvyplNOO7h37A/exec';
 const PAGE_SZ   = 20;
+const APP_STATE = { userDepositos: null };
 
 /* ============================================================
    ESTADO GLOBAL
@@ -1004,7 +1047,8 @@ document.addEventListener('DOMContentLoaded', () => {
     th.addEventListener('click', () => handleSort(th.dataset.tbl, th.dataset.col));
   });
 
-  // Auto-load
+  // Auth + auto-load
+  initAuth();
   loadData();
 });
 
@@ -1172,10 +1216,11 @@ function buildProvData(rows) {
    TAB 1 — GENERAL
 ============================================================ */
 function renderGeneral() {
-  if (!RAW.length) { clearKPIs(); return; }
+  const ERAW = getEffectiveRAW();
+  if (!ERAW.length) { clearKPIs(); return; }
 
-  const s = stats(RAW);
-  const dias = new Set(RAW.map(r => r.fecha)).size;
+  const s = stats(ERAW);
+  const dias = new Set(ERAW.map(r => r.fecha)).size;
 
   // KPIs
   el('kTotal').textContent   = s.total.toLocaleString('es-AR');
@@ -1187,7 +1232,7 @@ function renderGeneral() {
   el('kPend').textContent    = s.pendientes.toLocaleString('es-AR');
   el('kPendSub').textContent = s.total > 0 ? (s.pendientes/s.total*100).toFixed(1) + '% del total' : '';
 
-  const byDay = groupByDay(RAW);
+  const byDay = groupByDay(ERAW);
 
   // Chart: efectividad diaria
   killChart('cEfDiaria');
@@ -1231,7 +1276,7 @@ function renderGeneral() {
   });
 
   // Chart: órdenes por depósito (stacked bar horizontal)
-  const byDep = groupByKey(RAW, 'deposito').slice(0,15);
+  const byDep = groupByKey(ERAW, 'deposito').slice(0,15);
   killChart('cDepTotales');
   CH['cDepTotales'] = new Chart(el('cDepTotales'), {
     type: 'bar',
@@ -1275,7 +1320,7 @@ function renderGeneral() {
   });
 
   // Tab1 v2: Top motivos / conductores / proveedores
-  const rech = RAW.filter(r => r.status === 'rejected');
+  const rech = ERAW.filter(r => r.status === 'rejected');
   const totalRech = rech.length;
 
   // motivos
@@ -1297,11 +1342,11 @@ function renderGeneral() {
   if (bGC) bGC.innerHTML = condList.map(([c, n], i) => `<tr>
     <td class="tm">${i+1}</td><td>${esc(c)}</td>
     <td class="td"><strong>${n}</strong></td>
-    <td class="tm">${totalRech > 0 ? (n/totalRech*100).toFixed(1) : 0}%</td>
+    <td class="tm" title="Participación sobre fallidas">${totalRech > 0 ? (n/totalRech*100).toFixed(1) : 0}%</td>
   </tr>`).join('') || '<tr><td colspan="4"><div class="empty">Sin rechazadas</div></td></tr>';
 
   // proveedores con más rechazadas
-  const provList = buildProvData(RAW).slice(0, 15);
+  const provList = buildProvData(ERAW).slice(0, 15);
   const bGP = el('bGenProv');
   if (bGP) bGP.innerHTML = provList.map((p, i) => `<tr>
     <td class="tm">${i+1}</td><td>${esc(p.proveedor)}</td>
@@ -1319,7 +1364,7 @@ function clearKPIs() {
    TAB 2 — POR DÍA
 ============================================================ */
 function renderPorDia() {
-  D_PORDIA = groupByDay(RAW);
+  D_PORDIA = groupByDay(getEffectiveRAW());
 
   killChart('cPorDia');
   CH['cPorDia'] = new Chart(el('cPorDia'), {
@@ -1379,7 +1424,7 @@ function navDia(dir) {
 
 function renderDiaDetalle(fecha) {
   _selFecha = fecha;
-  const rows = RAW.filter(r => r.fecha === fecha);
+  const rows = getEffectiveRAW().filter(r => r.fecha === fecha);
   D_DIADET  = rows;
 
   // Resaltar fila en tabla resumen
@@ -1471,20 +1516,40 @@ function sortAndRender_diadet() {
    TAB 3 — CONDUCTORES
 ============================================================ */
 function renderConductores() {
-  _top10Map = buildTop10Map(RAW);
-  D_COND    = buildCondData(RAW);
+  const ERAW = getEffectiveRAW();
+  _top10Map = buildTop10Map(ERAW);
+  D_COND    = buildCondData(ERAW);
 
   // Poblar filtro depósito
   const depSel = el('filtroCondDep');
   if (depSel) {
     const prev = depSel.value;
-    const deps = [...new Set(RAW.map(r => r.deposito).filter(Boolean))].sort();
+    const deps = [...new Set(ERAW.map(r => r.deposito).filter(Boolean))].sort();
     depSel.innerHTML = '<option value="">Todos los depósitos</option>';
     deps.forEach(d => depSel.add(new Option(d, d)));
     depSel.value = prev;
   }
 
-  const top15 = [...D_COND].sort((a,b) => b.rechazadas - a.rechazadas).slice(0,15);
+  applyCondFilters();
+}
+
+function applyCondFilters() {
+  const dep = el('filtroCondDep')?.value || '';
+  const txt = (el('filtroCondTxt')?.value || '').toLowerCase().trim();
+  const ERAW = getEffectiveRAW();
+  D_COND_FILTERED = D_COND.filter(c => {
+    if (dep) {
+      const condRows = ERAW.filter(r => r.conductor === c.conductor);
+      if (!condRows.some(r => r.deposito === dep)) return false;
+    }
+    if (txt && !c.conductor.toLowerCase().includes(txt)) return false;
+    return true;
+  });
+
+  // Reconstruir chart Top 15 respetando el filtro activo
+  const hasFilter = dep || txt;
+  const chartSrc  = hasFilter ? D_COND_FILTERED : D_COND;
+  const top15 = [...chartSrc].sort((a,b) => b.rechazadas - a.rechazadas).slice(0,15);
   killChart('cConductores');
   CH['cConductores'] = new Chart(el('cConductores'), {
     type: 'bar',
@@ -1499,20 +1564,7 @@ function renderConductores() {
     }
   });
 
-  applyCondFilters();
-}
-
-function applyCondFilters() {
-  const dep = el('filtroCondDep')?.value || '';
-  const txt = (el('filtroCondTxt')?.value || '').toLowerCase().trim();
-  D_COND_FILTERED = D_COND.filter(c => {
-    if (dep) {
-      const condRows = RAW.filter(r => r.conductor === c.conductor);
-      if (!condRows.some(r => r.deposito === dep)) return false;
-    }
-    if (txt && !c.conductor.toLowerCase().includes(txt)) return false;
-    return true;
-  });
+  renderTop10PeorEff(chartSrc);
   sortAndRender_conductores();
 }
 
@@ -1582,7 +1634,7 @@ function showCondDetail(conductor) {
    TAB 4 — DEPÓSITOS
 ============================================================ */
 function renderDepositos() {
-  D_DEP = groupByKey(RAW, 'deposito').map(d => ({
+  D_DEP = groupByKey(getEffectiveRAW(), 'deposito').map(d => ({
     deposito: d.key, total: d.total, entregadas: d.entregadas,
     rechazadas: d.rechazadas, pendientes: d.pendientes, eff: d.eff,
   }));
@@ -1660,7 +1712,7 @@ function sortAndRender_depositos() {
 }
 
 function renderDepDetail(deposito) {
-  const rows   = RAW.filter(r => r.deposito === deposito);
+  const rows   = getEffectiveRAW().filter(r => r.deposito === deposito);
   const s      = stats(rows);
   const rech   = rows.filter(r => r.status === 'rejected');
   const conds  = new Set(rows.map(r => r.conductor).filter(Boolean)).size;
@@ -1699,16 +1751,43 @@ function renderDepDetail(deposito) {
     options: { responsive: true, maintainAspectRatio: false, indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x: axisOpts(), y: axisOpts() } }
   });
 
-  // Tabla conductores del depósito
+  // Tabla conductores del depósito (con acciones y accordion)
   const condDep = buildCondData(rows).sort((a,b) => b.rechazadas - a.rechazadas);
+  const depActionsMap = {};
+  getEffectiveACTIONS().filter(a => a.deposito === deposito).forEach(a => {
+    const k = a.conductor || '';
+    if (!depActionsMap[k]) depActionsMap[k] = [];
+    depActionsMap[k].push(a);
+  });
   const bDC = el('bDepCond');
   if (bDC) {
-    bDC.innerHTML = condDep.slice(0,20).map((c, i) => `<tr>
-      <td class="tm">${i+1}</td><td>${esc(c.conductor)}</td>
-      <td>${c.total}</td><td class="tg">${c.entregadas}</td>
-      <td class="td">${c.rechazadas}</td>
-      <td><span class="${effCls(c.eff)}">${c.eff.toFixed(1)}%</span></td>
-    </tr>`).join('') || '<tr><td colspan="6"><div class="empty">Sin datos</div></td></tr>';
+    bDC.innerHTML = condDep.slice(0,20).map((c, i) => {
+      const acts    = depActionsMap[c.conductor] || [];
+      const detId   = `depCondDet-${i}`;
+      const actCell = acts.length > 0
+        ? `<span style="color:var(--cyan);cursor:pointer">${acts.length} ▼</span>`
+        : '—';
+      const detailRow = acts.length > 0 ? `<tr id="${detId}" style="display:none">
+        <td colspan="7" style="padding:8px 14px;background:var(--surface2)">
+          <table class="data-tbl" style="font-size:11px">
+            <thead><tr><th>Fecha</th><th>Hora</th><th>Descripción</th><th>Usuario</th></tr></thead>
+            <tbody>${acts.slice(0,20).map(a => `<tr>
+              <td class="mono">${esc(a.date)}</td>
+              <td class="mono">${a.timestamp ? String(a.timestamp).substring(0,8) : '—'}</td>
+              <td style="white-space:normal;max-width:300px">${esc(a.descripcion)}</td>
+              <td>${esc(a.nombre_completo || a.usuario)}</td>
+            </tr>`).join('')}</tbody>
+          </table>
+        </td>
+      </tr>` : '';
+      return `<tr style="cursor:pointer" onclick="toggleDepCondAccordion('${detId}')">
+        <td class="tm">${i+1}</td><td>${esc(c.conductor)}</td>
+        <td>${c.total}</td><td class="tg">${c.entregadas}</td>
+        <td class="td">${c.rechazadas}</td>
+        <td><span class="${effCls(c.eff)}">${c.eff.toFixed(1)}%</span></td>
+        <td class="tm">${actCell}</td>
+      </tr>${detailRow}`;
+    }).join('') || '<tr><td colspan="7"><div class="empty">Sin datos</div></td></tr>';
   }
 
   // Tabla motivos del depósito
@@ -1721,20 +1800,19 @@ function renderDepDetail(deposito) {
     </tr>`).join('') || '<tr><td colspan="4"><div class="empty">Sin rechazadas</div></td></tr>';
   }
 
-  // Últimas órdenes del depósito
-  const ultimos = [...rows].sort((a,b) => (b.fecha||'').localeCompare(a.fecha||'')).slice(0,20);
+  // Top Proveedores — últimos 7 días del período del depósito
+  const allDates  = [...new Set(rows.map(r => r.fecha))].sort().reverse();
+  const last7Set  = new Set(allDates.slice(0, 7));
+  const last7Rows = rows.filter(r => last7Set.has(r.fecha));
+  const provL7    = buildProvData(last7Rows).slice(0, 15);
   const bDU = el('bDepUltimos');
   if (bDU) {
-    bDU.innerHTML = ultimos.map(r => {
-      const stCl = (r.status === 'delivered' || r.status === 'approved') ? 'b-delivered' : r.status === 'rejected' ? 'b-rejected' : 'b-pending';
-      return `<tr>
-        <td class="mono tm">${esc(r.fecha)}</td>
-        <td>${esc(r.conductor)}</td>
-        <td class="mono tm">${esc(r.codigo_orden)}</td>
-        <td><span class="badge ${stCl}">${esc(r.status)}</span></td>
-        <td class="tm" style="max-width:150px;overflow:hidden;text-overflow:ellipsis">${esc(r.motivo_rechazo || '—')}</td>
-      </tr>`;
-    }).join('') || '<tr><td colspan="5"><div class="empty">Sin datos</div></td></tr>';
+    bDU.innerHTML = provL7.map((p, i) => `<tr>
+      <td class="tm">${i+1}</td>
+      <td>${esc(p.proveedor)}</td>
+      <td class="td"><strong>${p.total}</strong></td>
+      <td class="tm">${p.pct.toFixed(1)}%</td>
+    </tr>`).join('') || '<tr><td colspan="4"><div class="empty">Sin rechazadas</div></td></tr>';
   }
 }
 
@@ -1742,7 +1820,8 @@ function renderDepDetail(deposito) {
    TAB 5 — RECHAZOS
 ============================================================ */
 function renderRechazos() {
-  const rech      = RAW.filter(r => r.status === 'rejected');
+  const ERAW      = getEffectiveRAW();
+  const rech      = ERAW.filter(r => r.status === 'rejected');
   const totalRech = rech.length;
 
   // Motivos
@@ -1756,7 +1835,7 @@ function renderRechazos() {
     .sort((a,b) => b.total - a.total);
 
   // Proveedores
-  D_PROVRECH = buildProvData(RAW);
+  D_PROVRECH = buildProvData(ERAW);
 
   // Chart motivos (top 10)
   const top10m = D_MOTIVOS.slice(0,10);
@@ -1775,7 +1854,7 @@ function renderRechazos() {
   });
 
   // Chart rechazadas por día
-  const byDay = groupByDay(RAW);
+  const byDay = groupByDay(ERAW);
   killChart('cRechDia');
   CH['cRechDia'] = new Chart(el('cRechDia'), {
     type: 'line',
@@ -1797,6 +1876,7 @@ function renderRechazos() {
 
   sortAndRender_motivos();
   sortAndRender_provrech();
+  renderNadieAnalysis(ERAW);
 }
 
 function sortAndRender_motivos() {
@@ -1842,15 +1922,16 @@ function renderAcciones() {
   const prevUser = userSel?.value || '';
   const prevCond = condSel?.value || '';
 
-  const deps  = [...new Set(ACTIONS.map(a => a.deposito).filter(Boolean))].sort();
-  const users = [...new Set(ACTIONS.map(a => (a.nombre_completo || a.usuario)).filter(Boolean))].sort();
-  const conds = [...new Set(ACTIONS.map(a => a.conductor).filter(Boolean))].sort();
+  const EACT  = getEffectiveACTIONS();
+  const deps  = [...new Set(EACT.map(a => a.deposito).filter(Boolean))].sort();
+  const users = [...new Set(EACT.map(a => (a.nombre_completo || a.usuario)).filter(Boolean))].sort();
+  const conds = [...new Set(EACT.map(a => a.conductor).filter(Boolean))].sort();
 
   if (depSel)  { depSel.innerHTML  = '<option value="">Todos</option>'; deps.forEach(d  => depSel.add(new Option(d, d)));  depSel.value  = prevDep; }
   if (userSel) { userSel.innerHTML = '<option value="">Todos</option>'; users.forEach(u => userSel.add(new Option(u, u))); userSel.value = prevUser; }
   if (condSel) { condSel.innerHTML = '<option value="">Todos</option>'; conds.forEach(c => condSel.add(new Option(c, c))); condSel.value = prevCond; }
 
-  let filtered = ACTIONS;
+  let filtered = EACT;
   if (depSel?.value)  filtered = filtered.filter(a => a.deposito === depSel.value);
   if (userSel?.value) filtered = filtered.filter(a => (a.nombre_completo || a.usuario) === userSel.value);
   if (condSel?.value) filtered = filtered.filter(a => a.conductor === condSel.value);
@@ -2026,6 +2107,28 @@ function capitalize(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+function initAuth() {
+  try {
+    const session = JSON.parse(sessionStorage.getItem('andesmar_session'));
+    if (!session) return;
+    if (session.perfil === 'monitoreosuc' && session.depositos) {
+      APP_STATE.userDepositos = session.depositos.split(',').map(d => d.trim()).filter(Boolean);
+    }
+  } catch(e) {}
+}
+
+function getEffectiveRAW() {
+  const deps = APP_STATE.userDepositos;
+  if (!deps || !deps.length) return RAW;
+  return RAW.filter(r => deps.includes(r.deposito));
+}
+
+function getEffectiveACTIONS() {
+  const deps = APP_STATE.userDepositos;
+  if (!deps || !deps.length) return ACTIONS;
+  return ACTIONS.filter(a => deps.includes(a.deposito));
+}
+
 /* ---- v2 helpers ---- */
 function cv(v) { return '"' + String(v ?? '').replace(/"/g, '""') + '"'; }
 
@@ -2142,7 +2245,7 @@ function exportAccCSV()  { exportCSV_acciones(); }
 
 /* --- Tab 1 --- */
 function exportCSV_generalMotivos() {
-  const rech = RAW.filter(r => r.status === 'rejected');
+  const rech = getEffectiveRAW().filter(r => r.status === 'rejected');
   if (!rech.length) { alert('Sin rechazadas en el período.'); return; }
   const mMap = {};
   rech.forEach(r => { const k = r.motivo_rechazo || 'Sin motivo'; mMap[k] = (mMap[k] || 0) + 1; });
@@ -2153,7 +2256,7 @@ function exportCSV_generalMotivos() {
 }
 
 function exportCSV_generalConductores() {
-  const rech = RAW.filter(r => r.status === 'rejected');
+  const rech = getEffectiveRAW().filter(r => r.status === 'rejected');
   if (!rech.length) { alert('Sin rechazadas en el período.'); return; }
   const m = {};
   rech.forEach(r => { const k = r.conductor || '(sin conductor)'; m[k] = (m[k] || 0) + 1; });
@@ -2193,7 +2296,7 @@ function exportCSV_conductores() {
 }
 
 function exportCSV_conductoresDetalle() {
-  const rech = RAW.filter(r => r.status === 'rejected');
+  const rech = getEffectiveRAW().filter(r => r.status === 'rejected');
   if (!rech.length) { alert('Sin rechazadas en el período.'); return; }
   const hdr = ['Conductor','Fecha','Cód.Orden','Depósito','Motivo','Proveedor'];
   const rows = rech.map(r => [r.conductor, r.fecha, r.codigo_orden, r.deposito, r.motivo_rechazo, r.proveedor || r.cliente].map(cv));
@@ -2209,7 +2312,7 @@ function exportCSV_rechMotivos() {
 }
 
 function exportCSV_rechConductores() {
-  const rech = RAW.filter(r => r.status === 'rejected');
+  const rech = getEffectiveRAW().filter(r => r.status === 'rejected');
   const m = {};
   rech.forEach(r => { const k = r.conductor || '(sin conductor)'; m[k] = (m[k] || 0) + 1; });
   const list = Object.entries(m).sort((a,b) => b[1]-a[1]);
@@ -2225,7 +2328,7 @@ function exportCSV_rechProveedores() {
 }
 
 function exportCSV_rechDomicilios() {
-  const rech = RAW.filter(r => r.status === 'rejected');
+  const rech = getEffectiveRAW().filter(r => r.status === 'rejected');
   if (!rech.length) { alert('Sin rechazadas en el período.'); return; }
   const m = {};
   rech.forEach(r => { const k = r.codigo_direccion || r.direccion || '(sin dirección)'; m[k] = (m[k] || 0) + 1; });
@@ -2234,7 +2337,7 @@ function exportCSV_rechDomicilios() {
 }
 
 function exportCSV_rechDetalle() {
-  const rech = RAW.filter(r => r.status === 'rejected');
+  const rech = getEffectiveRAW().filter(r => r.status === 'rejected');
   if (!rech.length) { alert('Sin rechazadas en el período.'); return; }
   const hdr = ['Fecha','Plan','Cód.Orden','Cód.Dirección','Depósito','Flota','Conductor','Vehículo','Categoría','Estado','Motivo','Cliente','Proveedor','Kg','Bultos','VD'];
   const rows = rech.map(r => [r.fecha, r.plan, r.codigo_orden, r.codigo_direccion, r.deposito, r.flota, r.conductor, r.vehiculo, r.categoria, r.status, r.motivo_rechazo, r.cliente, r.proveedor, r.kg, r.bultos, r.valor_declarado].map(cv));
@@ -2243,11 +2346,12 @@ function exportCSV_rechDetalle() {
 
 /* --- Tab 6 --- */
 function exportCSV_acciones() {
-  if (!ACTIONS.length) { alert('Sin acciones en el período.'); return; }
+  const EACT = getEffectiveACTIONS();
+  if (!EACT.length) { alert('Sin acciones en el período.'); return; }
   const dep  = el('fAccDep')?.value  || '';
   const user = el('fAccUser')?.value || '';
   const cond = el('fAccCond')?.value || '';
-  let data = ACTIONS;
+  let data = EACT;
   if (dep)  data = data.filter(a => a.deposito === dep);
   if (user) data = data.filter(a => (a.nombre_completo || a.usuario) === user);
   if (cond) data = data.filter(a => a.conductor === cond);
@@ -2264,6 +2368,116 @@ function dlCSV(rows, filename) {
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click();
   document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+/* ============================================================
+   UI HELPERS
+============================================================ */
+/* ============================================================
+   TOP 10 PEOR EFECTIVIDAD (Tab 3)
+============================================================ */
+function renderTop10PeorEff(src) {
+  const tbody = el('bTop10PeorEff');
+  if (!tbody) return;
+  const top10 = [...src]
+    .filter(c => c.total >= 5 && c.rechazadas >= 1)
+    .sort((a,b) => a.eff - b.eff)
+    .slice(0, 10);
+  tbody.innerHTML = top10.map((c, i) => `<tr>
+    <td class="tm">${i+1}</td>
+    <td>${esc(c.conductor)}</td>
+    <td class="tm">${c.total}</td>
+    <td class="td">${c.rechazadas}</td>
+    <td><span class="${effCls(c.eff)}">${c.eff.toFixed(1)}%</span></td>
+  </tr>`).join('') || '<tr><td colspan="5"><div class="empty">Sin datos (mín. 5 órdenes)</div></td></tr>';
+}
+
+/* ============================================================
+   ACORDEÓN CONDUCTORES EN DEPÓSITO (Tab 4)
+============================================================ */
+function toggleDepCondAccordion(detailId) {
+  const row = el(detailId);
+  if (!row) return;
+  row.style.display = row.style.display === 'none' ? '' : 'none';
+}
+
+/* ============================================================
+   ANÁLISIS NADIE EN EL DOMICILIO (Tab 5)
+============================================================ */
+let _nadieData       = { sin_gps: [], dudosa: [], ok: [] };
+let _nadieActiveTab  = null;
+
+function classifyNadie(row) {
+  const arr = row.tracked_arrival ? new Date(row.tracked_arrival).getTime() : null;
+  const lv  = row.tracked_leave   ? new Date(row.tracked_leave).getTime()   : null;
+  if (!arr || !lv || isNaN(arr) || isNaN(lv)) return 'sin_gps';
+  const diffMin = (lv - arr) / 60000;
+  if (diffMin < 0) return 'sin_gps';
+  if (diffMin < 3) return 'dudosa';
+  return 'ok';
+}
+
+function fmtDuration(row) {
+  const arr = row.tracked_arrival ? new Date(row.tracked_arrival).getTime() : null;
+  const lv  = row.tracked_leave   ? new Date(row.tracked_leave).getTime()   : null;
+  if (!arr || !lv || isNaN(arr) || isNaN(lv)) return '—';
+  const diff = (lv - arr) / 60000;
+  if (diff < 0) return '—';
+  return fmtMin(diff);
+}
+
+function renderNadieAnalysis(eraw) {
+  const nadie = eraw.filter(r => {
+    const mt = (r.motivo_rechazo || '').toLowerCase();
+    return r.status === 'rejected' && mt.includes('nadie');
+  });
+  _nadieData       = { sin_gps: [], dudosa: [], ok: [] };
+  _nadieActiveTab  = null;
+  nadie.forEach(r => _nadieData[classifyNadie(r)].push(r));
+
+  const setN = (id, v) => { const e = el(id); if (e) e.textContent = v; };
+  setN('nadieN_sin_gps', _nadieData.sin_gps.length);
+  setN('nadieN_dudosa',  _nadieData.dudosa.length);
+  setN('nadieN_ok',      _nadieData.ok.length);
+
+  const cont = el('nadieDetailContainer');
+  if (cont) cont.innerHTML = '';
+}
+
+function toggleNadieDetail(cat) {
+  const cont = el('nadieDetailContainer');
+  if (!cont) return;
+  if (_nadieActiveTab === cat) {
+    _nadieActiveTab = null;
+    cont.innerHTML  = '';
+    return;
+  }
+  _nadieActiveTab = cat;
+  const rows   = _nadieData[cat] || [];
+  const labels = { sin_gps: 'Sin registro GPS', dudosa: 'Parada dudosa (< 3 min)', ok: 'Parada OK (≥ 3 min)' };
+  cont.innerHTML = `
+    <div style="margin-top:12px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:1px">
+        ${labels[cat]} — ${rows.length} pedidos
+      </div>
+      <div class="tbl-wrap">
+        <table class="data-tbl">
+          <thead><tr>
+            <th>Conductor</th><th>Orden</th><th>Depósito</th>
+            <th>Duración</th><th>Llegada</th><th>Salida</th>
+          </tr></thead>
+          <tbody>${rows.slice(0,100).map(r => `<tr>
+            <td>${esc(r.conductor)}</td>
+            <td class="mono tm">${esc(r.codigo_orden)}</td>
+            <td class="tm">${esc(r.deposito)}</td>
+            <td class="mono tm">${fmtDuration(r)}</td>
+            <td class="mono tm" style="font-size:10px">${esc(r.tracked_arrival || '—')}</td>
+            <td class="mono tm" style="font-size:10px">${esc(r.tracked_leave   || '—')}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>
+      ${rows.length > 100 ? `<div style="font-size:11px;color:var(--muted);margin-top:6px">Mostrando 100 de ${rows.length} registros.</div>` : ''}
+    </div>`;
 }
 
 /* ============================================================
