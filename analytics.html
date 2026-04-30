@@ -2298,8 +2298,8 @@ function exportCSV_conductores() {
 function exportCSV_conductoresDetalle() {
   const rech = getEffectiveRAW().filter(r => r.status === 'rejected');
   if (!rech.length) { alert('Sin rechazadas en el período.'); return; }
-  const hdr = ['Conductor','Fecha','Cód.Orden','Depósito','Motivo','Proveedor'];
-  const rows = rech.map(r => [r.conductor, r.fecha, r.codigo_orden, r.deposito, r.motivo_rechazo, r.proveedor || r.cliente].map(cv));
+  const hdr = ['Conductor','Fecha','Cód.Orden','Depósito','Motivo','Comentario conductor','Proveedor'];
+  const rows = rech.map(r => [r.conductor, r.fecha, r.codigo_orden, r.deposito, r.motivo_rechazo, r.comment, r.proveedor || r.cliente].map(cv));
   dlCSV([hdr.map(cv), ...rows], csvFilename('conductores_rechazadas', ''));
 }
 
@@ -2339,8 +2339,8 @@ function exportCSV_rechDomicilios() {
 function exportCSV_rechDetalle() {
   const rech = getEffectiveRAW().filter(r => r.status === 'rejected');
   if (!rech.length) { alert('Sin rechazadas en el período.'); return; }
-  const hdr = ['Fecha','Plan','Cód.Orden','Cód.Dirección','Depósito','Flota','Conductor','Vehículo','Categoría','Estado','Motivo','Cliente','Proveedor','Kg','Bultos','VD'];
-  const rows = rech.map(r => [r.fecha, r.plan, r.codigo_orden, r.codigo_direccion, r.deposito, r.flota, r.conductor, r.vehiculo, r.categoria, r.status, r.motivo_rechazo, r.cliente, r.proveedor, r.kg, r.bultos, r.valor_declarado].map(cv));
+  const hdr = ['Fecha','Plan','Cód.Orden','Cód.Dirección','Depósito','Flota','Conductor','Vehículo','Categoría','Estado','Motivo','Comentario conductor','Cliente','Proveedor','Kg','Bultos','VD'];
+  const rows = rech.map(r => [r.fecha, r.plan, r.codigo_orden, r.codigo_direccion, r.deposito, r.flota, r.conductor, r.vehiculo, r.categoria, r.status, r.motivo_rechazo, r.comment, r.cliente, r.proveedor, r.kg, r.bultos, r.valor_declarado].map(cv));
   dlCSV([hdr.map(cv), ...rows], csvFilename('rechazadas_detalle', ''));
 }
 
