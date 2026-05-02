@@ -1035,11 +1035,9 @@ function axisOpts(rotate) {
    INIT
 ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
-  // Default: últimos 30 días
-  const hoy   = new Date();
-  const desde = new Date(hoy);
-  desde.setDate(desde.getDate() - 29);
-  document.getElementById('inDesde').value = fmtISO(desde);
+  // Default: hoy — para cargar rápido al abrir. Cambiar rango y presionar "Cargar" para histórico.
+  const hoy = new Date();
+  document.getElementById('inDesde').value = fmtISO(hoy);
   document.getElementById('inHasta').value = fmtISO(hoy);
 
   // Attach sort listeners (once, for all sortable headers)
