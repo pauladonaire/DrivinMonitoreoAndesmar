@@ -1,16 +1,20 @@
-const CONFIG = {
-  // URL del Apps Script desplegado como Web App (para escritura en Sheets)
-  // Ver instrucciones en config.example.js para crearlo
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwxGBg8eD6u8r6YVpRR9VgkvqCqsIMjPvyJ76k1Y084kKRIZTVGeHDaL9-sMZfyU7z0/exec',
+/* ============================================================
+   config.js — Constantes globales de la aplicación
+   ============================================================ */
 
-  FIJAS_SHEET_ID:     '1eAKCw1xuJ9qFYFDnc7HpZ986Nn34rljdJOc0MgOTm1M',
-  DEPOSITOS_SHEET_ID: '1yjgGOPMWxjodE16CfYXwcq6of6ydMROZ0VgituXGUXg',
-  USUARIOS_SHEET_ID:  '1BjujCArFJMz1qiOWoVXhhi70GtJoDtPx2iV3WvScuAY',
+const API_KEY          = '69191355-f4d1-40e4-bc2f-087b4451f59d';
+const PODS_ENDPOINT    = 'https://external.driv.in/api/external/v2/pods';
+const PODS_V3_ENDPOINT = 'https://external.driv.in/api/external/v3/pods';
+const USERS_ENDPOINT   = 'https://external.driv.in/api/external/v2/users?role_name=driver';
+const EMAIL_DESTINO    = 'pauladonaire@andesmar.com.ar';
 
-  FIJAS_SHEET_TAB:       'Fijas',
-  DEPOSITOS_SHEET_TAB:   'Depositos',
-  USUARIOS_SHEET_TAB:    'Usuarios',
+// Google Sheets API — para login y gestión de usuarios (solo lectura)
+const SHEETS_API_KEY  = 'AIzaSyBqsKySJZCQJ08eImBuMGyDjaISldwD0v4';
+const USERS_SHEET_ID  = '1-Ygy8Q2aTKHJSw_seauqMObp4GLHPbD-0uds9pfWOr0';
 
-  PENDIENTES_SHEET_ID:   '1DmAhLJlqBR2pWoqym5nstwI_kb0SwbMUvl70VCFDEOI',
-  PENDIENTES_SHEET_TAB:  'DireccionesPendientes',
-};
+// Google Apps Script Web App — maneja emails, Sheets y cierre automático
+// Redeploy en script.google.com si el código GAS cambia (misma URL)
+const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycby0MDTJ9-Hvqww_Ze4ILTHUlAYzmc5RUo5UZ8pSnvBUDit1tMGxMFVF3xvyplNOO7h37A/exec';
+
+const REFRESH_INTERVAL_MS = 180000; // 3 minutos
+const PAGE_SIZE           = 20;
