@@ -2926,22 +2926,36 @@ function setText(id, v) { const e = el(id); if (e) e.textContent = v; }
 /* -- Cálculos -- */
 
 function calcTiempoRutaPromedio(rows) {
-  // Toma un único valor por grupo fecha+scenario_token+vehiculo (first-seen)
-  const rutaMap  = {};
-  const inicioMap = {};
+  // Paso 1: deduplicar por ruta (fecha+scenario_token+vehiculo)
+  const rutaMap   = {};
+  const rutaInicio = {};
   rows.forEach(r => {
-    const key = (r.fecha||'')+'||'+(r.scenario_token||'')+'||'+(r.vehiculo||'');
-    if (!(key in rutaMap) && r.tiempo_en_ruta_min != null && r.tiempo_en_ruta_min !== '') {
+    const rk = (r.fecha||'')+'||'+(r.scenario_token||'')+'||'+(r.vehiculo||'');
+    if (!(rk in rutaMap) && r.tiempo_en_ruta_min != null && r.tiempo_en_ruta_min !== '') {
       const t = Number(r.tiempo_en_ruta_min);
-      if (!isNaN(t) && t > 0) rutaMap[key] = t;
+      if (!isNaN(t) && t > 0) rutaMap[rk] = t;
     }
-    if (!(key in inicioMap) && r.route_started_at) {
+    if (!(rk in rutaInicio) && r.route_started_at) {
       const minAbs = tsToMinutesLocal(r.route_started_at);
-      if (minAbs !== null) inicioMap[key] = minAbs;
+      if (minAbs !== null) rutaInicio[rk] = minAbs;
     }
   });
-  const tiempos = Object.values(rutaMap);
-  const inits   = Object.values(inicioMap);
+  // Paso 2: sumar rutas del mismo vehículo en el mismo día → un total por fecha+vehiculo
+  const dvTiempo = {};
+  const dvInicio = {};
+  Object.entries(rutaMap).forEach(([rk, t]) => {
+    const [fecha,,vehiculo] = rk.split('||');
+    const dvk = fecha + '||' + vehiculo;
+    dvTiempo[dvk] = (dvTiempo[dvk] || 0) + t;
+  });
+  Object.entries(rutaInicio).forEach(([rk, minAbs]) => {
+    const [fecha,,vehiculo] = rk.split('||');
+    const dvk = fecha + '||' + vehiculo;
+    // inicio = el más temprano del día
+    if (!(dvk in dvInicio) || minAbs < dvInicio[dvk]) dvInicio[dvk] = minAbs;
+  });
+  const tiempos = Object.values(dvTiempo);
+  const inits   = Object.values(dvInicio);
   const avg     = tiempos.length ? average(tiempos) : null;
   let inicioPromedio = null;
   if (inits.length) {
@@ -3138,45 +3152,58 @@ function buildModalEfectividad(rows) {
 }
 
 function buildModalTruta(rows) {
-  const seen  = {};
-  const items = [];
+  // Paso 1: deduplicar por ruta (fecha+scenario_token+vehiculo)
+  const rutaMap    = {};
+  const rutaInicio = {};
   rows.forEach(r => {
     const t = Number(r.tiempo_en_ruta_min);
     if (isNaN(t) || t <= 0) return;
-    const key = (r.fecha||'')+'||'+(r.scenario_token||'')+'||'+(r.vehiculo||'');
-    if (!seen[key]) {
-      seen[key] = true;
-      const inicioMin = r.route_started_at ? tsToMinutesLocal(r.route_started_at) : null;
-      let inicioFmt = '';
-      if (inicioMin !== null) {
-        inicioFmt = String(Math.floor(inicioMin / 60)).padStart(2,'0') + ':' + String(inicioMin % 60).padStart(2,'0');
-      }
-      items.push({ fecha: r.fecha, vehiculo: r.vehiculo, conductor: r.conductor, plan: r.scenario_token, tiempo: t, inicio: inicioFmt });
+    const rk = (r.fecha||'')+'||'+(r.scenario_token||'')+'||'+(r.vehiculo||'');
+    if (!rutaMap[rk]) rutaMap[rk] = { t, fecha: r.fecha, vehiculo: r.vehiculo, conductor: r.conductor };
+    if (!rutaInicio[rk] && r.route_started_at) {
+      const m = tsToMinutesLocal(r.route_started_at);
+      if (m !== null) rutaInicio[rk] = m;
     }
   });
+  // Paso 2: sumar rutas del mismo vehículo en el mismo día
+  const dvMap = {};
+  Object.entries(rutaMap).forEach(([rk, info]) => {
+    const [fecha,,vehiculo] = rk.split('||');
+    const dvk = fecha + '||' + vehiculo;
+    if (!dvMap[dvk]) dvMap[dvk] = { fecha, vehiculo, conductor: info.conductor, tiempo: 0, rutas: 0, inicio: null };
+    dvMap[dvk].tiempo += info.t;
+    dvMap[dvk].rutas++;
+    if (!dvMap[dvk].conductor && info.conductor) dvMap[dvk].conductor = info.conductor;
+    const ini = rutaInicio[rk];
+    if (ini !== undefined && (dvMap[dvk].inicio === null || ini < dvMap[dvk].inicio)) dvMap[dvk].inicio = ini;
+  });
+  const items = Object.values(dvMap);
   if (!items.length) return '<div class="empty">Sin datos de tiempo de ruta en el período</div>';
   items.sort((a, b) => b.tiempo - a.tiempo);
   _resModalData = items;
-  const avg    = average(items.map(i => i.tiempo));
-  const inits  = items.filter(i => i.inicio).map(i => { const [h,m] = i.inicio.split(':'); return parseInt(h)*60+parseInt(m); });
-  const avgIni = inits.length ? Math.round(average(inits)) : null;
+  const avg       = average(items.map(i => i.tiempo));
+  const inits     = items.filter(i => i.inicio !== null).map(i => i.inicio);
+  const avgIni    = inits.length ? Math.round(average(inits)) : null;
   const avgIniFmt = avgIni !== null ? String(Math.floor(avgIni/60)).padStart(2,'0')+':'+String(avgIni%60).padStart(2,'0') : '—';
   return `
     <div style="margin-bottom:12px;font-size:12px;color:var(--muted);display:flex;gap:20px;flex-wrap:wrap">
-      <span>${items.length} rutas · Duración prom.: <span style="color:var(--cyan);font-family:'IBM Plex Mono',monospace">${fmtMin(avg)}</span></span>
+      <span>${items.length} vehículo-días · Duración prom.: <span style="color:var(--cyan);font-family:'IBM Plex Mono',monospace">${fmtMin(avg)}</span></span>
       <span>Inicio prom.: <span style="color:var(--cyan);font-family:'IBM Plex Mono',monospace">${avgIniFmt}</span></span>
     </div>
     <div class="tbl-wrap"><table class="data-tbl">
-      <thead><tr><th>Fecha</th><th>Vehículo</th><th>Conductor</th><th>Plan</th><th>Inicio Ruta</th><th>Minutos</th><th>Duración</th></tr></thead>
-      <tbody>${items.map(i => `<tr>
-        <td class="mono">${esc(i.fecha)}</td>
-        <td class="tm mono">${esc(i.vehiculo)}</td>
-        <td>${esc(i.conductor)}</td>
-        <td class="tm">${esc(i.plan)}</td>
-        <td class="mono tm">${esc(i.inicio || '—')}</td>
-        <td class="mono">${i.tiempo}</td>
-        <td class="tc mono">${fmtMin(i.tiempo)}</td>
-      </tr>`).join('')}</tbody>
+      <thead><tr><th>Fecha</th><th>Vehículo</th><th>Conductor</th><th>Rutas</th><th>Inicio 1ra</th><th>Minutos</th><th>Duración</th></tr></thead>
+      <tbody>${items.map(i => {
+        const iniFmt = i.inicio !== null ? String(Math.floor(i.inicio/60)).padStart(2,'0')+':'+String(i.inicio%60).padStart(2,'0') : '—';
+        return `<tr>
+          <td class="mono">${esc(i.fecha)}</td>
+          <td class="tm mono">${esc(i.vehiculo)}</td>
+          <td>${esc(i.conductor)}</td>
+          <td class="tc">${i.rutas}</td>
+          <td class="mono tm">${iniFmt}</td>
+          <td class="mono">${i.tiempo}</td>
+          <td class="tc mono">${fmtMin(i.tiempo)}</td>
+        </tr>`;
+      }).join('')}</tbody>
     </table></div>`;
 }
 
@@ -3477,8 +3504,11 @@ function exportResCSV_efectividad() {
 function exportResCSV_truta() {
   if (!_resModalData.length) return;
   dlCSV(
-    [[cv('Fecha'), cv('Vehículo'), cv('Conductor'), cv('Plan'), cv('Inicio Ruta'), cv('Minutos'), cv('Duración')],
-     ..._resModalData.map(i => [cv(i.fecha), cv(i.vehiculo), cv(i.conductor), cv(i.plan), cv(i.inicio||''), i.tiempo, cv(fmtMin(i.tiempo))].map(String))],
+    [[cv('Fecha'), cv('Vehículo'), cv('Conductor'), cv('Rutas'), cv('Inicio 1ra'), cv('Minutos'), cv('Duración')],
+     ..._resModalData.map(i => {
+       const iniFmt = i.inicio !== null ? String(Math.floor(i.inicio/60)).padStart(2,'0')+':'+String(i.inicio%60).padStart(2,'0') : '';
+       return [cv(i.fecha), cv(i.vehiculo), cv(i.conductor), i.rutas, cv(iniFmt), i.tiempo, cv(fmtMin(i.tiempo))].map(String);
+     })],
     csvFilename('resumen_truta', '')
   );
 }
