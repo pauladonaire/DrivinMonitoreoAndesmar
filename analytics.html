@@ -593,7 +593,7 @@
         <div class="rc-val" id="rcvProdBultos">—</div>
         <div class="rc-sub" id="rcsProdBultos">ocupación promedio</div>
       </div>
-      <div class="res-card" id="rcNPS" onclick="openResModal('nps')">
+      <div class="res-card" id="rcNPS" onclick="openResModal('nps')" title="NPS = Net Promoter Score&#10;((Promotores − Detractores) / Total con rating) × 100&#10;&#10;Promotor:   suma R1+R2+R3 ≥ 14&#10;Neutral:    suma 11–13&#10;Detractor:  suma ≤ 10&#10;&#10;Escala: −100 → +100  |  +70 o más = Excelente">
         <div class="rc-icon">★</div>
         <div class="rc-label">NPS</div>
         <div class="rc-val" id="rcvNPS">—</div>
@@ -3356,6 +3356,7 @@ function buildModalNPS(rows) {
     const suma = (Number(r.rating_1)||0) + (Number(r.rating_2)||0) + (Number(r.rating_3)||0);
     return {
       fecha: r.fecha, conductor: r.conductor, vehiculo: r.vehiculo,
+      codigo_orden: r.codigo_orden || '',
       r1: r.rating_1, r2: r.rating_2, r3: r.rating_3,
       suma, cat: suma >= 14 ? 'Promotor' : suma >= 11 ? 'Neutral' : 'Detractor',
       comment: r.customer_comment || ''
@@ -3386,11 +3387,12 @@ function buildModalNPS(rows) {
         >${f || 'Todos'}</button>`).join('')}
     </div>
     <div class="tbl-wrap"><table class="data-tbl">
-      <thead><tr><th>Fecha</th><th>Conductor</th><th>Vehículo</th><th>R1</th><th>R2</th><th>R3</th><th>Suma</th><th>Categoría</th><th>Comentario</th></tr></thead>
+      <thead><tr><th>Fecha</th><th>Conductor</th><th>Vehículo</th><th>Cód. Orden</th><th>R1</th><th>R2</th><th>R3</th><th>Suma</th><th>Categoría</th><th>Comentario</th></tr></thead>
       <tbody>${filtered.slice(0, 200).map(i => `<tr>
         <td class="mono">${esc(i.fecha)}</td>
         <td>${esc(i.conductor)}</td>
         <td class="tm mono">${esc(i.vehiculo)}</td>
+        <td class="tm mono">${esc(i.codigo_orden || '—')}</td>
         <td class="tm">${i.r1 != null && i.r1 !== '' ? i.r1 : '—'}</td>
         <td class="tm">${i.r2 != null && i.r2 !== '' ? i.r2 : '—'}</td>
         <td class="tm">${i.r3 != null && i.r3 !== '' ? i.r3 : '—'}</td>
@@ -3413,7 +3415,7 @@ function buildModalIngreso(rows) {
   const totalIer = items.reduce((s, i) => s + i.ier, 0);
 
   const viewBtns = `<div class="res-view-btns">
-    <button class="res-view-btn ${_resIerView==='prov'?'active':''}" onclick="_resIerView='prov';el('resModalBody').innerHTML=buildModalIngreso(getResRAW())">Por Proveedor</button>
+    <button class="res-view-btn ${_resIerView==='prov'?'active':''}" onclick="_resIerView='prov';el('resModalBody').innerHTML=buildModalIngreso(getResRAW())">Por Cliente Andesmar</button>
     <button class="res-view-btn ${_resIerView==='vehiculo'?'active':''}" onclick="_resIerView='vehiculo';el('resModalBody').innerHTML=buildModalIngreso(getResRAW())">Por Vehículo</button>
     <button class="res-view-btn ${_resIerView==='dia'?'active':''}" onclick="_resIerView='dia';el('resModalBody').innerHTML=buildModalIngreso(getResRAW())">Por Día</button>
   </div>`;
@@ -3478,7 +3480,7 @@ function buildModalIngreso(rows) {
   return viewBtns + `
     <div style="margin-bottom:10px;font-size:12px;color:var(--muted)">Total IER: <span style="color:#a3e635;font-family:'IBM Plex Mono',monospace">${fmtIer(totalIer)}</span></div>
     <div class="tbl-wrap"><table class="data-tbl">
-      <thead><tr><th>Proveedor</th><th>Cant. Guías</th><th>IER Total</th><th>%</th><th>Prom. por Guía</th></tr></thead>
+      <thead><tr><th>Cliente Andesmar</th><th>Cant. Guías</th><th>IER Total</th><th>%</th><th>Prom. por Guía</th></tr></thead>
       <tbody>${pItems.map(i => `<tr>
         <td>${esc(i.proveedor)}</td>
         <td>${i.guias}</td>
@@ -3573,7 +3575,7 @@ function exportResCSV_ingreso() {
     );
   } else {
     dlCSV(
-      [[cv('Proveedor'), cv('Cant.Guías'), cv('IER Total'), cv('%'), cv('Prom.por Guía')],
+      [[cv('Cliente Andesmar'), cv('Cant.Guías'), cv('IER Total'), cv('%'), cv('Prom.por Guía')],
        ..._resModalData.map(i => {
          const totalAll = _resModalData.reduce((s, x) => s + x.total, 0);
          return [cv(i.proveedor), i.guias, Math.round(i.total), (i.total/totalAll*100).toFixed(1)+'%', Math.round(i.total/i.guias)].map(String);
