@@ -389,30 +389,73 @@
     /* ================================================
        SECCIÓN RESUMEN — tarjetas + modales
     ================================================ */
-    .res-grid-top { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 12px; }
-    .res-grid-bot { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-    @media (max-width: 1200px) { .res-grid-top { grid-template-columns: repeat(3, 1fr); } }
+    .res-filter-bar {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 16px;
+      margin-bottom: 14px; display: flex; align-items: flex-end;
+      gap: 12px; flex-wrap: wrap;
+    }
+    .res-filter-bar .f-grp label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:3px; }
+    .res-filter-bar select, .res-filter-bar input[type=text] {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 5px 9px; border-radius: 5px;
+      font-size: 12px; font-family: 'IBM Plex Sans', sans-serif;
+      min-width: 120px; cursor: pointer;
+    }
+    .res-filter-bar select:focus, .res-filter-bar input[type=text]:focus { outline: none; border-color: var(--cyan); }
+    .btn-res-clear {
+      font-family:'Rajdhani',sans-serif; font-weight:700; font-size:11px;
+      letter-spacing:1.5px; text-transform:uppercase;
+      background:none; border:1px solid var(--border); color:var(--muted);
+      padding:5px 12px; border-radius:5px; cursor:pointer; transition:all .2s;
+      white-space:nowrap; align-self:flex-end;
+    }
+    .btn-res-clear:hover { border-color:var(--danger); color:var(--danger); }
+    .res-filter-scope {
+      display:flex; align-items:center; gap:4px; align-self:flex-end; margin-left:auto;
+    }
+    .res-scope-btn {
+      font-family:'Rajdhani',sans-serif; font-weight:700; font-size:10px;
+      letter-spacing:1px; text-transform:uppercase;
+      background:none; border:1px solid var(--border); color:var(--muted);
+      padding:4px 10px; border-radius:5px; cursor:pointer; transition:all .2s;
+    }
+    .res-scope-btn.active { border-color:var(--cyan); color:var(--cyan); background:rgba(1,254,255,.06); }
+    .res-grid-top { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 12px; }
+    .res-grid-bot { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+    @media (max-width: 1366px) { .res-grid-top { grid-template-columns: repeat(3, 1fr); } }
     @media (max-width: 900px)  { .res-grid-top, .res-grid-bot { grid-template-columns: 1fr; } }
     .res-card {
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: 10px; padding: 18px 20px;
-      cursor: pointer; transition: all .2s;
+      border-radius: 10px; padding: 20px 18px 16px;
+      cursor: pointer; transition: all .2s; min-height: 130px;
       border-top: 3px solid transparent; position: relative; user-select: none;
+      display: flex; flex-direction: column; justify-content: space-between;
     }
     .res-card:hover:not(.res-card--disabled) { border-color: var(--cyan); background: var(--surface2); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(1,254,255,.08); }
     .res-card--disabled { opacity: .42; cursor: not-allowed; }
     .res-card .rc-label { font-family:'Rajdhani',sans-serif; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
-    .res-card .rc-val   { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:500; line-height:1.1; }
-    .res-card .rc-sub   { font-size:11px; color:var(--muted); margin-top:5px; }
-    .res-card .rc-icon  { position:absolute; top:14px; right:16px; font-size:18px; opacity:.35; }
+    .res-card .rc-val   { font-family:'IBM Plex Mono',monospace; font-size:30px; font-weight:500; line-height:1.1; }
+    .res-card .rc-sub   { font-size:11px; color:var(--muted); margin-top:6px; }
+    .res-card .rc-sub2  { font-size:10px; color:var(--muted); margin-top:2px; opacity:.7; }
+    .res-card .rc-icon  { position:absolute; top:14px; right:14px; font-size:18px; opacity:.3; }
     .rc-eff-g { color:var(--success); border-top-color:var(--success); }
     .rc-eff-w { color:var(--warning); border-top-color:var(--warning); }
     .rc-eff-d { color:var(--danger);  border-top-color:var(--danger); }
     .rc-cyan  { color:var(--cyan);    border-top-color:var(--cyan); }
     .rc-blue  { color:#60a5fa;        border-top-color:#60a5fa; }
     .rc-money { color:#a3e635;        border-top-color:#a3e635; }
+    .rc-orange { color:#f97316;       border-top-color:#f97316; }
     .rc-nps-p { color:#22c55e; }
     .rc-nps-n { color:#ef4444; }
+    .res-view-btns { display:flex; gap:5px; margin-bottom:10px; flex-wrap:wrap; }
+    .res-view-btn {
+      font-family:'Rajdhani',sans-serif; font-weight:700; font-size:11px;
+      letter-spacing:1px; text-transform:uppercase;
+      background:none; border:1px solid var(--border); color:var(--muted);
+      padding:4px 12px; border-radius:5px; cursor:pointer; transition:all .2s;
+    }
+    .res-view-btn.active { border-color:var(--cyan); color:var(--cyan); background:rgba(1,254,255,.06); }
     .res-modal-overlay {
       display:none; position:fixed; inset:0;
       background:rgba(14,20,30,.88); z-index:600;
@@ -492,7 +535,32 @@
   ======================================== -->
   <div id="tab-resumen" class="tab-pane">
 
-    <!-- Fila 1 — 5 tarjetas operativas -->
+    <!-- Barra de filtros globales -->
+    <div class="res-filter-bar" id="resFilterBar">
+      <div class="f-grp">
+        <label>Depósito</label>
+        <select id="rfDeposito" onchange="applyResFilters()"><option value="">Todos</option></select>
+      </div>
+      <div class="f-grp">
+        <label>Flota</label>
+        <select id="rfFlota" onchange="applyResFilters()"><option value="">Todas</option></select>
+      </div>
+      <div class="f-grp">
+        <label>Vehículo</label>
+        <input type="text" id="rfVehiculo" placeholder="Buscar código o conductor…" oninput="applyResFilters()" style="min-width:190px">
+      </div>
+      <div class="f-grp">
+        <label>Empleador</label>
+        <select id="rfEmpleador" onchange="applyResFilters()"><option value="">Todos</option></select>
+      </div>
+      <button class="btn-res-clear" onclick="clearResFilters()">Limpiar filtros</button>
+      <div class="res-filter-scope">
+        <button class="res-scope-btn active" id="rfScopeAll" onclick="setResScope('all')">Todos los tabs</button>
+        <button class="res-scope-btn" id="rfScopeRes" onclick="setResScope('resumen')">Solo Resumen</button>
+      </div>
+    </div>
+
+    <!-- Fila 1 — 6 tarjetas operativas -->
     <div class="res-grid-top">
       <div class="res-card" id="rcEfectividad" onclick="openResModal('efectividad')">
         <div class="rc-icon">✓</div>
@@ -505,6 +573,7 @@
         <div class="rc-label">T. Promedio Ruta</div>
         <div class="rc-val" id="rcvTruta">—</div>
         <div class="rc-sub" id="rcsTruta">—</div>
+        <div class="rc-sub2" id="rcsTruta2"></div>
       </div>
       <div class="res-card rc-blue" onclick="openResModal('ordxveh')">
         <div class="rc-icon">📦</div>
@@ -512,7 +581,13 @@
         <div class="rc-val" id="rcvOrdxveh">—</div>
         <div class="rc-sub" id="rcsOrdxveh">órdenes por vehículo/día</div>
       </div>
-      <div class="res-card rc-cyan" onclick="openResModal('prodBultos')">
+      <div class="res-card rc-orange" id="rcProdKG" onclick="openResModal('prodKG')">
+        <div class="rc-icon">⚖</div>
+        <div class="rc-label">Productividad KG</div>
+        <div class="rc-val" id="rcvProdKG">—</div>
+        <div class="rc-sub" id="rcsProdKG">ocupación promedio</div>
+      </div>
+      <div class="res-card rc-cyan" id="rcProdBultos" onclick="openResModal('prodBultos')">
         <div class="rc-icon">⚡</div>
         <div class="rc-label">Productividad Bultos</div>
         <div class="rc-val" id="rcvProdBultos">—</div>
@@ -1104,6 +1179,14 @@ let RAW      = [];   // historico rows from GAS
 let ACTIONS  = [];   // actions rows from GAS
 let VEHICULOS     = [];   // datos del Sheet de Vehículos
 let VEHICULOS_MAP = {};   // { code → {capacidad_bultos, capacidad_kg, employer_name} }
+
+// Estado filtros globales resumen
+let _resFilters   = { deposito: '', flota: '', vehiculo: '', empleador: '' };
+let _resScope     = 'all'; // 'all' | 'resumen'
+
+// Estado vistas modales
+let _resOrdView = 'dia';   // 'dia' | 'vehiculo'
+let _resIerView = 'prov';  // 'prov' | 'vehiculo' | 'dia'
 
 const SORT = {};    // { tblKey: { col, dir } }
 const PAGE = {};    // { bodyId: currentPage }
@@ -2274,10 +2357,117 @@ async function loadVehiculos() {
   }
 }
 
+// Aplica _resFilters a un set de filas (sin tocar el filtro de depósitos de usuario)
+function applyResFilterLogic(rows) {
+  const { deposito, flota, vehiculo, empleador } = _resFilters;
+  const q = vehiculo.trim().toLowerCase();
+  if (!deposito && !flota && !q && !empleador) return rows;
+  return rows.filter(r => {
+    if (deposito && r.deposito !== deposito) return false;
+    if (flota) {
+      const vInfo = VEHICULOS_MAP[r.vehiculo];
+      const flotas = vInfo && vInfo.fleets
+        ? vInfo.fleets.split(',').map(f => f.trim()).filter(Boolean)
+        : [];
+      if (!flotas.includes(flota)) return false;
+    }
+    if (q) {
+      const matchV = (r.vehiculo  || '').toLowerCase().includes(q);
+      const matchC = (r.conductor || '').toLowerCase().includes(q);
+      if (!matchV && !matchC) return false;
+    }
+    if (empleador) {
+      const vInfo = VEHICULOS_MAP[r.vehiculo];
+      if (!vInfo || vInfo.employer_name !== empleador) return false;
+    }
+    return true;
+  });
+}
+
+// Devuelve RAW filtrado por depósitos del usuario.
+// Cuando _resScope === 'all', también aplica _resFilters (afecta todos los tabs).
 function getEffectiveRAW() {
   const deps = APP_STATE.userDepositos;
-  if (!deps || !deps.length) return RAW;
-  return RAW.filter(r => deps.includes(r.deposito));
+  let rows = RAW;
+  if (deps && deps.length) rows = rows.filter(r => deps.includes(r.deposito));
+  if (_resScope === 'all') rows = applyResFilterLogic(rows);
+  return rows;
+}
+
+// Igual que getEffectiveRAW() pero SIEMPRE aplica _resFilters.
+// Usar exclusivamente en el tab Resumen para que los filtros funcionen
+// aunque _resScope sea 'resumen'.
+function getResRAW() {
+  const deps = APP_STATE.userDepositos;
+  let rows = RAW;
+  if (deps && deps.length) rows = rows.filter(r => deps.includes(r.deposito));
+  return applyResFilterLogic(rows);
+}
+
+/* ---- Gestión de filtros del tab Resumen ---- */
+
+function populateResFilterDropdowns() {
+  const deps = APP_STATE.userDepositos;
+  let base = RAW;
+  if (deps && deps.length) base = base.filter(r => deps.includes(r.deposito));
+
+  // Depósito — valores únicos del conjunto base
+  const depSel = el('rfDeposito');
+  if (depSel) {
+    const prev = depSel.value;
+    const vals = [...new Set(base.map(r => r.deposito).filter(Boolean))].sort();
+    depSel.innerHTML = '<option value="">Todos</option>';
+    vals.forEach(v => depSel.add(new Option(v, v)));
+    if (prev && vals.includes(prev)) depSel.value = prev;
+  }
+
+  // Flota — desde VEHICULOS_MAP (campo fleets, separado por coma)
+  const fltSel = el('rfFlota');
+  if (fltSel) {
+    const prev = fltSel.value;
+    const flotas = new Set();
+    Object.values(VEHICULOS_MAP).forEach(v => {
+      if (v.fleets) v.fleets.split(',').map(f => f.trim()).filter(Boolean).forEach(f => flotas.add(f));
+    });
+    const vals = [...flotas].sort();
+    fltSel.innerHTML = '<option value="">Todas</option>';
+    vals.forEach(v => fltSel.add(new Option(v, v)));
+    if (prev && vals.includes(prev)) fltSel.value = prev;
+  }
+
+  // Empleador — desde VEHICULOS_MAP
+  const empSel = el('rfEmpleador');
+  if (empSel) {
+    const prev = empSel.value;
+    const emps = [...new Set(Object.values(VEHICULOS_MAP).map(v => v.employer_name).filter(Boolean))].sort();
+    empSel.innerHTML = '<option value="">Todos</option>';
+    emps.forEach(v => empSel.add(new Option(v, v)));
+    if (prev && emps.includes(prev)) empSel.value = prev;
+  }
+}
+
+function applyResFilters() {
+  _resFilters.deposito  = el('rfDeposito')?.value  || '';
+  _resFilters.flota     = el('rfFlota')?.value     || '';
+  _resFilters.vehiculo  = el('rfVehiculo')?.value  || '';
+  _resFilters.empleador = el('rfEmpleador')?.value || '';
+  renderResumen();
+}
+
+function clearResFilters() {
+  _resFilters = { deposito: '', flota: '', vehiculo: '', empleador: '' };
+  const depSel = el('rfDeposito');  if (depSel)  depSel.value = '';
+  const fltSel = el('rfFlota');     if (fltSel)  fltSel.value = '';
+  const vehIn  = el('rfVehiculo');  if (vehIn)   vehIn.value  = '';
+  const empSel = el('rfEmpleador'); if (empSel)  empSel.value = '';
+  renderResumen();
+}
+
+function setResScope(scope) {
+  _resScope = scope;
+  el('rfScopeAll')?.classList.toggle('active', scope === 'all');
+  el('rfScopeRes')?.classList.toggle('active', scope === 'resumen');
+  renderResumen();
 }
 
 function getEffectiveACTIONS() {
@@ -2663,11 +2853,12 @@ let _npsFilter       = '';
 function average(arr) { return arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : null; }
 
 function renderResumen() {
-  const ERAW   = getEffectiveRAW();
+  populateResFilterDropdowns();
+  const ERAW   = getResRAW();
   const noData = el('resNoData');
   if (!ERAW.length) {
     if (noData) noData.style.display = '';
-    ['rcvEfectividad','rcvTruta','rcvOrdxveh','rcvProdBultos','rcvNPS','rcvIngreso']
+    ['rcvEfectividad','rcvTruta','rcvOrdxveh','rcvProdKG','rcvProdBultos','rcvNPS','rcvIngreso']
       .forEach(id => { const e = el(id); if (e) e.textContent = '—'; });
     return;
   }
@@ -2680,27 +2871,35 @@ function renderResumen() {
   const s   = stats(ERAW);
   const eff = s.total > 0 ? s.entregadas / s.total * 100 : 0;
   const rcE = el('rcEfectividad');
-  if (rcE) {
-    rcE.className = 'res-card ' + (eff >= 85 ? 'rc-eff-g' : eff >= 70 ? 'rc-eff-w' : 'rc-eff-d');
-  }
+  if (rcE) rcE.className = 'res-card ' + (eff >= 85 ? 'rc-eff-g' : eff >= 70 ? 'rc-eff-w' : 'rc-eff-d');
   setText('rcvEfectividad', eff.toFixed(1) + '%');
   setText('rcsEfectividad', s.entregadas.toLocaleString('es-AR') + ' / ' + s.total.toLocaleString('es-AR') + ' órdenes');
 
-  // Tarjeta 2: T.Ruta
-  const tRuta = calcTiempoRutaPromedio(ERAW);
-  setText('rcvTruta', tRuta != null ? fmtMin(tRuta) : '—');
-  setText('rcsTruta', tRuta != null ? 'promedio del período' : 'sin datos de tiempo');
+  // Tarjeta 2: T.Ruta + inicio promedio
+  const tRutaRes = calcTiempoRutaPromedio(ERAW);
+  setText('rcvTruta', tRutaRes.avg != null ? fmtMin(tRutaRes.avg) : '—');
+  setText('rcsTruta', tRutaRes.avg != null ? 'promedio del período' : 'sin datos de tiempo');
+  setText('rcsTruta2', tRutaRes.inicioPromedio ? 'Inicio prom: ' + tRutaRes.inicioPromedio : '');
 
   // Tarjeta 3: Órd x Vehículo
   const ordProm = calcOrdenesPorVehiculo(ERAW);
   setText('rcvOrdxveh', ordProm != null ? ordProm.toFixed(1) : '—');
 
-  // Tarjeta 4: Productividad Bultos
-  const prodB = calcProductividadBultos(ERAW);
-  setText('rcvProdBultos', prodB != null ? prodB.toFixed(1) + '%' : '—');
-  setText('rcsProdBultos', prodB != null ? 'ocupación promedio' : 'sin capacidades cargadas');
+  // Tarjeta 4: Productividad KG
+  const prodKG = calcProductividadKG(ERAW);
+  const rcKG   = el('rcProdKG');
+  if (rcKG) rcKG.className = 'res-card ' + (prodKG != null ? (prodKG >= 70 ? 'rc-eff-g' : prodKG >= 40 ? 'rc-eff-w' : 'rc-eff-d') : 'rc-orange');
+  setText('rcvProdKG', prodKG != null ? prodKG.toFixed(1) + '%' : '—');
+  setText('rcsProdKG', prodKG != null ? 'ocupación KG promedio' : 'sin capacidades cargadas');
 
-  // Tarjeta 5: NPS
+  // Tarjeta 5: Productividad Bultos
+  const prodB  = calcProductividadBultos(ERAW);
+  const rcPB   = el('rcProdBultos');
+  if (rcPB) rcPB.className = 'res-card ' + (prodB != null ? (prodB >= 70 ? 'rc-eff-g' : prodB >= 40 ? 'rc-eff-w' : 'rc-eff-d') : 'rc-cyan');
+  setText('rcvProdBultos', prodB != null ? prodB.toFixed(1) + '%' : '—');
+  setText('rcsProdBultos', prodB != null ? 'ocupación bultos promedio' : 'sin capacidades cargadas');
+
+  // Tarjeta 6: NPS
   const nps = calcNPS(ERAW);
   const rcN = el('rcNPS');
   if (nps.total > 0) {
@@ -2713,10 +2912,10 @@ function renderResumen() {
     setText('rcsNPS', 'sin datos NPS');
   }
 
-  // Tarjeta 6: Ingreso (solo financiales)
+  // Tarjeta 7: Ingreso (solo financiales)
   if (canSeeFinancials()) {
-    const ingreso  = ERAW.reduce((sum, r) => { const v = parseFloat(r.ier); return sum + (isNaN(v) ? 0 : v); }, 0);
-    const conIer   = ERAW.filter(r => r.ier != null && r.ier !== '' && Number(r.ier) > 0).length;
+    const ingreso = ERAW.reduce((sum, r) => { const v = parseFloat(r.ier); return sum + (isNaN(v) ? 0 : v); }, 0);
+    const conIer  = ERAW.filter(r => r.ier != null && r.ier !== '' && Number(r.ier) > 0).length;
     setText('rcvIngreso', '$ ' + Math.round(ingreso).toLocaleString('es-AR'));
     setText('rcsIngreso', conIer.toLocaleString('es-AR') + ' órdenes con IER');
   }
@@ -2727,16 +2926,44 @@ function setText(id, v) { const e = el(id); if (e) e.textContent = v; }
 /* -- Cálculos -- */
 
 function calcTiempoRutaPromedio(rows) {
-  const rutaMap = {};
+  // Toma un único valor por grupo fecha+scenario_token+vehiculo (first-seen)
+  const rutaMap  = {};
+  const inicioMap = {};
   rows.forEach(r => {
     const key = (r.fecha||'')+'||'+(r.scenario_token||'')+'||'+(r.vehiculo||'');
     if (!(key in rutaMap) && r.tiempo_en_ruta_min != null && r.tiempo_en_ruta_min !== '') {
       const t = Number(r.tiempo_en_ruta_min);
       if (!isNaN(t) && t > 0) rutaMap[key] = t;
     }
+    if (!(key in inicioMap) && r.route_started_at) {
+      const minAbs = tsToMinutesLocal(r.route_started_at);
+      if (minAbs !== null) inicioMap[key] = minAbs;
+    }
   });
   const tiempos = Object.values(rutaMap);
-  return tiempos.length ? average(tiempos) : null;
+  const inits   = Object.values(inicioMap);
+  const avg     = tiempos.length ? average(tiempos) : null;
+  let inicioPromedio = null;
+  if (inits.length) {
+    const avgMin = Math.round(average(inits));
+    inicioPromedio = String(Math.floor(avgMin / 60)).padStart(2, '0') + ':' + String(avgMin % 60).padStart(2, '0');
+  }
+  return { avg, inicioPromedio };
+}
+
+// Extrae HH:MM de un timestamp ISO con offset -03:00 o similar
+function tsToMinutesLocal(ts) {
+  if (!ts) return null;
+  const s = String(ts);
+  // Formato: 2026-04-14T08:30:00-03:00 o similar
+  const m = s.match(/T(\d{2}):(\d{2})/);
+  if (!m) {
+    // Fallback: HH:MM:SS
+    const m2 = s.match(/^(\d{2}):(\d{2})/);
+    if (m2) return parseInt(m2[1]) * 60 + parseInt(m2[2]);
+    return null;
+  }
+  return parseInt(m[1]) * 60 + parseInt(m[2]);
 }
 
 function calcOrdenesPorVehiculo(rows) {
@@ -2744,6 +2971,23 @@ function calcOrdenesPorVehiculo(rows) {
   rows.forEach(r => { const k = (r.fecha||'')+'||'+(r.vehiculo||''); map[k] = (map[k]||0) + 1; });
   const counts = Object.values(map);
   return counts.length ? average(counts) : null;
+}
+
+function calcProductividadKG(rows) {
+  if (!Object.keys(VEHICULOS_MAP).length) return null;
+  const map = {};
+  rows.forEach(r => {
+    if (!r.vehiculo) return;
+    const cap = VEHICULOS_MAP[r.vehiculo];
+    if (!cap || !cap.capacidad_kg || cap.capacidad_kg <= 0) return;
+    const k = (r.fecha||'')+'||'+(r.vehiculo||'');
+    if (!map[k]) map[k] = { kg: 0, cap: cap.capacidad_kg, conductor: r.conductor };
+    const v = Number(r.kg);
+    if (!isNaN(v) && v > 0) map[k].kg += v;
+    if (!map[k].conductor && r.conductor) map[k].conductor = r.conductor;
+  });
+  const pcts = Object.values(map).filter(v => v.cap > 0).map(v => v.kg / v.cap * 100);
+  return pcts.length ? average(pcts) : null;
 }
 
 function calcProductividadBultos(rows) {
@@ -2754,9 +2998,11 @@ function calcProductividadBultos(rows) {
     const cap = VEHICULOS_MAP[r.vehiculo];
     if (!cap || !cap.capacidad_bultos || cap.capacidad_bultos <= 0) return;
     const k = (r.fecha||'')+'||'+(r.vehiculo||'');
-    if (!map[k]) map[k] = { bultos: 0, cap: cap.capacidad_bultos };
+    if (!map[k]) map[k] = { bultos: 0, cap: cap.capacidad_bultos, conductor: r.conductor };
+    // r.bultos = units_2 (cantidad entera de bultos por orden)
     const b = Number(r.bultos);
     if (!isNaN(b) && b > 0) map[k].bultos += b;
+    if (!map[k].conductor && r.conductor) map[k].conductor = r.conductor;
   });
   const pcts = Object.values(map).filter(v => v.cap > 0).map(v => v.bultos / v.cap * 100);
   return pcts.length ? average(pcts) : null;
@@ -2792,12 +3038,13 @@ function openResModal(tipo) {
   if (tipo === 'ingreso' && !canSeeFinancials()) return;
   _resModalCurrent = tipo;
   _npsFilter       = '';
-  const ERAW  = getEffectiveRAW();
+  const ERAW  = getResRAW();
   const titles = {
     efectividad: 'Efectividad por día',
     truta:       'Detalle tiempo de ruta',
     ordxveh:     'Órdenes por vehículo',
-    prodBultos:  'Productividad de bultos',
+    prodKG:      'Productividad KG',
+    prodBultos:  'Productividad Bultos',
     nps:         'Detalle NPS',
     ingreso:     'Detalle de ingresos (IER)'
   };
@@ -2805,6 +3052,7 @@ function openResModal(tipo) {
     efectividad: buildModalEfectividad,
     truta:       buildModalTruta,
     ordxveh:     buildModalOrdxveh,
+    prodKG:      buildModalProdKG,
     prodBultos:  buildModalProdBultos,
     nps:         buildModalNPS,
     ingreso:     buildModalIngreso
@@ -2845,11 +3093,12 @@ function closeResModal(e) {
 }
 
 function exportResModal() {
-  const ERAW = getEffectiveRAW();
+  const ERAW = getResRAW();
   const map  = {
     efectividad: exportResCSV_efectividad,
     truta:       exportResCSV_truta,
     ordxveh:     exportResCSV_ordxveh,
+    prodKG:      exportResCSV_prodKG,
     prodBultos:  exportResCSV_prodBultos,
     nps:         exportResCSV_nps,
     ingreso:     exportResCSV_ingreso
@@ -2897,52 +3146,136 @@ function buildModalTruta(rows) {
     const key = (r.fecha||'')+'||'+(r.scenario_token||'')+'||'+(r.vehiculo||'');
     if (!seen[key]) {
       seen[key] = true;
-      items.push({ fecha: r.fecha, vehiculo: r.vehiculo, conductor: r.conductor, plan: r.scenario_token, tiempo: t });
+      const inicioMin = r.route_started_at ? tsToMinutesLocal(r.route_started_at) : null;
+      let inicioFmt = '';
+      if (inicioMin !== null) {
+        inicioFmt = String(Math.floor(inicioMin / 60)).padStart(2,'0') + ':' + String(inicioMin % 60).padStart(2,'0');
+      }
+      items.push({ fecha: r.fecha, vehiculo: r.vehiculo, conductor: r.conductor, plan: r.scenario_token, tiempo: t, inicio: inicioFmt });
     }
   });
   if (!items.length) return '<div class="empty">Sin datos de tiempo de ruta en el período</div>';
   items.sort((a, b) => b.tiempo - a.tiempo);
   _resModalData = items;
-  const avg = average(items.map(i => i.tiempo));
+  const avg    = average(items.map(i => i.tiempo));
+  const inits  = items.filter(i => i.inicio).map(i => { const [h,m] = i.inicio.split(':'); return parseInt(h)*60+parseInt(m); });
+  const avgIni = inits.length ? Math.round(average(inits)) : null;
+  const avgIniFmt = avgIni !== null ? String(Math.floor(avgIni/60)).padStart(2,'0')+':'+String(avgIni%60).padStart(2,'0') : '—';
   return `
-    <div style="margin-bottom:12px;font-size:12px;color:var(--muted)">
-      ${items.length} rutas · Promedio: <span style="color:var(--cyan);font-family:'IBM Plex Mono',monospace">${fmtMin(avg)}</span>
+    <div style="margin-bottom:12px;font-size:12px;color:var(--muted);display:flex;gap:20px;flex-wrap:wrap">
+      <span>${items.length} rutas · Duración prom.: <span style="color:var(--cyan);font-family:'IBM Plex Mono',monospace">${fmtMin(avg)}</span></span>
+      <span>Inicio prom.: <span style="color:var(--cyan);font-family:'IBM Plex Mono',monospace">${avgIniFmt}</span></span>
     </div>
     <div class="tbl-wrap"><table class="data-tbl">
-      <thead><tr><th>Fecha</th><th>Vehículo</th><th>Conductor</th><th>Plan</th><th>Tiempo de Ruta</th></tr></thead>
+      <thead><tr><th>Fecha</th><th>Vehículo</th><th>Conductor</th><th>Plan</th><th>Inicio Ruta</th><th>Minutos</th><th>Duración</th></tr></thead>
       <tbody>${items.map(i => `<tr>
         <td class="mono">${esc(i.fecha)}</td>
         <td class="tm mono">${esc(i.vehiculo)}</td>
         <td>${esc(i.conductor)}</td>
         <td class="tm">${esc(i.plan)}</td>
+        <td class="mono tm">${esc(i.inicio || '—')}</td>
+        <td class="mono">${i.tiempo}</td>
         <td class="tc mono">${fmtMin(i.tiempo)}</td>
       </tr>`).join('')}</tbody>
     </table></div>`;
 }
 
 function buildModalOrdxveh(rows) {
-  const map = {};
+  // Agrupar por fecha+vehiculo (base de cálculo)
+  const vdMap = {};
   rows.forEach(r => {
     const k = (r.fecha||'')+'||'+(r.vehiculo||'');
-    if (!map[k]) map[k] = { fecha: r.fecha, vehiculo: r.vehiculo, conductor: r.conductor, count: 0 };
-    map[k].count++;
+    if (!vdMap[k]) vdMap[k] = { fecha: r.fecha, vehiculo: r.vehiculo, conductor: r.conductor, count: 0 };
+    vdMap[k].count++;
+    if (!vdMap[k].conductor && r.conductor) vdMap[k].conductor = r.conductor;
+  });
+  const vdItems = Object.values(vdMap);
+  if (!vdItems.length) return '<div class="empty">Sin datos</div>';
+  _resModalData = vdItems;
+
+  const viewBtns = `<div class="res-view-btns">
+    <button class="res-view-btn ${_resOrdView==='dia'?'active':''}" onclick="_resOrdView='dia';el('resModalBody').innerHTML=buildModalOrdxveh(getResRAW())">Por Día</button>
+    <button class="res-view-btn ${_resOrdView==='vehiculo'?'active':''}" onclick="_resOrdView='vehiculo';el('resModalBody').innerHTML=buildModalOrdxveh(getResRAW())">Por Vehículo</button>
+  </div>`;
+
+  if (_resOrdView === 'vehiculo') {
+    // Agrupar por vehículo: total ordenes + cantidad de días activo
+    const vMap = {};
+    vdItems.forEach(i => {
+      if (!vMap[i.vehiculo]) vMap[i.vehiculo] = { vehiculo: i.vehiculo, conductor: i.conductor, total: 0, dias: 0 };
+      vMap[i.vehiculo].total += i.count;
+      vMap[i.vehiculo].dias++;
+      if (!vMap[i.vehiculo].conductor && i.conductor) vMap[i.vehiculo].conductor = i.conductor;
+    });
+    const vItems = Object.values(vMap).sort((a, b) => b.total - a.total);
+    _resModalData = vItems;
+    return viewBtns + `
+      <div style="margin-bottom:10px;font-size:12px;color:var(--muted)">${vItems.length} vehículos en el período</div>
+      <div class="tbl-wrap"><table class="data-tbl">
+        <thead><tr><th>Vehículo</th><th>Conductor</th><th>Días Activo</th><th>Total Órdenes</th><th>Prom. Órdenes/Día</th></tr></thead>
+        <tbody>${vItems.map(i => `<tr>
+          <td class="tm mono">${esc(i.vehiculo)}</td>
+          <td>${esc(i.conductor)}</td>
+          <td>${i.dias}</td>
+          <td class="tc">${i.total}</td>
+          <td class="mono">${(i.total/i.dias).toFixed(1)}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>`;
+  }
+
+  // Vista Por Día (default)
+  const dMap = {};
+  vdItems.forEach(i => {
+    if (!dMap[i.fecha]) dMap[i.fecha] = { fecha: i.fecha, vehiculos: 0, total: 0 };
+    dMap[i.fecha].vehiculos++;
+    dMap[i.fecha].total += i.count;
+  });
+  const dItems = Object.values(dMap).sort((a, b) => a.fecha.localeCompare(b.fecha));
+  _resModalData = dItems;
+  return viewBtns + `
+    <div style="margin-bottom:10px;font-size:12px;color:var(--muted)">${dItems.length} días en el período</div>
+    <div class="tbl-wrap"><table class="data-tbl">
+      <thead><tr><th>Fecha</th><th>Vehículos Activos</th><th>Total Órdenes</th><th>Prom. Órdenes/Vehículo</th></tr></thead>
+      <tbody>${dItems.map(i => `<tr>
+        <td class="mono">${esc(i.fecha)}</td>
+        <td>${i.vehiculos}</td>
+        <td class="tc">${i.total}</td>
+        <td class="mono">${(i.total/i.vehiculos).toFixed(1)}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+}
+
+function buildModalProdKG(rows) {
+  const map = {};
+  rows.forEach(r => {
+    if (!r.vehiculo) return;
+    const cap = VEHICULOS_MAP[r.vehiculo];
+    if (!cap || !cap.capacidad_kg || cap.capacidad_kg <= 0) return;
+    const k = (r.fecha||'')+'||'+(r.vehiculo||'');
+    if (!map[k]) map[k] = { fecha: r.fecha, vehiculo: r.vehiculo, conductor: r.conductor, kg: 0, cap: cap.capacidad_kg };
+    const v = Number(r.kg);
+    if (!isNaN(v) && v > 0) map[k].kg += v;
     if (!map[k].conductor && r.conductor) map[k].conductor = r.conductor;
   });
-  const items = Object.values(map).sort((a, b) => b.count - a.count);
-  if (!items.length) return '<div class="empty">Sin datos</div>';
+  const items = Object.values(map)
+    .map(i => ({ ...i, pct: i.cap > 0 ? i.kg / i.cap * 100 : 0 }))
+    .sort((a, b) => b.pct - a.pct);
+  if (!items.length) return '<div class="empty">Sin datos de capacidad KG. Ejecutar syncVehiculos() para poblar el Sheet de Vehículos.</div>';
   _resModalData = items;
-  const avg = average(items.map(i => i.count));
+  const avgPct = average(items.map(i => i.pct));
   return `
     <div style="margin-bottom:12px;font-size:12px;color:var(--muted)">
-      ${items.length} combinaciones vehículo/día · Promedio: <span style="color:var(--cyan);font-family:'IBM Plex Mono',monospace">${avg?.toFixed(1) ?? '—'} órdenes</span>
+      ${items.length} combinaciones vehículo/día · Ocupación KG promedio: <span style="color:#f97316;font-family:'IBM Plex Mono',monospace">${avgPct?.toFixed(1) ?? '—'}%</span>
     </div>
     <div class="tbl-wrap"><table class="data-tbl">
-      <thead><tr><th>Fecha</th><th>Vehículo</th><th>Conductor</th><th>Cant. Órdenes</th></tr></thead>
+      <thead><tr><th>Fecha</th><th>Vehículo</th><th>Conductor</th><th>KG Cargados</th><th>Cap. KG</th><th>% Ocupación KG</th></tr></thead>
       <tbody>${items.slice(0, 500).map(i => `<tr>
         <td class="mono">${esc(i.fecha)}</td>
         <td class="tm mono">${esc(i.vehiculo)}</td>
         <td>${esc(i.conductor)}</td>
-        <td class="tc">${i.count}</td>
+        <td class="mono">${i.kg.toFixed(1)}</td>
+        <td class="tm">${i.cap}</td>
+        <td><span class="${i.pct >= 70 ? 'tg' : i.pct >= 40 ? 'tw' : 'tm'}">${i.pct.toFixed(1)}%</span></td>
       </tr>`).join('')}</tbody>
     </table></div>
     ${items.length > 500 ? `<div style="font-size:11px;color:var(--muted);margin-top:6px">Mostrando 500 de ${items.length}</div>` : ''}`;
@@ -3022,7 +3355,7 @@ function buildModalNPS(rows) {
       <span style="font-size:11px;color:var(--muted)">Filtrar:</span>
       ${['', 'Promotor', 'Neutral', 'Detractor'].map(f => `
         <button class="btn-nav" style="${_npsFilter === f ? 'border-color:var(--cyan);color:var(--cyan)' : ''}"
-          onclick="_npsFilter='${f}';el('resModalBody').innerHTML=buildModalNPS(getEffectiveRAW())"
+          onclick="_npsFilter='${f}';el('resModalBody').innerHTML=buildModalNPS(getResRAW())"
         >${f || 'Todos'}</button>`).join('')}
     </div>
     <div class="tbl-wrap"><table class="data-tbl">
@@ -3046,44 +3379,93 @@ function buildModalIngreso(rows) {
   if (!canSeeFinancials()) return '';
   const items = rows
     .filter(r => r.ier != null && r.ier !== '' && Number(r.ier) > 0)
-    .map(r => ({ fecha: r.fecha, proveedor: r.proveedor, vehiculo: r.vehiculo, conductor: r.conductor, ier: Number(r.ier) }))
+    .map(r => ({ fecha: r.fecha, proveedor: r.proveedor || '(sin proveedor)', vehiculo: r.vehiculo, conductor: r.conductor, ier: Number(r.ier) }))
     .sort((a, b) => a.fecha.localeCompare(b.fecha));
   if (!items.length) return '<div class="empty">Sin datos de IER en el período</div>';
   _resModalData = items;
-  const byProv   = {};
-  items.forEach(i => { const k = i.proveedor || '(sin proveedor)'; byProv[k] = (byProv[k] || 0) + i.ier; });
-  const provList = Object.entries(byProv).sort((a, b) => b[1] - a[1]);
   const totalIer = items.reduce((s, i) => s + i.ier, 0);
-  return `
-    <div style="margin-bottom:14px">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Subtotales por proveedor</div>
+
+  const viewBtns = `<div class="res-view-btns">
+    <button class="res-view-btn ${_resIerView==='prov'?'active':''}" onclick="_resIerView='prov';el('resModalBody').innerHTML=buildModalIngreso(getResRAW())">Por Proveedor</button>
+    <button class="res-view-btn ${_resIerView==='vehiculo'?'active':''}" onclick="_resIerView='vehiculo';el('resModalBody').innerHTML=buildModalIngreso(getResRAW())">Por Vehículo</button>
+    <button class="res-view-btn ${_resIerView==='dia'?'active':''}" onclick="_resIerView='dia';el('resModalBody').innerHTML=buildModalIngreso(getResRAW())">Por Día</button>
+  </div>`;
+
+  const fmtIer = v => '$ ' + Math.round(v).toLocaleString('es-AR');
+
+  if (_resIerView === 'vehiculo') {
+    const vMap = {};
+    items.forEach(i => {
+      if (!vMap[i.vehiculo]) vMap[i.vehiculo] = { vehiculo: i.vehiculo, conductor: i.conductor, total: 0, guias: 0 };
+      vMap[i.vehiculo].total += i.ier;
+      vMap[i.vehiculo].guias++;
+      if (!vMap[i.vehiculo].conductor && i.conductor) vMap[i.vehiculo].conductor = i.conductor;
+    });
+    const vItems = Object.values(vMap).sort((a, b) => b.total - a.total);
+    _resModalData = vItems;
+    return viewBtns + `
+      <div style="margin-bottom:10px;font-size:12px;color:var(--muted)">Total IER: <span style="color:#a3e635;font-family:'IBM Plex Mono',monospace">${fmtIer(totalIer)}</span></div>
       <div class="tbl-wrap"><table class="data-tbl">
-        <thead><tr><th>Proveedor</th><th>Total IER</th><th>%</th></tr></thead>
-        <tbody>${provList.slice(0, 20).map(([p, t]) => `<tr>
-          <td>${esc(p)}</td>
-          <td class="mono" style="color:#a3e635">$ ${Math.round(t).toLocaleString('es-AR')}</td>
-          <td class="tm">${(t / totalIer * 100).toFixed(1)}%</td>
+        <thead><tr><th>Vehículo</th><th>Conductor</th><th>Cant. Guías</th><th>IER Total</th><th>Prom. por Guía</th></tr></thead>
+        <tbody>${vItems.map(i => `<tr>
+          <td class="tm mono">${esc(i.vehiculo)}</td>
+          <td>${esc(i.conductor)}</td>
+          <td>${i.guias}</td>
+          <td class="mono" style="color:#a3e635">${fmtIer(i.total)}</td>
+          <td class="mono tm">${fmtIer(i.total/i.guias)}</td>
         </tr>`).join('')}</tbody>
-      </table></div>
-    </div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Detalle por orden</div>
+      </table></div>`;
+  }
+
+  if (_resIerView === 'dia') {
+    const dMap = {};
+    items.forEach(i => {
+      if (!dMap[i.fecha]) dMap[i.fecha] = { fecha: i.fecha, total: 0, guias: 0 };
+      dMap[i.fecha].total += i.ier;
+      dMap[i.fecha].guias++;
+    });
+    const dItems = Object.values(dMap).sort((a, b) => a.fecha.localeCompare(b.fecha));
+    _resModalData = dItems;
+    return viewBtns + `
+      <div style="margin-bottom:10px;font-size:12px;color:var(--muted)">Total IER: <span style="color:#a3e635;font-family:'IBM Plex Mono',monospace">${fmtIer(totalIer)}</span></div>
+      <div class="tbl-wrap"><table class="data-tbl">
+        <thead><tr><th>Fecha</th><th>Cant. Guías</th><th>IER Total</th><th>Prom. por Guía</th></tr></thead>
+        <tbody>${dItems.map(i => `<tr>
+          <td class="mono">${esc(i.fecha)}</td>
+          <td>${i.guias}</td>
+          <td class="mono" style="color:#a3e635">${fmtIer(i.total)}</td>
+          <td class="mono tm">${fmtIer(i.total/i.guias)}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>`;
+  }
+
+  // Vista Por Proveedor (default)
+  const pMap = {};
+  items.forEach(i => {
+    if (!pMap[i.proveedor]) pMap[i.proveedor] = { proveedor: i.proveedor, total: 0, guias: 0 };
+    pMap[i.proveedor].total += i.ier;
+    pMap[i.proveedor].guias++;
+  });
+  const pItems = Object.values(pMap).sort((a, b) => b.total - a.total);
+  _resModalData = pItems;
+  return viewBtns + `
+    <div style="margin-bottom:10px;font-size:12px;color:var(--muted)">Total IER: <span style="color:#a3e635;font-family:'IBM Plex Mono',monospace">${fmtIer(totalIer)}</span></div>
     <div class="tbl-wrap"><table class="data-tbl">
-      <thead><tr><th>Fecha</th><th>Proveedor</th><th>Vehículo</th><th>Conductor</th><th>IER</th></tr></thead>
-      <tbody>${items.slice(0, 300).map(i => `<tr>
-        <td class="mono">${esc(i.fecha)}</td>
-        <td>${esc(i.proveedor || '—')}</td>
-        <td class="tm mono">${esc(i.vehiculo)}</td>
-        <td>${esc(i.conductor)}</td>
-        <td class="mono" style="color:#a3e635">$ ${Math.round(i.ier).toLocaleString('es-AR')}</td>
+      <thead><tr><th>Proveedor</th><th>Cant. Guías</th><th>IER Total</th><th>%</th><th>Prom. por Guía</th></tr></thead>
+      <tbody>${pItems.map(i => `<tr>
+        <td>${esc(i.proveedor)}</td>
+        <td>${i.guias}</td>
+        <td class="mono" style="color:#a3e635">${fmtIer(i.total)}</td>
+        <td class="tm">${(i.total/totalIer*100).toFixed(1)}%</td>
+        <td class="mono tm">${fmtIer(i.total/i.guias)}</td>
       </tr>`).join('')}</tbody>
-    </table></div>
-    ${items.length > 300 ? `<div style="font-size:11px;color:var(--muted);margin-top:6px">Mostrando 300 de ${items.length}</div>` : ''}`;
+    </table></div>`;
 }
 
 /* -- CSV exports modales -- */
 
 function exportResCSV_efectividad() {
-  const byDay = groupByDay(getEffectiveRAW());
+  const byDay = groupByDay(getResRAW());
   if (!byDay.length) return;
   dlCSV(
     [[cv('Fecha'), cv('Total'), cv('Entregadas'), cv('Rechazadas'), cv('Pendientes'), cv('Efectividad%')],
@@ -3095,25 +3477,42 @@ function exportResCSV_efectividad() {
 function exportResCSV_truta() {
   if (!_resModalData.length) return;
   dlCSV(
-    [[cv('Fecha'), cv('Vehículo'), cv('Conductor'), cv('Plan'), cv('Tiempo(min)'), cv('Tiempo fmt')],
-     ..._resModalData.map(i => [cv(i.fecha), cv(i.vehiculo), cv(i.conductor), cv(i.plan), i.tiempo, cv(fmtMin(i.tiempo))].map(String))],
+    [[cv('Fecha'), cv('Vehículo'), cv('Conductor'), cv('Plan'), cv('Inicio Ruta'), cv('Minutos'), cv('Duración')],
+     ..._resModalData.map(i => [cv(i.fecha), cv(i.vehiculo), cv(i.conductor), cv(i.plan), cv(i.inicio||''), i.tiempo, cv(fmtMin(i.tiempo))].map(String))],
     csvFilename('resumen_truta', '')
   );
 }
 
 function exportResCSV_ordxveh() {
   if (!_resModalData.length) return;
+  if (_resOrdView === 'vehiculo') {
+    dlCSV(
+      [[cv('Vehículo'), cv('Conductor'), cv('Días Activo'), cv('Total Órdenes'), cv('Prom.Órdenes/Día')],
+       ..._resModalData.map(i => [cv(i.vehiculo), cv(i.conductor), i.dias, i.total, (i.total/i.dias).toFixed(1)].map(String))],
+      csvFilename('resumen_ordxveh_vehiculo', '')
+    );
+  } else {
+    dlCSV(
+      [[cv('Fecha'), cv('Vehículos Activos'), cv('Total Órdenes'), cv('Prom.Órdenes/Vehículo')],
+       ..._resModalData.map(i => [cv(i.fecha), i.vehiculos, i.total, (i.total/i.vehiculos).toFixed(1)].map(String))],
+      csvFilename('resumen_ordxveh_dia', '')
+    );
+  }
+}
+
+function exportResCSV_prodKG() {
+  if (!_resModalData.length) return;
   dlCSV(
-    [[cv('Fecha'), cv('Vehículo'), cv('Conductor'), cv('Cant.Órdenes')],
-     ..._resModalData.map(i => [cv(i.fecha), cv(i.vehiculo), cv(i.conductor), i.count].map(String))],
-    csvFilename('resumen_ordxveh', '')
+    [[cv('Fecha'), cv('Vehículo'), cv('Conductor'), cv('KG Cargados'), cv('Cap.KG'), cv('%Ocupación KG')],
+     ..._resModalData.map(i => [cv(i.fecha), cv(i.vehiculo), cv(i.conductor), i.kg?.toFixed(1) ?? '', i.cap, i.pct.toFixed(1) + '%'].map(String))],
+    csvFilename('resumen_prod_kg', '')
   );
 }
 
 function exportResCSV_prodBultos() {
   if (!_resModalData.length) return;
   dlCSV(
-    [[cv('Fecha'), cv('Vehículo'), cv('Conductor'), cv('Bultos'), cv('Capacidad'), cv('%Ocupación')],
+    [[cv('Fecha'), cv('Vehículo'), cv('Conductor'), cv('Bultos Cargados'), cv('Cap.Bultos'), cv('%Ocupación Bultos')],
      ..._resModalData.map(i => [cv(i.fecha), cv(i.vehiculo), cv(i.conductor), i.bultos, i.cap, i.pct.toFixed(1) + '%'].map(String))],
     csvFilename('resumen_prod_bultos', '')
   );
@@ -3130,11 +3529,28 @@ function exportResCSV_nps() {
 
 function exportResCSV_ingreso() {
   if (!_resModalData.length) return;
-  dlCSV(
-    [[cv('Fecha'), cv('Proveedor'), cv('Vehículo'), cv('Conductor'), cv('IER')],
-     ..._resModalData.map(i => [cv(i.fecha), cv(i.proveedor || ''), cv(i.vehiculo), cv(i.conductor), i.ier].map(String))],
-    csvFilename('resumen_ingreso', '')
-  );
+  if (_resIerView === 'vehiculo') {
+    dlCSV(
+      [[cv('Vehículo'), cv('Conductor'), cv('Cant.Guías'), cv('IER Total'), cv('Prom.por Guía')],
+       ..._resModalData.map(i => [cv(i.vehiculo), cv(i.conductor), i.guias, Math.round(i.total), Math.round(i.total/i.guias)].map(String))],
+      csvFilename('resumen_ingreso_vehiculo', '')
+    );
+  } else if (_resIerView === 'dia') {
+    dlCSV(
+      [[cv('Fecha'), cv('Cant.Guías'), cv('IER Total'), cv('Prom.por Guía')],
+       ..._resModalData.map(i => [cv(i.fecha), i.guias, Math.round(i.total), Math.round(i.total/i.guias)].map(String))],
+      csvFilename('resumen_ingreso_dia', '')
+    );
+  } else {
+    dlCSV(
+      [[cv('Proveedor'), cv('Cant.Guías'), cv('IER Total'), cv('%'), cv('Prom.por Guía')],
+       ..._resModalData.map(i => {
+         const totalAll = _resModalData.reduce((s, x) => s + x.total, 0);
+         return [cv(i.proveedor), i.guias, Math.round(i.total), (i.total/totalAll*100).toFixed(1)+'%', Math.round(i.total/i.guias)].map(String);
+       })],
+      csvFilename('resumen_ingreso_prov', '')
+    );
+  }
 }
 </script>
 </body>
