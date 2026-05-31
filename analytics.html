@@ -593,7 +593,7 @@
         <div class="rc-val" id="rcvProdBultos">—</div>
         <div class="rc-sub" id="rcsProdBultos">ocupación promedio</div>
       </div>
-      <div class="res-card" id="rcNPS" onclick="openResModal('nps')" title="NPS = Net Promoter Score&#10;((Promotores − Detractores) / Total con rating) × 100&#10;&#10;Promotor:   suma R1+R2+R3 ≥ 14&#10;Neutral:    suma 11–13&#10;Detractor:  suma ≤ 10&#10;&#10;Escala: −100 → +100  |  +70 o más = Excelente">
+      <div class="res-card" id="rcNPS" onclick="openResModal('nps')" title="NPS = Net Promoter Score = ((Promotores - Detractores) / Total con rating) × 100">
         <div class="rc-icon">★</div>
         <div class="rc-label">NPS</div>
         <div class="rc-val" id="rcvNPS">—</div>
@@ -3387,7 +3387,7 @@ function buildModalNPS(rows) {
         >${f || 'Todos'}</button>`).join('')}
     </div>
     <div class="tbl-wrap"><table class="data-tbl">
-      <thead><tr><th>Fecha</th><th>Conductor</th><th>Vehículo</th><th>Cód. Orden</th><th>R1</th><th>R2</th><th>R3</th><th>Suma</th><th>Categoría</th><th>Comentario</th></tr></thead>
+      <thead><tr><th>Fecha</th><th>Conductor</th><th>Vehículo</th><th>Cód. Orden</th><th title="¿Cómo calificarías la atención del personal de reparto?">R1</th><th title="¿Cómo calificarías el tiempo total del envío?">R2</th><th title="¿Cómo calificarías tu experiencia con Andesmar?">R3</th><th>Suma</th><th>Categoría</th><th>Comentario</th></tr></thead>
       <tbody>${filtered.slice(0, 200).map(i => `<tr>
         <td class="mono">${esc(i.fecha)}</td>
         <td>${esc(i.conductor)}</td>
@@ -3553,8 +3553,8 @@ function exportResCSV_prodBultos() {
 function exportResCSV_nps() {
   if (!_resModalData.length) return;
   dlCSV(
-    [[cv('Fecha'), cv('Conductor'), cv('Vehículo'), cv('R1'), cv('R2'), cv('R3'), cv('Suma'), cv('Categoría'), cv('Comentario')],
-     ..._resModalData.map(i => [cv(i.fecha), cv(i.conductor), cv(i.vehiculo), i.r1 ?? '', i.r2 ?? '', i.r3 ?? '', i.suma, cv(i.cat), cv(i.comment)].map(String))],
+    [[cv('Fecha'), cv('Conductor'), cv('Vehículo'), cv('Cód. Orden'), cv('¿Cómo calificarías la atención del personal de reparto?'), cv('¿Cómo calificarías el tiempo total del envío?'), cv('¿Cómo calificarías tu experiencia con Andesmar?'), cv('Suma'), cv('Categoría'), cv('Comentario')],
+     ..._resModalData.map(i => [cv(i.fecha), cv(i.conductor), cv(i.vehiculo), cv(i.codigo_orden || ''), i.r1 ?? '', i.r2 ?? '', i.r3 ?? '', i.suma, cv(i.cat), cv(i.comment)].map(String))],
     csvFilename('resumen_nps', '')
   );
 }
