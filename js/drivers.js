@@ -63,6 +63,7 @@ function buildDriverRows() {
         pending:    0,
         pendientes: 0,  // [MEJORA 6] sin estado final
         vdTotal:    0,  // [MEJORA 1a] valor declarado acumulado
+        ierTotal:   0,  // IER (units_3) — suma de todas las órdenes sin importar estado
         // Para tiempo en ruta: mapa de rutas únicas por route_started_at
         // { routeKey: { startedMs, maxEndMs, hasEnd } }
         routeMap: {},
@@ -86,7 +87,9 @@ function buildDriverRows() {
     }
 
     // [MEJORA 1a] Valor declarado: todas las órdenes del conductor
-    d.vdTotal += parseFloat(o.custom_8) || 0;
+    d.vdTotal  += parseFloat(o.custom_8) || 0;
+    // IER (units_3): suma total independientemente del estado
+    d.ierTotal += parseFloat(o.units_3) || 0;
 
     // Acumular tiempo de ruta sin duplicar:
     // Usamos el stop original (_stop) para acceder a TODOS sus pod_arrivals
@@ -244,6 +247,10 @@ function renderDriversTable() {
       ? row.vdTotal.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })
       : '—';
 
+    const ierFormatted = row.ierTotal > 0
+      ? row.ierTotal.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })
+      : '—';
+
     return `<tr>
       <td>${esc(row.driver_name)}</td>
       <td class="text-muted">${phone ? esc(phone) : '<span class="no-phone">Sin tel.</span>'}</td>
@@ -257,6 +264,7 @@ function renderDriversTable() {
       <td><span class="${effClass}">${row.eff}%</span></td>
       <td>${routeHtml}</td>
       <td class="text-muted" style="font-size:12px;">${vdFormatted}</td>
+      <td class="text-muted" style="font-size:12px;">${ierFormatted}</td>
       <td>${renderContactButtons(phone)}</td>
     </tr>`;
   }).join('');
