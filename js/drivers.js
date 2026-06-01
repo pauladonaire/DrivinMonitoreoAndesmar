@@ -88,8 +88,8 @@ function buildDriverRows() {
 
     // [MEJORA 1a] Valor declarado: todas las órdenes del conductor
     d.vdTotal  += parseFloat(o.custom_8) || 0;
-    // IER (units_3): suma total independientemente del estado
-    d.ierTotal += parseFloat(o.units_3) || 0;
+    // IER: suma total independientemente del estado
+    d.ierTotal += parseFloat(o.ier) || 0;
 
     // Acumular tiempo de ruta sin duplicar:
     // Usamos el stop original (_stop) para acceder a TODOS sus pod_arrivals

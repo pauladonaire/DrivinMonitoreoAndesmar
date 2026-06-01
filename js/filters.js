@@ -227,6 +227,7 @@ function buildFlatRow(stop, order) {
     units_1:       order.units_1       ?? null,
     units_2:       order.units_2       ?? null,
     units_3:       order.units_3       ?? null,
+    ier:           order.units_3       ?? order.ier ?? null,
     is_otd:        order.is_otd        || false,
     num_retries:   order.num_retries   ?? 0,
     pdf_pod_order: order.pdf_pod_order || null,
