@@ -176,6 +176,7 @@ function buildDriverRows() {
       rechazadas:   d.rechazadas,
       pendientes:   d.pendientes,  // [MEJORA 6]
       vdTotal:      d.vdTotal,     // [MEJORA 1a]
+      ierTotal:     d.ierTotal,
       eff,
       routeTime:    routeTimeStr,
     };
