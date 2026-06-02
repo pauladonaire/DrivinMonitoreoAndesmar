@@ -572,9 +572,9 @@
         <div class="rc-sub" id="rcsEfectividad">—</div>
         <div class="rc-obj" id="rcoEfectividad"></div>
       </div>
-      <div class="res-card" id="rcDNV" onclick="openResModal('dnv')" title="Dom. No Visitado = Órdenes gestionadas (sin tipificado DNV) / Total órdenes × 100">
+      <div class="res-card" id="rcDNV" onclick="openResModal('dnv')" title="Domicilio Visitado = Órdenes gestionadas (sin tipificado DNV) / Total órdenes × 100">
         <div class="rc-icon">🏠</div>
-        <div class="rc-label">Dom. No Visitado</div>
+        <div class="rc-label">Domicilio Visitado</div>
         <div class="rc-val" id="rcvDNV">—</div>
         <div class="rc-sub" id="rcsDNV">—</div>
         <div class="rc-obj" id="rcoDNV"></div>
@@ -2903,11 +2903,11 @@ function renderResumen() {
   const rcoDNV = el('rcoDNV');
   if (dnvTotal > 0) {
     const dnvPct = conGestion / dnvTotal * 100;
-    const dnvOk  = dnvPct >= 95;
+    const dnvOk  = dnvPct >= 98;
     if (rcDNV) rcDNV.className = 'res-card ' + (dnvOk ? 'rc-eff-g' : 'rc-eff-d');
     setText('rcvDNV', dnvPct.toFixed(1) + '%');
     setText('rcsDNV', dnvCount + ' sin gestión');
-    if (rcoDNV) { rcoDNV.className = 'rc-obj ' + (dnvOk ? 'rc-obj-ok' : 'rc-obj-fail'); rcoDNV.textContent = dnvOk ? 'Objetivo: 95%  ✓' : 'Objetivo: 95%  ✗'; }
+    if (rcoDNV) { rcoDNV.className = 'rc-obj ' + (dnvOk ? 'rc-obj-ok' : 'rc-obj-fail'); rcoDNV.textContent = dnvOk ? 'Objetivo: 98%  ✓' : 'Objetivo: 98%  ✗'; }
   } else {
     if (rcDNV) rcDNV.className = 'res-card';
     setText('rcvDNV', '—');
@@ -2962,7 +2962,7 @@ function renderResumen() {
   const nps = calcNPS(ERAW);
   const rcN = el('rcNPS');
   if (nps.total > 0) {
-    if (rcN) rcN.className = 'res-card ' + (nps.score >= 90 ? 'rc-eff-g' : 'rc-eff-d');
+    if (rcN) rcN.className = 'res-card ' + (nps.score >= 95 ? 'rc-eff-g' : 'rc-eff-d');
     setText('rcvNPS', (nps.score >= 0 ? '+' : '') + nps.score.toFixed(1));
     setText('rcsNPS', nps.total + ' respuestas · ' + nps.pctRespuesta.toFixed(1) + '% tasa');
   } else {
@@ -2972,7 +2972,7 @@ function renderResumen() {
   }
   const rcoN = el('rcoNPS');
   if (rcoN) {
-    if (nps.total > 0) { const ok = nps.score >= 90; rcoN.className = 'rc-obj ' + (ok ? 'rc-obj-ok' : 'rc-obj-fail'); rcoN.textContent = ok ? 'Objetivo: 90  ✓' : 'Objetivo: 90  ✗'; }
+    if (nps.total > 0) { const ok = nps.score >= 95; rcoN.className = 'rc-obj ' + (ok ? 'rc-obj-ok' : 'rc-obj-fail'); rcoN.textContent = ok ? 'Objetivo: 95  ✓' : 'Objetivo: 95  ✗'; }
     else rcoN.textContent = '';
   }
 
