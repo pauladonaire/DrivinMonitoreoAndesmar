@@ -421,9 +421,9 @@
       padding:4px 10px; border-radius:5px; cursor:pointer; transition:all .2s;
     }
     .res-scope-btn.active { border-color:var(--cyan); color:var(--cyan); background:rgba(1,254,255,.06); }
-    .res-grid-top { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 12px; }
+    .res-grid-top { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 12px; }
     .res-grid-bot { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-    @media (max-width: 1366px) { .res-grid-top { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 1366px) { .res-grid-top { grid-template-columns: repeat(4, 1fr); } }
     @media (max-width: 900px)  { .res-grid-top, .res-grid-bot { grid-template-columns: 1fr; } }
     .res-card {
       background: var(--surface); border: 1px solid var(--border);
@@ -446,6 +446,9 @@
     .rc-blue  { color:#60a5fa;        border-top-color:#60a5fa; }
     .rc-money { color:#a3e635;        border-top-color:#a3e635; }
     .rc-orange { color:#f97316;       border-top-color:#f97316; }
+    .res-card .rc-obj { font-size:10px; margin-top:5px; }
+    .rc-obj-ok   { color:var(--success); }
+    .rc-obj-fail { color:var(--danger); }
     .rc-nps-p { color:#22c55e; }
     .rc-nps-n { color:#ef4444; }
     .res-view-btns { display:flex; gap:5px; margin-bottom:10px; flex-wrap:wrap; }
@@ -562,42 +565,54 @@
 
     <!-- Fila 1 — 6 tarjetas operativas -->
     <div class="res-grid-top">
-      <div class="res-card" id="rcEfectividad" onclick="openResModal('efectividad')">
+      <div class="res-card" id="rcEfectividad" onclick="openResModal('efectividad')" title="Efectividad = Pedidos aprobados / Total pedidos × 100">
         <div class="rc-icon">✓</div>
         <div class="rc-label">Efectividad</div>
         <div class="rc-val" id="rcvEfectividad">—</div>
         <div class="rc-sub" id="rcsEfectividad">—</div>
+        <div class="rc-obj" id="rcoEfectividad"></div>
       </div>
-      <div class="res-card rc-cyan" onclick="openResModal('truta')">
+      <div class="res-card" id="rcDNV" onclick="openResModal('dnv')" title="Dom. No Visitado = Rechazos con motivo 'Domicilio No Visitado' / Total rechazos × 100">
+        <div class="rc-icon">🏠</div>
+        <div class="rc-label">Dom. No Visitado</div>
+        <div class="rc-val" id="rcvDNV">—</div>
+        <div class="rc-sub" id="rcsDNV">—</div>
+        <div class="rc-obj" id="rcoDNV"></div>
+      </div>
+      <div class="res-card rc-cyan" id="rcTruta" onclick="openResModal('truta')" title="Tiempo de Ruta = Último pedido cerrado - Inicio de ruta.">
         <div class="rc-icon">⏱</div>
         <div class="rc-label">T. Promedio Ruta</div>
         <div class="rc-val" id="rcvTruta">—</div>
         <div class="rc-sub" id="rcsTruta">—</div>
         <div class="rc-sub2" id="rcsTruta2"></div>
+        <div class="rc-obj" id="rcoTruta"></div>
       </div>
-      <div class="res-card rc-blue" onclick="openResModal('ordxveh')">
+      <div class="res-card rc-blue" id="rcOrdxveh" onclick="openResModal('ordxveh')" title="Órdenes promedio = Total guías del período / Cantidad de vehículos activos">
         <div class="rc-icon">📦</div>
         <div class="rc-label">Ord. Prom. x Vehículo</div>
         <div class="rc-val" id="rcvOrdxveh">—</div>
         <div class="rc-sub" id="rcsOrdxveh">órdenes por vehículo/día</div>
+        <div class="rc-obj" id="rcoOrdxveh"></div>
       </div>
-      <div class="res-card rc-orange" id="rcProdKG" onclick="openResModal('prodKG')">
+      <div class="res-card rc-orange" id="rcProdKG" onclick="openResModal('prodKG')" title="Productividad KG = KG cargados / Capacidad KG del vehículo × 100">
         <div class="rc-icon">⚖</div>
         <div class="rc-label">Productividad KG</div>
         <div class="rc-val" id="rcvProdKG">—</div>
         <div class="rc-sub" id="rcsProdKG">ocupación promedio</div>
       </div>
-      <div class="res-card rc-cyan" id="rcProdBultos" onclick="openResModal('prodBultos')">
+      <div class="res-card rc-cyan" id="rcProdBultos" onclick="openResModal('prodBultos')" title="Productividad Bultos = Bultos cargados / Capacidad de bultos del vehículo × 100">
         <div class="rc-icon">⚡</div>
         <div class="rc-label">Productividad Bultos</div>
         <div class="rc-val" id="rcvProdBultos">—</div>
         <div class="rc-sub" id="rcsProdBultos">ocupación promedio</div>
+        <div class="rc-obj" id="rcoProdBultos"></div>
       </div>
       <div class="res-card" id="rcNPS" onclick="openResModal('nps')" title="NPS = Net Promoter Score = ((Promotores - Detractores) / Total con rating) × 100">
         <div class="rc-icon">★</div>
         <div class="rc-label">NPS</div>
         <div class="rc-val" id="rcvNPS">—</div>
         <div class="rc-sub" id="rcsNPS">sin datos</div>
+        <div class="rc-obj" id="rcoNPS"></div>
       </div>
     </div>
 
@@ -2858,8 +2873,9 @@ function renderResumen() {
   const noData = el('resNoData');
   if (!ERAW.length) {
     if (noData) noData.style.display = '';
-    ['rcvEfectividad','rcvTruta','rcvOrdxveh','rcvProdKG','rcvProdBultos','rcvNPS','rcvIngreso']
+    ['rcvEfectividad','rcvDNV','rcvTruta','rcvOrdxveh','rcvProdKG','rcvProdBultos','rcvNPS','rcvIngreso']
       .forEach(id => { const e = el(id); if (e) e.textContent = '—'; });
+    ['rcoEfectividad','rcoDNV','rcoTruta','rcoOrdxveh','rcoProdBultos','rcoNPS'].forEach(id => { const e = el(id); if (e) e.textContent = ''; });
     return;
   }
   if (noData) noData.style.display = 'none';
@@ -2871,19 +2887,55 @@ function renderResumen() {
   const s   = stats(ERAW);
   const eff = s.total > 0 ? s.entregadas / s.total * 100 : 0;
   const rcE = el('rcEfectividad');
-  if (rcE) rcE.className = 'res-card ' + (eff >= 85 ? 'rc-eff-g' : eff >= 70 ? 'rc-eff-w' : 'rc-eff-d');
+  if (rcE) rcE.className = 'res-card ' + (eff >= 95 ? 'rc-eff-g' : 'rc-eff-d');
   setText('rcvEfectividad', eff.toFixed(1) + '%');
   setText('rcsEfectividad', s.entregadas.toLocaleString('es-AR') + ' / ' + s.total.toLocaleString('es-AR') + ' órdenes');
+  const rcoE = el('rcoEfectividad');
+  if (rcoE) { const ok = eff >= 95; rcoE.className = 'rc-obj ' + (ok ? 'rc-obj-ok' : 'rc-obj-fail'); rcoE.textContent = ok ? 'Objetivo: 95%  ✓' : 'Objetivo: 95%  ✗'; }
+
+  // Tarjeta DNV: Domicilio No Visitado
+  const rejectedRows = ERAW.filter(r => r.status === 'rejected');
+  const dnvCount = rejectedRows.filter(r => (r.motivo_rechazo || '').toLowerCase().trim() === 'domicilio no visitado').length;
+  const dnvTotal = rejectedRows.length;
+  const rcDNV  = el('rcDNV');
+  const rcoDNV = el('rcoDNV');
+  if (dnvTotal > 0) {
+    const dnvPct = dnvCount / dnvTotal * 100;
+    const dnvOk  = dnvPct <= 2;
+    if (rcDNV) rcDNV.className = 'res-card ' + (dnvOk ? 'rc-eff-g' : 'rc-eff-d');
+    setText('rcvDNV', dnvPct.toFixed(1) + '%');
+    setText('rcsDNV', dnvCount + ' de ' + dnvTotal + ' rechazos');
+    if (rcoDNV) { rcoDNV.className = 'rc-obj ' + (dnvOk ? 'rc-obj-ok' : 'rc-obj-fail'); rcoDNV.textContent = dnvOk ? 'Objetivo: ≤2%  ✓' : 'Objetivo: ≤2%  ✗'; }
+  } else {
+    if (rcDNV) rcDNV.className = 'res-card';
+    setText('rcvDNV', '—');
+    setText('rcsDNV', 'sin rechazos');
+    if (rcoDNV) rcoDNV.textContent = '';
+  }
 
   // Tarjeta 2: T.Ruta + inicio promedio
   const tRutaRes = calcTiempoRutaPromedio(ERAW);
   setText('rcvTruta', tRutaRes.avg != null ? fmtMin(tRutaRes.avg) : '—');
   setText('rcsTruta', tRutaRes.avg != null ? 'promedio del período' : 'sin datos de tiempo');
   setText('rcsTruta2', tRutaRes.inicioPromedio ? 'Inicio prom: ' + tRutaRes.inicioPromedio : '');
+  const rcoT = el('rcoTruta');
+  if (rcoT) {
+    if (tRutaRes.avg != null) { const ok = tRutaRes.avg >= 480; rcoT.className = 'rc-obj ' + (ok ? 'rc-obj-ok' : 'rc-obj-fail'); rcoT.textContent = ok ? 'Objetivo: ≥8hs  ✓' : 'Objetivo: ≥8hs  ✗'; }
+    else rcoT.textContent = '';
+  }
+  const rcTCard = el('rcTruta');
+  if (rcTCard) rcTCard.className = 'res-card ' + (tRutaRes.avg != null ? (tRutaRes.avg >= 480 ? 'rc-eff-g' : 'rc-eff-d') : 'rc-cyan');
 
   // Tarjeta 3: Órd x Vehículo
   const ordProm = calcOrdenesPorVehiculo(ERAW);
+  const rcOV = el('rcOrdxveh');
+  if (rcOV) rcOV.className = 'res-card ' + (ordProm != null ? (ordProm >= 60 ? 'rc-eff-g' : 'rc-eff-d') : 'rc-blue');
   setText('rcvOrdxveh', ordProm != null ? ordProm.toFixed(1) : '—');
+  const rcoOV = el('rcoOrdxveh');
+  if (rcoOV) {
+    if (ordProm != null) { const ok = ordProm >= 60; rcoOV.className = 'rc-obj ' + (ok ? 'rc-obj-ok' : 'rc-obj-fail'); rcoOV.textContent = ok ? 'Objetivo: 60 guías  ✓' : 'Objetivo: 60 guías  ✗'; }
+    else rcoOV.textContent = '';
+  }
 
   // Tarjeta 4: Productividad KG
   const prodKG = calcProductividadKG(ERAW);
@@ -2895,21 +2947,31 @@ function renderResumen() {
   // Tarjeta 5: Productividad Bultos
   const prodB  = calcProductividadBultos(ERAW);
   const rcPB   = el('rcProdBultos');
-  if (rcPB) rcPB.className = 'res-card ' + (prodB != null ? (prodB >= 70 ? 'rc-eff-g' : prodB >= 40 ? 'rc-eff-w' : 'rc-eff-d') : 'rc-cyan');
+  if (rcPB) rcPB.className = 'res-card ' + (prodB != null ? (prodB >= 95 ? 'rc-eff-g' : 'rc-eff-d') : 'rc-cyan');
   setText('rcvProdBultos', prodB != null ? prodB.toFixed(1) + '%' : '—');
   setText('rcsProdBultos', prodB != null ? 'ocupación bultos promedio' : 'sin capacidades cargadas');
+  const rcoPB = el('rcoProdBultos');
+  if (rcoPB) {
+    if (prodB != null) { const ok = prodB >= 95; rcoPB.className = 'rc-obj ' + (ok ? 'rc-obj-ok' : 'rc-obj-fail'); rcoPB.textContent = ok ? 'Objetivo: 95%  ✓' : 'Objetivo: 95%  ✗'; }
+    else rcoPB.textContent = '';
+  }
 
   // Tarjeta 6: NPS
   const nps = calcNPS(ERAW);
   const rcN = el('rcNPS');
   if (nps.total > 0) {
-    if (rcN) rcN.className = 'res-card ' + (nps.score >= 50 ? 'rc-eff-g' : nps.score >= 0 ? 'rc-cyan' : 'rc-eff-d');
+    if (rcN) rcN.className = 'res-card ' + (nps.score >= 90 ? 'rc-eff-g' : 'rc-eff-d');
     setText('rcvNPS', (nps.score >= 0 ? '+' : '') + nps.score.toFixed(1));
     setText('rcsNPS', nps.total + ' respuestas · ' + nps.pctRespuesta.toFixed(1) + '% tasa');
   } else {
     if (rcN) rcN.className = 'res-card rc-cyan';
     setText('rcvNPS', '—');
     setText('rcsNPS', 'sin datos NPS');
+  }
+  const rcoN = el('rcoNPS');
+  if (rcoN) {
+    if (nps.total > 0) { const ok = nps.score >= 90; rcoN.className = 'rc-obj ' + (ok ? 'rc-obj-ok' : 'rc-obj-fail'); rcoN.textContent = ok ? 'Objetivo: 90  ✓' : 'Objetivo: 90  ✗'; }
+    else rcoN.textContent = '';
   }
 
   // Tarjeta 7: Ingreso (solo financiales)
@@ -3055,6 +3117,7 @@ function openResModal(tipo) {
   const ERAW  = getResRAW();
   const titles = {
     efectividad: 'Efectividad por día',
+    dnv:         'Domicilio No Visitado — detalle',
     truta:       'Detalle tiempo de ruta',
     ordxveh:     'Órdenes por vehículo',
     prodKG:      'Productividad KG',
@@ -3064,6 +3127,7 @@ function openResModal(tipo) {
   };
   const builderMap = {
     efectividad: buildModalEfectividad,
+    dnv:         buildModalDNV,
     truta:       buildModalTruta,
     ordxveh:     buildModalOrdxveh,
     prodKG:      buildModalProdKG,
@@ -3110,6 +3174,7 @@ function exportResModal() {
   const ERAW = getResRAW();
   const map  = {
     efectividad: exportResCSV_efectividad,
+    dnv:         exportResCSV_dnv,
     truta:       exportResCSV_truta,
     ordxveh:     exportResCSV_ordxveh,
     prodKG:      exportResCSV_prodKG,
@@ -3121,6 +3186,41 @@ function exportResModal() {
 }
 
 /* -- Builders de contenido modal -- */
+
+function buildModalDNV(rows) {
+  const totalRech = rows.filter(r => r.status === 'rejected').length;
+  const items = rows
+    .filter(r => r.status === 'rejected' && (r.motivo_rechazo || '').toLowerCase().trim() === 'domicilio no visitado')
+    .map(r => ({
+      fecha:        r.fecha,
+      conductor:    r.conductor || '',
+      vehiculo:     r.vehiculo  || '',
+      codigo_orden: r.codigo_orden || '',
+      cliente:      r.proveedor || r.cliente || '',
+      motivo:       r.motivo_rechazo || ''
+    }))
+    .sort((a, b) => a.fecha.localeCompare(b.fecha));
+  if (!items.length) return '<div class="empty">Sin Domicilio No Visitado en el período</div>';
+  _resModalData = items;
+  const pct = totalRech > 0 ? (items.length / totalRech * 100).toFixed(1) : '0.0';
+  const pctColor = parseFloat(pct) <= 2 ? 'var(--success)' : 'var(--danger)';
+  return `
+    <div style="margin-bottom:12px;font-size:12px;color:var(--muted)">
+      ${items.length} órdenes · <span style="color:${pctColor};font-family:'IBM Plex Mono',monospace">${pct}%</span> de los ${totalRech} rechazos
+    </div>
+    <div class="tbl-wrap"><table class="data-tbl">
+      <thead><tr><th>Fecha</th><th>Conductor</th><th>Vehículo</th><th>Cód. Orden</th><th>Cliente</th><th>Motivo Rechazo</th></tr></thead>
+      <tbody>${items.slice(0, 500).map(i => `<tr>
+        <td class="mono">${esc(i.fecha)}</td>
+        <td>${esc(i.conductor)}</td>
+        <td class="tm mono">${esc(i.vehiculo)}</td>
+        <td class="tm mono">${esc(i.codigo_orden || '—')}</td>
+        <td class="tm">${esc(i.cliente || '—')}</td>
+        <td class="td">${esc(i.motivo)}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+    ${items.length > 500 ? `<div style="font-size:11px;color:var(--muted);margin-top:6px">Mostrando 500 de ${items.length}</div>` : ''}`;
+}
 
 function buildModalEfectividad(rows) {
   const byDay = groupByDay(rows);
@@ -3492,6 +3592,15 @@ function buildModalIngreso(rows) {
 }
 
 /* -- CSV exports modales -- */
+
+function exportResCSV_dnv() {
+  if (!_resModalData.length) return;
+  dlCSV(
+    [[cv('Fecha'), cv('Conductor'), cv('Vehículo'), cv('Cód. Orden'), cv('Cliente'), cv('Motivo Rechazo')],
+     ..._resModalData.map(i => [cv(i.fecha), cv(i.conductor), cv(i.vehiculo), cv(i.codigo_orden || ''), cv(i.cliente || ''), cv(i.motivo)].map(String))],
+    csvFilename('resumen_dnv', '')
+  );
+}
 
 function exportResCSV_efectividad() {
   const byDay = groupByDay(getResRAW());
