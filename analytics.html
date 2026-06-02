@@ -572,7 +572,7 @@
         <div class="rc-sub" id="rcsEfectividad">—</div>
         <div class="rc-obj" id="rcoEfectividad"></div>
       </div>
-      <div class="res-card" id="rcDNV" onclick="openResModal('dnv')" title="Dom. No Visitado = Rechazos con motivo 'Domicilio No Visitado' / Total rechazos × 100">
+      <div class="res-card" id="rcDNV" onclick="openResModal('dnv')" title="Dom. No Visitado = Órdenes gestionadas (sin tipificado DNV) / Total órdenes × 100">
         <div class="rc-icon">🏠</div>
         <div class="rc-label">Dom. No Visitado</div>
         <div class="rc-val" id="rcvDNV">—</div>
@@ -2893,23 +2893,25 @@ function renderResumen() {
   const rcoE = el('rcoEfectividad');
   if (rcoE) { const ok = eff >= 95; rcoE.className = 'rc-obj ' + (ok ? 'rc-obj-ok' : 'rc-obj-fail'); rcoE.textContent = ok ? 'Objetivo: 95%  ✓' : 'Objetivo: 95%  ✗'; }
 
-  // Tarjeta DNV: Domicilio No Visitado
-  const rejectedRows = ERAW.filter(r => r.status === 'rejected');
-  const dnvCount = rejectedRows.filter(r => (r.motivo_rechazo || '').toLowerCase().trim() === 'domicilio no visitado').length;
-  const dnvTotal = rejectedRows.length;
+  // Tarjeta DNV: Órdenes con gestión real (sin tipificado Domicilio No Visitado)
+  // Numerador: órdenes que no son pending Y no tienen motivo DNV
+  // Denominador: total órdenes del período
+  const dnvTotal = ERAW.length;
+  const dnvCount = ERAW.filter(r => (r.motivo_rechazo || '').toLowerCase().trim() === 'domicilio no visitado').length;
+  const conGestion = ERAW.filter(r => r.status !== 'pending' && (r.motivo_rechazo || '').toLowerCase().trim() !== 'domicilio no visitado').length;
   const rcDNV  = el('rcDNV');
   const rcoDNV = el('rcoDNV');
   if (dnvTotal > 0) {
-    const dnvPct = dnvCount / dnvTotal * 100;
-    const dnvOk  = dnvPct <= 2;
+    const dnvPct = conGestion / dnvTotal * 100;
+    const dnvOk  = dnvPct >= 95;
     if (rcDNV) rcDNV.className = 'res-card ' + (dnvOk ? 'rc-eff-g' : 'rc-eff-d');
     setText('rcvDNV', dnvPct.toFixed(1) + '%');
-    setText('rcsDNV', dnvCount + ' de ' + dnvTotal + ' rechazos');
-    if (rcoDNV) { rcoDNV.className = 'rc-obj ' + (dnvOk ? 'rc-obj-ok' : 'rc-obj-fail'); rcoDNV.textContent = dnvOk ? 'Objetivo: ≤2%  ✓' : 'Objetivo: ≤2%  ✗'; }
+    setText('rcsDNV', dnvCount + ' sin gestión');
+    if (rcoDNV) { rcoDNV.className = 'rc-obj ' + (dnvOk ? 'rc-obj-ok' : 'rc-obj-fail'); rcoDNV.textContent = dnvOk ? 'Objetivo: 95%  ✓' : 'Objetivo: 95%  ✗'; }
   } else {
     if (rcDNV) rcDNV.className = 'res-card';
     setText('rcvDNV', '—');
-    setText('rcsDNV', 'sin rechazos');
+    setText('rcsDNV', '—');
     if (rcoDNV) rcoDNV.textContent = '';
   }
 
@@ -3188,38 +3190,72 @@ function exportResModal() {
 /* -- Builders de contenido modal -- */
 
 function buildModalDNV(rows) {
-  const totalRech = rows.filter(r => r.status === 'rejected').length;
-  const items = rows
-    .filter(r => r.status === 'rejected' && (r.motivo_rechazo || '').toLowerCase().trim() === 'domicilio no visitado')
-    .map(r => ({
-      fecha:        r.fecha,
-      conductor:    r.conductor || '',
-      vehiculo:     r.vehiculo  || '',
-      codigo_orden: r.codigo_orden || '',
-      cliente:      r.proveedor || r.cliente || '',
-      motivo:       r.motivo_rechazo || ''
-    }))
-    .sort((a, b) => a.fecha.localeCompare(b.fecha));
-  if (!items.length) return '<div class="empty">Sin Domicilio No Visitado en el período</div>';
-  _resModalData = items;
-  const pct = totalRech > 0 ? (items.length / totalRech * 100).toFixed(1) : '0.0';
-  const pctColor = parseFloat(pct) <= 2 ? 'var(--success)' : 'var(--danger)';
+  const total = rows.length;
+  if (!total) return '<div class="empty">Sin datos en el período</div>';
+
+  const DNV_MOTIVO = 'domicilio no visitado';
+  const entregadas = rows.filter(r => r.status === 'approved' || r.status === 'delivered').length;
+  const pendientes = rows.filter(r => r.status === 'pending').length;
+  const dnvCount   = rows.filter(r => (r.motivo_rechazo || '').toLowerCase().trim() === DNV_MOTIVO).length;
+  const conGestion = rows.filter(r => r.status !== 'pending' && (r.motivo_rechazo || '').toLowerCase().trim() !== DNV_MOTIVO).length;
+  const pctGestion = (conGestion / total * 100).toFixed(1);
+  const pctColor   = parseFloat(pctGestion) >= 95 ? 'var(--success)' : 'var(--danger)';
+
+  // Agrupar rechazos por motivo, DNV siempre al final
+  const motivoMap = {};
+  rows.filter(r => r.status === 'rejected').forEach(r => {
+    const m = r.motivo_rechazo || '(sin motivo)';
+    motivoMap[m] = (motivoMap[m] || 0) + 1;
+  });
+  const motivoList = Object.entries(motivoMap).sort((a, b) => {
+    const aDnv = a[0].toLowerCase().trim() === DNV_MOTIVO;
+    const bDnv = b[0].toLowerCase().trim() === DNV_MOTIVO;
+    if (aDnv && !bDnv) return 1;
+    if (!aDnv && bDnv) return -1;
+    return b[1] - a[1];
+  });
+
+  _resModalData = [
+    { resultado: 'Entregadas / Aprobadas', cantidad: entregadas, pct: (entregadas/total*100).toFixed(1) },
+    ...motivoList.map(([m, c]) => ({ resultado: m, cantidad: c, pct: (c/total*100).toFixed(1) })),
+    ...(pendientes > 0 ? [{ resultado: 'Pendientes (sin resolución)', cantidad: pendientes, pct: (pendientes/total*100).toFixed(1) }] : [])
+  ];
+
+  const motivoRows = motivoList.map(([m, c]) => {
+    const isDnv = m.toLowerCase().trim() === DNV_MOTIVO;
+    return `<tr ${isDnv ? 'style="background:rgba(239,68,68,.08)"' : ''}>
+      <td style="${isDnv ? 'color:var(--danger);font-weight:600' : ''}">${esc(m)}</td>
+      <td class="mono ${isDnv ? 'td' : ''}">${c.toLocaleString('es-AR')}</td>
+      <td class="mono" style="color:var(--muted)">${(c/total*100).toFixed(1)}%</td>
+    </tr>`;
+  }).join('');
+
   return `
-    <div style="margin-bottom:12px;font-size:12px;color:var(--muted)">
-      ${items.length} órdenes · <span style="color:${pctColor};font-family:'IBM Plex Mono',monospace">${pct}%</span> de los ${totalRech} rechazos
+    <div class="kpi-grid-8" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
+      <div class="kpi-sm c"><div class="kpi-label">Total</div><div class="kpi-val">${total.toLocaleString('es-AR')}</div></div>
+      <div class="kpi-sm g"><div class="kpi-label">Con gestión</div><div class="kpi-val">${conGestion.toLocaleString('es-AR')}</div></div>
+      <div class="kpi-sm r"><div class="kpi-label">Sin gestión (DNV)</div><div class="kpi-val">${dnvCount.toLocaleString('es-AR')}</div></div>
+      <div class="kpi-sm" style="border-top-color:${pctColor}">
+        <div class="kpi-label">% Con gestión</div>
+        <div class="kpi-val" style="color:${pctColor}">${pctGestion}%</div>
+      </div>
     </div>
-    <div class="tbl-wrap"><table class="data-tbl">
-      <thead><tr><th>Fecha</th><th>Conductor</th><th>Vehículo</th><th>Cód. Orden</th><th>Cliente</th><th>Motivo Rechazo</th></tr></thead>
-      <tbody>${items.slice(0, 500).map(i => `<tr>
-        <td class="mono">${esc(i.fecha)}</td>
-        <td>${esc(i.conductor)}</td>
-        <td class="tm mono">${esc(i.vehiculo)}</td>
-        <td class="tm mono">${esc(i.codigo_orden || '—')}</td>
-        <td class="tm">${esc(i.cliente || '—')}</td>
-        <td class="td">${esc(i.motivo)}</td>
-      </tr>`).join('')}</tbody>
-    </table></div>
-    ${items.length > 500 ? `<div style="font-size:11px;color:var(--muted);margin-top:6px">Mostrando 500 de ${items.length}</div>` : ''}`;
+    <table class="data-tbl" style="width:100%">
+      <thead><tr><th>Resultado / Motivo</th><th>Órdenes</th><th>% s/total</th></tr></thead>
+      <tbody>
+        <tr style="background:rgba(34,197,94,.08)">
+          <td style="color:var(--success);font-weight:600">Entregadas / Aprobadas</td>
+          <td class="mono tg">${entregadas.toLocaleString('es-AR')}</td>
+          <td class="mono" style="color:var(--muted)">${(entregadas/total*100).toFixed(1)}%</td>
+        </tr>
+        ${motivoRows}
+        ${pendientes > 0 ? `<tr style="opacity:.6">
+          <td>Pendientes (sin resolución)</td>
+          <td class="mono">${pendientes.toLocaleString('es-AR')}</td>
+          <td class="mono" style="color:var(--muted)">${(pendientes/total*100).toFixed(1)}%</td>
+        </tr>` : ''}
+      </tbody>
+    </table>`;
 }
 
 function buildModalEfectividad(rows) {
@@ -3596,9 +3632,9 @@ function buildModalIngreso(rows) {
 function exportResCSV_dnv() {
   if (!_resModalData.length) return;
   dlCSV(
-    [[cv('Fecha'), cv('Conductor'), cv('Vehículo'), cv('Cód. Orden'), cv('Cliente'), cv('Motivo Rechazo')],
-     ..._resModalData.map(i => [cv(i.fecha), cv(i.conductor), cv(i.vehiculo), cv(i.codigo_orden || ''), cv(i.cliente || ''), cv(i.motivo)].map(String))],
-    csvFilename('resumen_dnv', '')
+    [[cv('Resultado / Motivo'), cv('Órdenes'), cv('% s/total')],
+     ..._resModalData.map(i => [cv(i.resultado), String(i.cantidad), String(i.pct + '%')])],
+    csvFilename('resumen_gestion_dnv', '')
   );
 }
 
