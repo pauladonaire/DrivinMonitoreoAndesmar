@@ -1793,8 +1793,7 @@ async function loadDetalleResumen() {
       const msg = isTimeout ? 'Tiempo de espera agotado — reintentá' : 'Error al cargar historial';
       if (label) { label.textContent = `❌ ${msg}`; label.className = 'mode-lbl-fast'; }
       if (btn)   { btn.disabled = false; btn.textContent = '🔄 Reintentar'; }
-    } finally {
-      _rawResLoadingPromise = null;
+      _rawResLoadingPromise = null;  // solo resetear en error para permitir reintentar
     }
   })();
   return _rawResLoadingPromise;
