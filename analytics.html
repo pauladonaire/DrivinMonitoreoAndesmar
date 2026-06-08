@@ -487,6 +487,177 @@
     .nps-cat-p { color:#22c55e; font-weight:600; }
     .nps-cat-n { color:#a0b4c8; }
     .nps-cat-d { color:#ef4444; font-weight:600; }
+
+    /* ================================================
+       MODE BAR — indicador ⚡ rápido / 📊 detalle
+    ================================================ */
+    .res-mode-bar {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:7px 14px; border-radius:7px; margin-bottom:10px;
+      background:rgba(1,254,255,.06); border:1px solid rgba(1,254,255,.15);
+      font-size:12px; gap:10px;
+    }
+    .mode-lbl-fast   { color:var(--cyan);    font-weight:600; }
+    .mode-lbl-detail { color:var(--success); font-weight:600; }
+    .btn-detail-load {
+      font-family:'Rajdhani',sans-serif; font-weight:700; font-size:12px;
+      padding:5px 13px; border-radius:5px; cursor:pointer;
+      background:transparent; border:1px solid var(--border); color:var(--muted);
+      transition:all .15s; white-space:nowrap;
+    }
+    .btn-detail-load:hover { border-color:var(--cyan); color:var(--cyan); }
+    .btn-detail-load:disabled { opacity:.4; cursor:not-allowed; }
+
+    /* ================================================
+       PERIOD SLIDER — navegar rango de tarjetas en memoria
+    ================================================ */
+    .period-slider-bar {
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+      padding:7px 14px; border-radius:7px; margin-bottom:10px;
+      background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.1);
+      font-size:12px;
+    }
+    .ps-label   { color:var(--muted); white-space:nowrap; font-weight:600; }
+    .ps-date-lbl{ color:var(--cyan); font-weight:700; min-width:68px; text-align:center; }
+    .ps-range   { flex:1; min-width:90px; accent-color:var(--cyan); cursor:pointer; height:4px; }
+    .ps-sep     { color:var(--muted); }
+    .ps-reset   {
+      font-family:'Rajdhani',sans-serif; font-weight:700; font-size:11px;
+      padding:3px 10px; border-radius:4px; cursor:pointer;
+      background:transparent; border:1px solid var(--border); color:var(--muted);
+      transition:all .15s; white-space:nowrap;
+    }
+    .ps-reset:hover { border-color:var(--warning); color:var(--warning); }
+
+    /* ================================================
+       MES CHIPS — estado de carga por mes
+    ================================================ */
+    .mes-chips-bar  { display:flex; gap:8px; flex-wrap:wrap; padding:4px 0 10px 0; }
+    .mes-chip {
+      font-size:11px; font-family:'Rajdhani',sans-serif; font-weight:700; letter-spacing:.5px;
+      padding:3px 11px; border-radius:12px; border:1px solid; transition:all .25s;
+    }
+    .mes-chip-pending { color:var(--muted);    border-color:rgba(160,180,200,.3); }
+    .mes-chip-loading { color:var(--warning);  border-color:var(--warning); animation:chip-pulse 1.2s infinite; }
+    .mes-chip-ok      { color:var(--success);  border-color:var(--success); }
+    .mes-chip-error   { color:var(--danger);   border-color:var(--danger); }
+    @keyframes chip-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    /* ================================================
+       BARRA DE CARGA NO-BLOQUEANTE
+    ================================================ */
+    .load-bar {
+      position: fixed; top: var(--hdr-h); left: 0; right: 0;
+      height: 3px; z-index: 99; pointer-events: none; display: none;
+    }
+    .load-bar.on {
+      display: block;
+      background: linear-gradient(90deg, var(--surface) 0%, var(--cyan) 50%, var(--surface) 100%);
+      background-size: 200% 100%;
+      animation: load-sweep 1.4s ease-in-out infinite;
+    }
+    @keyframes load-sweep { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    /* ================================================
+       MULTI-SELECT DROPDOWNS (Depósito / Flota)
+    ================================================ */
+    .ms-wrap { position: relative; }
+    .ms-btn {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 5px 9px; border-radius: 5px;
+      font-size: 12px; font-family: 'IBM Plex Sans', sans-serif;
+      cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+      gap: 6px; min-width: 120px; width: 100%; text-align: left;
+    }
+    .ms-btn:hover, .ms-btn:focus { outline: none; border-color: var(--cyan); }
+    .ms-btn.ms-active { border-color: var(--cyan); color: var(--cyan); }
+    .ms-arr { color: var(--muted); font-size: 10px; flex-shrink: 0; }
+    .ms-panel {
+      display: none; position: absolute; top: calc(100% + 3px); left: 0; z-index: 300;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; min-width: 200px; max-height: 240px;
+      overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,.6);
+    }
+    .ms-panel.open { display: block; }
+    .ms-opt {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 12px; cursor: pointer; font-size: 12px; width: 100%;
+      user-select: none; margin: 0;
+    }
+    .ms-opt:hover { background: var(--surface2); }
+    .ms-opt-all { border-bottom: 1px solid var(--border); font-weight: 600; }
+    .ms-opt input[type=checkbox] { accent-color: var(--cyan); width: 13px; height: 13px; cursor: pointer; flex-shrink: 0; }
+
+    /* ================================================
+       FAST-MODE PLACEHOLDER — tabs bloqueados
+    ================================================ */
+    .fast-mode-tab > *:not(.fast-placeholder) { display:none !important; }
+    .fast-placeholder {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      min-height:280px; gap:14px; color:var(--muted);
+    }
+    .fast-placeholder .fp-icon { font-size:40px; }
+    .fast-placeholder .fp-msg  { font-size:14px; text-align:center; line-height:1.6; }
+    .fast-placeholder .fp-btn  {
+      font-family:'Rajdhani',sans-serif; font-weight:700; font-size:13px;
+      padding:8px 20px; border-radius:7px; cursor:pointer;
+      background:var(--blue-mid); border:1px solid var(--cyan); color:var(--cyan);
+      transition:background .15s;
+    }
+    .fast-placeholder .fp-btn:hover { background:var(--blue-dark); }
+
+    /* ================================================
+       EVOLUTIVO DE INDICADORES
+    ================================================ */
+    .evol-section   { margin-top:20px; padding-top:16px; border-top:1px solid var(--border); }
+    .evol-title     {
+      font-family:'Rajdhani',sans-serif; font-weight:700; font-size:16px;
+      letter-spacing:1px; text-transform:uppercase; color:var(--cyan); margin-bottom:4px;
+    }
+    .evol-subtitle  { font-size:11px; color:var(--muted); margin-bottom:12px; }
+    .evol-controls  {
+      display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap;
+    }
+    .evol-agrup-btn {
+      font-family:'Rajdhani',sans-serif; font-weight:700; font-size:11px;
+      padding:5px 14px; border-radius:5px; cursor:pointer;
+      background:transparent; border:1px solid var(--border); color:var(--muted);
+      transition:all .15s; text-transform:uppercase; letter-spacing:.5px;
+    }
+    .evol-agrup-btn.active { background:var(--blue-mid); border-color:var(--cyan); color:var(--cyan); }
+    .evol-kpi-sel {
+      font-size:12px; padding:5px 10px; border-radius:5px;
+      background:var(--surface); border:1px solid var(--border); color:var(--text);
+      margin-left:auto;
+    }
+    .evol-tbl-wrap { overflow-x:auto; margin-bottom:16px; }
+    .evol-tbl {
+      width:100%; border-collapse:collapse; font-size:12px; white-space:nowrap;
+    }
+    .evol-tbl th {
+      background:var(--surface2); color:var(--muted); font-weight:600;
+      padding:7px 12px; border-bottom:1px solid var(--border);
+      text-transform:uppercase; font-size:10px; letter-spacing:.5px;
+    }
+    .evol-tbl th:first-child { text-align:left; min-width:170px; }
+    .evol-tbl th:not(:first-child) { text-align:right; min-width:80px; }
+    .evol-tbl td { padding:7px 12px; border-bottom:1px solid rgba(1,254,255,.05); }
+    .evol-tbl td:first-child { color:var(--muted); font-weight:500; }
+    .evol-tbl td:not(:first-child) { text-align:right; font-family:'IBM Plex Mono',monospace; }
+    .evol-tbl tr:hover td { background:rgba(1,254,255,.03); }
+    .evol-cell-ok   { background:rgba(34,197,94,.12)  !important; color:#22c55e !important; }
+    .evol-cell-fail { background:rgba(239,68,68,.10)  !important; color:#ef4444 !important; }
+    .evol-trend-up   { color:#22c55e; }
+    .evol-trend-dn   { color:#ef4444; }
+    .evol-trend-flat { color:var(--muted); }
+    .evol-ch-wrap { height:200px; margin-bottom:14px; }
+    .evol-footer { display:flex; justify-content:flex-end; }
+    .btn-evol-exp {
+      font-size:11px; padding:5px 12px; border-radius:5px; cursor:pointer;
+      background:transparent; border:1px solid var(--border); color:var(--muted);
+      font-family:'Rajdhani',sans-serif; font-weight:700; transition:all .15s;
+    }
+    .btn-evol-exp:hover { border-color:var(--cyan); color:var(--cyan); }
   </style>
 </head>
 <body>
@@ -494,8 +665,11 @@
 <!-- LOADING OVERLAY -->
 <div class="overlay" id="overlay">
   <div class="spinner"></div>
-  <div class="spin-msg">CARGANDO DATOS...</div>
+  <div class="spin-msg" id="spinMsg">CARGANDO DATOS COMPLETOS...</div>
 </div>
+
+<!-- BARRA DE CARGA NO-BLOQUEANTE (carga detalle en segundo plano) -->
+<div class="load-bar" id="loadBar"></div>
 
 <!-- HEADER -->
 <header class="app-header">
@@ -504,12 +678,16 @@
     <div class="brand-sub">Análisis Histórico</div>
   </div>
   <div class="hdr-sep"></div>
-  <div class="hdr-controls">
+  <div class="hdr-controls" id="hdrCtrlFechas">
     <span class="lbl">Desde</span>
     <input type="date" id="inDesde" class="date-in">
     <span class="lbl">Hasta</span>
     <input type="date" id="inHasta" class="date-in">
     <button class="btn-load" id="btnLoad" onclick="loadData()">Cargar</button>
+  </div>
+  <div id="hdrPeriodoLabel" style="display:none; align-items:center; gap:8px;">
+    <span class="lbl" style="color:var(--cyan); text-transform:uppercase; letter-spacing:1px;">Resumen</span>
+    <span class="hdr-status">Período completo · 01/04/2026 — hoy</span>
   </div>
   <div class="hdr-right">
     <span class="hdr-status" id="hdrSt">Sin datos</span>
@@ -542,11 +720,35 @@
     <div class="res-filter-bar" id="resFilterBar">
       <div class="f-grp">
         <label>Depósito</label>
-        <select id="rfDeposito" onchange="applyResFilters()"><option value="">Todos</option></select>
+        <div class="ms-wrap" id="mswDep">
+          <button class="ms-btn" type="button" onclick="toggleMs('dep')">
+            <span class="ms-lbl" id="mslDep">Todos</span>
+            <span class="ms-arr">▾</span>
+          </button>
+          <div class="ms-panel" id="mspDep">
+            <label class="ms-opt ms-opt-all">
+              <input type="checkbox" id="msCbxAllDep" checked onchange="toggleMsAll('dep', this.checked)">
+              <span>Todos</span>
+            </label>
+            <div id="msOptsDep"></div>
+          </div>
+        </div>
       </div>
       <div class="f-grp">
         <label>Flota</label>
-        <select id="rfFlota" onchange="applyResFilters()"><option value="">Todas</option></select>
+        <div class="ms-wrap" id="mswFlt">
+          <button class="ms-btn" type="button" onclick="toggleMs('flt')">
+            <span class="ms-lbl" id="mslFlt">Todas</span>
+            <span class="ms-arr">▾</span>
+          </button>
+          <div class="ms-panel" id="mspFlt">
+            <label class="ms-opt ms-opt-all">
+              <input type="checkbox" id="msCbxAllFlt" checked onchange="toggleMsAll('flt', this.checked)">
+              <span>Todas</span>
+            </label>
+            <div id="msOptsFlt"></div>
+          </div>
+        </div>
       </div>
       <div class="f-grp">
         <label>Vehículo</label>
@@ -561,6 +763,23 @@
         <button class="res-scope-btn active" id="rfScopeAll" onclick="setResScope('all')">Todos los tabs</button>
         <button class="res-scope-btn" id="rfScopeRes" onclick="setResScope('resumen')">Solo Resumen</button>
       </div>
+    </div>
+
+    <!-- Modo de carga: ⚡ rápido (cache) vs 📊 detalle (raw) -->
+    <div id="resModeBar" class="res-mode-bar" style="display:none">
+      <span id="resModeLabel" class="mode-lbl-fast">⚡ Modo rápido — datos pre-calculados</span>
+      <button id="btnLoadDetail" class="btn-detail-load" onclick="loadDetalleResumen()">📊 Cargar datos del período</button>
+    </div>
+
+    <!-- Slider de período — solo visible cuando rawResFullyLoaded, solo afecta tarjetas -->
+    <div id="periodSliderBar" class="period-slider-bar" style="display:none">
+      <span class="ps-label">Período tarjetas:</span>
+      <span id="psDesdeLabel" class="ps-date-lbl">—</span>
+      <input id="psDesde" type="range" class="ps-range" min="0" max="0" value="0" oninput="onPeriodSliderDesde()">
+      <span class="ps-sep">→</span>
+      <input id="psHasta" type="range" class="ps-range" min="0" max="0" value="0" oninput="onPeriodSliderHasta()">
+      <span id="psHastaLabel" class="ps-date-lbl">—</span>
+      <button class="ps-reset" onclick="resetPeriodSlider()">↺ Reset</button>
     </div>
 
     <!-- Fila 1 — 6 tarjetas operativas -->
@@ -636,6 +855,34 @@
         <div class="rc-val" style="font-size:15px;color:var(--muted)">PRÓXIMAMENTE</div>
         <div class="rc-sub">En desarrollo</div>
       </div>
+    </div>
+
+    <!-- Chips de estado por mes — actualizado en tiempo real durante la carga -->
+    <div id="mesChipsBar" class="mes-chips-bar" style="display:none"></div>
+
+    <!-- EVOLUTIVO DE INDICADORES -->
+    <div id="resEvolutivo" class="evol-section" style="display:none">
+      <div class="evol-title">EVOLUTIVO DE INDICADORES</div>
+      <div class="evol-subtitle" id="evolSubtitle">—</div>
+      <div class="evol-controls">
+        <button class="evol-agrup-btn active" id="evolBtnQ" onclick="setEvolAgrup('quincenal')">Quincenal</button>
+        <button class="evol-agrup-btn"        id="evolBtnM" onclick="setEvolAgrup('mensual')">Mensual</button>
+        <select class="evol-kpi-sel" id="evolKpiSel" onchange="renderEvolChart()">
+          <option value="efectividad">Efectividad (%)</option>
+          <option value="dnv">Dom. Visitado (%)</option>
+          <option value="nps">NPS Score</option>
+          <option value="ingreso">Ingreso Total ($)</option>
+          <option value="truta">T. Promedio Ruta (min)</option>
+        </select>
+        <button class="btn-evol-exp" onclick="exportEvolCSV()">↓ CSV Evolutivo</button>
+      </div>
+      <div class="evol-tbl-wrap">
+        <table class="evol-tbl">
+          <thead id="evolThead"></thead>
+          <tbody id="evolTbody"></tbody>
+        </table>
+      </div>
+      <div class="evol-ch-wrap"><canvas id="cEvol"></canvas></div>
     </div>
 
     <div id="resNoData" class="empty" style="display:none">Cargá un período para ver el resumen.</div>
@@ -1190,13 +1437,32 @@ const APP_STATE = { userDepositos: null, userProfile: 'monitoreo' };
 /* ============================================================
    ESTADO GLOBAL
 ============================================================ */
-let RAW      = [];   // historico rows from GAS
+let RAW      = [];   // historico rows from GAS (solo en modo detalle)
 let ACTIONS  = [];   // actions rows from GAS
 let VEHICULOS     = [];   // datos del Sheet de Vehículos
 let VEHICULOS_MAP = {};   // { code → {capacidad_bultos, capacidad_kg, employer_name} }
 
+// Modo de carga: 'none' | 'fast' | 'detail'
+let APP_MODE   = 'none';
+let CACHE_ROWS = [];  // filas del CACHE_KPI (días pasados)
+let RAW_TODAY  = [];  // raw de hoy (cargado en modo rápido)
+let RAW_RES    = [];  // raw período completo RESUMEN (2026-04-01→ayer), nunca cambia con los inputs
+
+// Estado evolutivo
+let _evolAgrup = 'quincenal';  // 'quincenal' | 'mensual'
+let _evolData  = [];           // periodos calculados para la tabla
+
+// Slider de período (tarjetas) — null = sin restricción
+let periodSlider = { desde: null, hasta: null };
+// Estado de carga por mes — { '2026-04': 'pending'|'loading'|'ok'|'error' }
+let mesEstados = {};
+let mesSource  = {};  // { '2026-04': 'cache'|'base1' } — origen del dato (⚡ vs 📡)
+let _resMeses  = [];  // lista de meses generada en loadDetalleResumen
+
 // Estado filtros globales resumen
-let _resFilters   = { deposito: '', flota: '', vehiculo: '', empleador: '' };
+let _resFilters   = { deposito: [], flota: [], vehiculo: '', empleador: '' };
+let _msDepSel     = new Set();   // depósitos seleccionados
+let _msFltSel     = new Set();   // flotas seleccionadas
 let _resScope     = 'all'; // 'all' | 'resumen'
 
 // Estado vistas modales
@@ -1270,10 +1536,11 @@ function axisOpts(rotate) {
    INIT
 ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
-  // Default: hoy — para cargar rápido al abrir. Cambiar rango y presionar "Cargar" para histórico.
+  // Otros tabs: default a ayer. RESUMEN siempre usa período completo (01/04→hoy) internamente.
   const hoy = new Date();
-  document.getElementById('inDesde').value = fmtISO(hoy);
-  document.getElementById('inHasta').value = fmtISO(hoy);
+  const ayer = new Date(hoy); ayer.setDate(ayer.getDate() - 1);
+  document.getElementById('inDesde').value = fmtISO(ayer);
+  document.getElementById('inHasta').value = fmtISO(ayer);
 
   // Attach sort listeners (once, for all sortable headers)
   document.querySelectorAll('th.s').forEach(th => {
@@ -1289,15 +1556,80 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ============================================================
    DATA LOADING
 ============================================================ */
+// Modo rápido — carga CACHE_KPI (30-90 filas) + hoy raw si aplica
 async function loadData() {
   const desde = document.getElementById('inDesde').value;
-  const hasta = document.getElementById('inHasta').value;
+  const hasta  = document.getElementById('inHasta').value;
   if (!desde || !hasta) { showErr('Seleccionar rango de fechas.'); return; }
 
-  showOverlay(true);
+  showLoadingBar(true);
   hideErr();
-  setSt('Cargando...', 'loading');
+  setSt('Cargando datos completos...', 'loading');
   document.getElementById('btnLoad').disabled = true;
+
+  try {
+    const today = isoToday();
+    // El período del RESUMEN cierra en ayer: datos "cerrados" (cache completo + RAW_RES completo)
+    const ayerD = new Date(); ayerD.setDate(ayerD.getDate() - 1);
+    const ayer  = fmtISO(ayerD);
+
+    const cacheDe = '2026-04-01';
+    const cacheHa = ayer;  // siempre hasta ayer, no hoy
+    const [cacheRes, actRes] = await Promise.all([
+      fetch(`${GAS_URL}?action=get_cache&desde=${encodeURIComponent(cacheDe)}&hasta=${encodeURIComponent(cacheHa)}`).then(r => r.json()),
+      gasPost({ action: 'get_actions_range', desde: cacheDe, hasta: cacheHa })
+    ]);
+
+    CACHE_ROWS = cacheRes.rows || [];
+    ACTIONS    = actRes.actions || [];
+    RAW_TODAY  = [];  // no se usa: el período cierra en ayer
+
+    APP_MODE = 'fast';
+    RAW = [];
+
+    if (!CACHE_ROWS.length) {
+      showErr('No hay datos cacheados para este período.');
+      setSt('Sin cache para el período', 'err');
+      return;
+    }
+
+    const cacheLabel = CACHE_ROWS.length;
+    setSt(`⚡ ${cacheLabel} días en cache · período 01/04/2026 – ${ayer}`, '');
+
+    // Actualizar label dinámico del header
+    const periodoSpan = document.querySelector('#hdrPeriodoLabel .hdr-status');
+    if (periodoSpan) periodoSpan.textContent = `Período completo · 01/04/2026 — ${ayer}`;
+
+    setModeBar('fast');
+    renderTab(activeTab());
+
+    // Lanzar ambas cargas de detalle en paralelo (sin bloquear la UI):
+    // · loadDetalle() → RAW con el período de los inputs (para tabs GENERAL, Conductores, etc.)
+    // · loadDetalleResumen() → RAW_RES con período fijo del RESUMEN (2026-04-01→ayer)
+    setTimeout(() => {
+      Promise.all([ loadDetalle(), loadDetalleResumen() ]).catch(console.error);
+    }, 300);
+
+  } catch(err) {
+    showErr('Error al cargar: ' + err.message);
+    setSt('Error de conexión', 'err');
+  } finally {
+    showLoadingBar(false);
+    document.getElementById('btnLoad').disabled = false;
+  }
+}
+
+// Modo detalle — carga todos los datos crudos (comportamiento original)
+async function loadDetalle(overrideDe, overrideHa) {
+  const desde = overrideDe || document.getElementById('inDesde').value;
+  const hasta  = overrideHa || document.getElementById('inHasta').value;
+  if (!desde || !hasta) return;
+
+  const btn = document.getElementById('btnLoadDetail');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Cargando...'; }
+  showLoadingBar(true);
+  setSt('Cargando datos completos...', 'loading');
+  hideErr();
 
   try {
     const [histRes, actRes] = await Promise.all([
@@ -1305,19 +1637,417 @@ async function loadData() {
       gasPost({ action: 'get_actions_range', desde, hasta })
     ]);
 
-    RAW     = histRes.rows    || [];
-    ACTIONS = actRes.actions  || [];
+    RAW     = histRes.rows   || [];
+    ACTIONS = actRes.actions || [];
+    APP_MODE = 'detail';
+
+    // Poblar filtros del RESUMEN ahora que RAW tiene el período completo
+    populateResFilterDropdowns();
+
+    // Restaurar tabs que tenían placeholder
+    ['general','pordia','conductores','depositos','rechazos','acciones'].forEach(removeFastPlaceholder);
 
     const dias = new Set(RAW.map(r => r.fecha)).size;
-    setSt(`${RAW.length.toLocaleString('es-AR')} órdenes · ${dias} días · ${ACTIONS.length} acciones`, '');
-
+    setSt(`📊 ${RAW.length.toLocaleString('es-AR')} órdenes · ${dias} días · ${ACTIONS.length} acciones`, '');
+    // setModeBar NO va acá: el mode bar del RESUMEN lo controla loadDetalleResumen()
     renderTab(activeTab());
+
   } catch(err) {
-    showErr('Error al cargar datos: ' + err.message);
+    showErr('Error al cargar datos completos: ' + err.message);
     setSt('Error de conexión', 'err');
   } finally {
-    showOverlay(false);
-    document.getElementById('btnLoad').disabled = false;
+    showLoadingBar(false);
+    if (btn) { btn.disabled = false; btn.textContent = '📊 Cargar datos completos'; }
+  }
+}
+
+// Carga el período fijo del RESUMEN (2026-04-01→ayer) en RAW_RES.
+// No toca RAW, APP_MODE, ni el render principal. Guard para evitar cargas paralelas duplicadas.
+let _rawResLoadingPromise = null;
+let _rawResFullyLoaded   = false; // true solo cuando todos los meses terminaron
+async function loadDetalleResumen() {
+  if (_rawResLoadingPromise) return _rawResLoadingPromise;
+  const ayer = (() => { const d = new Date(); d.setDate(d.getDate()-1); return fmtISO(d); })();
+  _rawResLoadingPromise = (async () => {
+    const btn   = document.getElementById('btnLoadDetail');
+    const label = document.getElementById('resModeLabel');
+    try {
+      if (btn)   { btn.disabled = true; btn.textContent = '⏳ Cargando...'; }
+      if (label) { label.textContent = '⏳ Cargando historial...'; label.className = 'mode-lbl-fast'; }
+
+      // Generar lista de meses desde el inicio del historial hasta el mes actual
+      const INICIO_HISTORICO = '2026-04'; // primer mes con base disponible
+      const meses = [];
+      {
+        const [iy, im] = INICIO_HISTORICO.split('-').map(Number);
+        const hoy = new Date();
+        const cy = hoy.getFullYear(), cm = hoy.getMonth() + 1;
+        let y = iy, m = im;
+        while (y < cy || (y === cy && m <= cm)) {
+          const mm   = String(m).padStart(2, '0');
+          const key  = `${y}-${mm}`;
+          const last = new Date(y, m, 0).getDate(); // último día del mes
+          const hasta = (y === cy && m === cm) ? ayer : `${key}-${last}`;
+          meses.push({ label: key, desde: `${key}-01`, hasta });
+          if (++m > 12) { m = 1; y++; }
+        }
+      }
+
+      const fetchMes = (m) => {
+        const ctrl  = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 360000); // 6 min por mes (bases grandes tardan 3-4 min en GAS)
+        return fetch(
+          `${GAS_URL}?action=get_historico&desde=${encodeURIComponent(m.desde)}&hasta=${encodeURIComponent(m.hasta)}`,
+          { signal: ctrl.signal }
+        )
+          .then(r => {
+            const ct = r.headers.get('content-type') || '';
+            if (!ct.includes('json')) {
+              return r.text().then(txt => {
+                throw new Error(`GAS devolvió HTML (HTTP ${r.status}) — revisar logs de GAS. Primeras chars: ${txt.slice(0,120)}`);
+              });
+            }
+            return r.json();
+          })
+          .then(res => {
+            if (res && res.status === 'error') {
+              throw new Error(`GAS error: ${res.message}`);
+            }
+            return res;
+          })
+          .finally(() => clearTimeout(timer));
+      };
+
+      // Retry: hasta 3 intentos por mes; no reintenta AbortError (timeout de 6 min)
+      const fetchMesConRetry = async (mes, maxIntentos = 3) => {
+        let lastErr;
+        for (let i = 1; i <= maxIntentos; i++) {
+          try {
+            return await fetchMes(mes);
+          } catch(e) {
+            lastErr = e;
+            if (e.name === 'AbortError') break; // timeout de 6 min → no reintentar
+            if (i < maxIntentos) await new Promise(r => setTimeout(r, i * 1000));
+          }
+        }
+        throw lastErr;
+      };
+
+      // Inicializar chips de estado
+      _resMeses = [...meses];
+      meses.forEach(mes => { mesEstados[mes.label] = 'pending'; });
+      renderMesChips();
+
+      RAW_RES = [];
+      _rawResFullyLoaded = false;
+      let cargados = 0;
+
+      // Carga de a 2 meses en paralelo (chunks) para no saturar GAS
+      const CHUNK = 2;
+      for (let ci = 0; ci < meses.length; ci += CHUNK) {
+        const chunk = meses.slice(ci, ci + CHUNK);
+        chunk.forEach(mes => { mesEstados[mes.label] = 'loading'; });
+        renderMesChips();
+        if (label) label.textContent = `⏳ Cargando ${chunk.map(m => m.label).join(', ')}...`;
+
+        await Promise.all(chunk.map(mes =>
+          fetchMesConRetry(mes)
+            .then(res => {
+              cargados++;
+              const src = res.source || 'base1';
+              mesSource[mes.label] = src;
+              if (res && res.rows && res.rows.length) {
+                const rows = src === 'cache' ? cacheRowsToSynthetic(res.rows) : res.rows;
+                RAW_RES = RAW_RES.concat(rows);
+                mesEstados[mes.label] = 'ok';
+                if (label) label.textContent = `⏳ ${cargados}/${meses.length} meses cargados...`;
+                populateResFilterDropdowns();
+                updateTrutaCardFromRAW();
+                renderResumen();
+                renderEvolutivo();
+                if (_resModalCurrent) openResModal(_resModalCurrent);
+              } else {
+                mesEstados[mes.label] = 'ok'; // ok pero vacío
+                console.warn(`[loadDetalleResumen] Sin filas para ${mes.label}:`, res);
+              }
+            })
+            .catch(e => {
+              cargados++;
+              mesEstados[mes.label] = 'error';
+              const tipo = e.name === 'AbortError' ? '⏱ TIMEOUT' : '❌ ERROR';
+              console.warn(`[loadDetalleResumen] ${tipo} en ${mes.label}:`, e.message);
+            })
+            .finally(() => renderMesChips())
+        ));
+      }
+      _rawResFullyLoaded = true;
+      populateResFilterDropdowns();
+      setModeBar('detail');
+      showPeriodSlider();
+      updateTrutaCardFromRAW();
+      renderResumen();
+      if (_resModalCurrent) openResModal(_resModalCurrent);
+    } catch(e) {
+      console.warn('[loadDetalleResumen] Error:', e.message);
+      const isTimeout = e.name === 'AbortError';
+      const msg = isTimeout ? 'Tiempo de espera agotado — reintentá' : 'Error al cargar historial';
+      if (label) { label.textContent = `❌ ${msg}`; label.className = 'mode-lbl-fast'; }
+      if (btn)   { btn.disabled = false; btn.textContent = '🔄 Reintentar'; }
+    } finally {
+      _rawResLoadingPromise = null;
+    }
+  })();
+  return _rawResLoadingPromise;
+}
+
+/* ============================================================
+   MEJORA 3 — chips de estado por mes
+============================================================ */
+function renderMesChips() {
+  const bar = document.getElementById('mesChipsBar');
+  if (!bar) return;
+  if (!_resMeses.length) { bar.style.display = 'none'; return; }
+  bar.style.display = '';
+  const iconMap = { pending: '○', loading: '⏳', ok: '✓', error: '✗' };
+  bar.innerHTML = _resMeses.map(mes => {
+    const est  = mesEstados[mes.label] || 'pending';
+    const src  = mesSource[mes.label];
+    let icon   = iconMap[est] || '○';
+    if (est === 'ok' && src === 'cache') icon = '⚡';
+    const tip  = est === 'ok' ? (src === 'cache' ? 'Desde caché (rápido)' : 'Desde BASE1') : '';
+    return `<span class="mes-chip mes-chip-${est}" title="${tip}">${icon} ${mes.label}</span>`;
+  }).join('');
+}
+
+/* ============================================================
+   CACHE → synthetic rows
+   Expande filas de CACHE (1 por plan) en filas sintéticas compatibles
+   con el schema de BASE1. Cada fila lleva _cache_count = N para que
+   stats(), calcNPS() y calcOrdenesPorVehiculo() cuenten N órdenes.
+============================================================ */
+function cacheRowsToSynthetic(cacheRows) {
+  const out = [];
+  cacheRows.forEach(c => {
+    const base = {
+      fecha: c.fecha, plan: c.plan,
+      scenario_token: c.plan,      // plan como clave de ruta (proxy de scenario_token)
+      vehiculo:  c.vehiculo,
+      conductor: c.conductor,
+      deposito:  c.deposito,
+      flota:     c.flota,
+      tiempo_en_ruta_min: c.tiempo_ruta_min,
+      route_started_at: '',
+      inicio_ruta_min: c.inicio_ruta_min != null ? c.inicio_ruta_min : null,
+      motivo_rechazo: '',
+      rating_1: null, rating_2: null, rating_3: null,
+      ier: 0, kg: 0, bultos: 0,
+      _from_cache: true,
+    };
+
+    const npsT    = (c.nps_promotores || 0) + (c.nps_neutrales || 0) + (c.nps_detractores || 0);
+    const nonNps  = Math.max(0, (c.aprobadas || 0) - npsT);
+    let ierUsed   = false;
+
+    // Bucket aprobadas sin NPS (lleva todo el IER, KG, bultos)
+    if (nonNps > 0) {
+      out.push({ ...base, status: 'approved',
+        ier: c.ingreso_total || 0, kg: c.kg_cargados || 0, bultos: c.bultos_cargados || 0,
+        _cache_count: nonNps });
+      ierUsed = true;
+    }
+
+    // NPS: individual si hay nps_comments (CACHE regenerado); genérico como fallback
+    if (c.nps_comments && c.nps_comments.trim()) {
+      c.nps_comments.split(';;').filter(e => e.trim()).forEach((entry, i) => {
+        const parts   = entry.split('|');
+        const code    = parts[0] || '';
+        const r1      = Number(parts[1]) || 0;
+        const r2      = Number(parts[2]) || 0;
+        const r3      = Number(parts[3]) || 0;
+        const comment = parts.slice(4).join('|');
+        out.push({ ...base, status: 'approved',
+          codigo_orden: code,
+          rating_1: r1, rating_2: r2, rating_3: r3,
+          customer_comment: comment,
+          ier:    (i === 0 && !ierUsed) ? (c.ingreso_total || 0) : 0,
+          kg:     (i === 0 && !ierUsed) ? (c.kg_cargados   || 0) : 0,
+          bultos: (i === 0 && !ierUsed) ? (c.bultos_cargados || 0) : 0,
+          _cache_count: 1 });
+        if (i === 0) ierUsed = true;
+      });
+    } else {
+      // Fallback: buckets genéricos (CACHE viejo sin nps_comments)
+      if ((c.nps_promotores || 0) > 0) {
+        out.push({ ...base, status: 'approved',
+          rating_1: 5, rating_2: 5, rating_3: 5,
+          ier:    !ierUsed ? (c.ingreso_total || 0) : 0,
+          kg:     !ierUsed ? (c.kg_cargados   || 0) : 0,
+          bultos: !ierUsed ? (c.bultos_cargados || 0) : 0,
+          _cache_count: c.nps_promotores });
+        ierUsed = true;
+      }
+      if ((c.nps_neutrales || 0) > 0) {
+        out.push({ ...base, status: 'approved', rating_1: 4, rating_2: 4, rating_3: 4, _cache_count: c.nps_neutrales });
+      }
+      if ((c.nps_detractores || 0) > 0) {
+        out.push({ ...base, status: 'approved', rating_1: 1, rating_2: 1, rating_3: 1, _cache_count: c.nps_detractores });
+      }
+    }
+
+    // Fallback: aprobadas sin ningún bucket aún (no debería ocurrir, pero defensivo)
+    if (!ierUsed && (c.aprobadas || 0) > 0) {
+      out.push({ ...base, status: 'approved',
+        ier: c.ingreso_total || 0, kg: c.kg_cargados || 0, bultos: c.bultos_cargados || 0,
+        _cache_count: c.aprobadas });
+    }
+
+    // Rechazadas por motivo conocido
+    const MOTIVOS_REJ = [
+      ['rej_nadie',      'Nadie en el Domicilio'],
+      ['rej_prob_carga', 'Problemas con la Carga'],
+      ['rej_prob_dir',   'Problemas con la Direccion'],
+      ['rej_rechazado',  'Rechazado'],
+      ['rej_retiro',     'Retiro Anulado'],
+      ['rej_rotura',     'Rotura'],
+    ];
+    let rejContabilizado = (c.dnv_count || 0);
+    MOTIVOS_REJ.forEach(([field, label]) => {
+      const n = c[field] || 0;
+      if (n > 0) {
+        out.push({ ...base, status: 'rejected', motivo_rechazo: label, _cache_count: n });
+        rejContabilizado += n;
+      }
+    });
+    // Rechazadas sin clasificar (no deberían quedar con CACHE regenerado)
+    const rejSinMotivo = Math.max(0, (c.rechazadas || 0) - rejContabilizado);
+    if (rejSinMotivo > 0) {
+      out.push({ ...base, status: 'rejected', _cache_count: rejSinMotivo });
+    }
+
+    // DNV
+    if ((c.dnv_count || 0) > 0) {
+      out.push({ ...base, status: 'rejected',
+        motivo_rechazo: 'domicilio no visitado', _cache_count: c.dnv_count });
+    }
+
+    // Pendientes
+    if ((c.pendientes || 0) > 0) {
+      out.push({ ...base, status: 'pending', _cache_count: c.pendientes });
+    }
+  });
+  return out;
+}
+
+/* ============================================================
+   MEJORA 2 — period slider (solo tarjetas)
+============================================================ */
+function showPeriodSlider() {
+  const bar = document.getElementById('periodSliderBar');
+  if (!bar) return;
+  const fechas = [...new Set(RAW_RES.map(r => r.fecha).filter(Boolean))].sort();
+  if (fechas.length < 2) return; // sin rango útil
+  bar.dataset.fechas = JSON.stringify(fechas);
+  const sDesde = document.getElementById('psDesde');
+  const sHasta = document.getElementById('psHasta');
+  if (!sDesde || !sHasta) return;
+  sDesde.min = 0; sDesde.max = fechas.length - 1; sDesde.value = 0;
+  sHasta.min = 0; sHasta.max = fechas.length - 1; sHasta.value = fechas.length - 1;
+  _updatePsLabels(fechas, 0, fechas.length - 1);
+  bar.style.display = '';
+}
+
+function onPeriodSliderDesde() {
+  const { fechas, sDesde, sHasta } = _psContext();
+  if (!fechas) return;
+  let idxD = parseInt(sDesde.value);
+  const idxH = parseInt(sHasta.value);
+  if (idxD > idxH) { idxD = idxH; sDesde.value = idxD; }
+  periodSlider.desde = idxD === 0 ? null : fechas[idxD];
+  _updatePsLabels(fechas, idxD, idxH);
+  renderResumen();
+}
+
+function onPeriodSliderHasta() {
+  const { fechas, sDesde, sHasta } = _psContext();
+  if (!fechas) return;
+  const idxD = parseInt(sDesde.value);
+  let idxH = parseInt(sHasta.value);
+  if (idxH < idxD) { idxH = idxD; sHasta.value = idxH; }
+  periodSlider.hasta = idxH === fechas.length - 1 ? null : fechas[idxH];
+  _updatePsLabels(fechas, idxD, idxH);
+  renderResumen();
+}
+
+function resetPeriodSlider() {
+  const { fechas, sDesde, sHasta } = _psContext();
+  if (!fechas) return;
+  sDesde.value = 0;
+  sHasta.value = fechas.length - 1;
+  periodSlider.desde = null;
+  periodSlider.hasta = null;
+  _updatePsLabels(fechas, 0, fechas.length - 1);
+  renderResumen();
+}
+
+function _psContext() {
+  const bar = document.getElementById('periodSliderBar');
+  if (!bar || !bar.dataset.fechas) return {};
+  return {
+    fechas: JSON.parse(bar.dataset.fechas),
+    sDesde: document.getElementById('psDesde'),
+    sHasta: document.getElementById('psHasta'),
+  };
+}
+
+function _updatePsLabels(fechas, idxD, idxH) {
+  const lD = document.getElementById('psDesdeLabel');
+  const lH = document.getElementById('psHastaLabel');
+  if (lD) lD.textContent = fmtDD(fechas[idxD]);
+  if (lH) lH.textContent = fmtDD(fechas[idxH]);
+}
+
+function updateTrutaCardFromRAW() {
+  if (!RAW_RES.length) return;
+  // Aplicar solo restricción de depósito del perfil (igual que CACHE_ROWS en cards)
+  const deps = APP_STATE.userDepositos;
+  let rows = RAW_RES;
+  if (deps && deps.length) rows = rows.filter(r => deps.includes(r.deposito));
+  if (!rows.length) return;
+
+  const tRutaRes = calcTiempoRutaPromedio(rows);
+  if (tRutaRes.avg == null) return;
+
+  const pm  = Math.round(tRutaRes.avg);
+  const h   = Math.floor(pm / 60);
+  const m   = pm % 60;
+  const tOk = pm >= 480;
+
+  const rcTr = el('rcTruta');
+  if (rcTr) rcTr.className = 'res-card ' + (tOk ? 'rc-eff-g' : 'rc-eff-d');
+  setText('rcvTruta', h > 0 ? `${h}h ${m}m` : `${m}m`);
+  setText('rcsTruta', 'promedio del período');
+  setText('rcsTruta2', tRutaRes.inicioPromedio ? 'Inicio prom: ' + tRutaRes.inicioPromedio : '');
+  const rcoTr = el('rcoTruta');
+  if (rcoTr) {
+    rcoTr.className = 'rc-obj ' + (tOk ? 'rc-obj-ok' : 'rc-obj-fail');
+    rcoTr.textContent = tOk ? 'Objetivo: ≥8hs  ✓' : 'Objetivo: ≥8hs  ✗';
+  }
+}
+
+function setModeBar(mode) {
+  const bar   = document.getElementById('resModeBar');
+  const label = document.getElementById('resModeLabel');
+  const btn   = document.getElementById('btnLoadDetail');
+  if (!bar) return;
+  bar.style.display = '';
+  if (mode === 'fast') {
+    label.textContent = '⚡ Modo rápido — datos pre-calculados';
+    label.className   = 'mode-lbl-fast';
+    if (btn) btn.style.display = '';
+  } else {
+    label.textContent = '📊 Modo detalle — datos completos cargados';
+    label.className   = 'mode-lbl-detail';
+    if (btn) btn.style.display = 'none';
   }
 }
 
@@ -1337,10 +2067,22 @@ function activeTab() {
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(b  => b.classList.toggle('active', b.dataset.tab === tab));
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab));
+  // Mostrar controles de fecha solo en tabs que no son RESUMEN
+  const ctrlFechas = document.getElementById('hdrCtrlFechas');
+  const lblPeriodo = document.getElementById('hdrPeriodoLabel');
+  if (ctrlFechas && lblPeriodo) {
+    const enResumen = tab === 'resumen';
+    ctrlFechas.style.display = enResumen ? 'none' : '';
+    lblPeriodo.style.display  = enResumen ? 'flex' : 'none';
+  }
   renderTab(tab);
 }
 
 function renderTab(tab) {
+  if (APP_MODE === 'fast' && tab !== 'resumen') {
+    showFastPlaceholder(tab);
+    return;
+  }
   switch(tab) {
     case 'resumen':     renderResumen();     break;
     case 'general':     renderGeneral();     break;
@@ -1352,13 +2094,38 @@ function renderTab(tab) {
   }
 }
 
+function showFastPlaceholder(tab) {
+  const pane = document.getElementById('tab-' + tab);
+  if (!pane) return;
+  if (pane.classList.contains('fast-mode-tab')) return; // ya tiene placeholder
+  pane.classList.add('fast-mode-tab');
+  const ph = document.createElement('div');
+  ph.className = 'fast-placeholder';
+  ph.innerHTML = `
+    <div class="fp-icon">📊</div>
+    <div class="fp-msg">Para ver este tab cargá los datos completos.<br>
+      <span style="font-size:11px">El modo rápido muestra Resumen y Evolutivo de indicadores.</span>
+    </div>
+    <button class="fp-btn" onclick="loadDetalle()">📊 Cargar datos completos</button>`;
+  pane.appendChild(ph);
+}
+
+function removeFastPlaceholder(tab) {
+  const pane = document.getElementById('tab-' + tab);
+  if (!pane) return;
+  pane.classList.remove('fast-mode-tab');
+  const ph = pane.querySelector('.fast-placeholder');
+  if (ph) ph.remove();
+}
+
 /* ============================================================
    DERIVED DATA
 ============================================================ */
 function stats(rows) {
-  const total      = rows.length;
-  const entregadas = rows.filter(r => r.status === 'delivered' || r.status === 'approved').length;
-  const rechazadas = rows.filter(r => r.status === 'rejected').length;
+  const cnt        = r => r._cache_count || 1;
+  const total      = rows.reduce((s, r) => s + cnt(r), 0);
+  const entregadas = rows.filter(r => r.status === 'delivered' || r.status === 'approved').reduce((s, r) => s + cnt(r), 0);
+  const rechazadas = rows.filter(r => r.status === 'rejected').reduce((s, r) => s + cnt(r), 0);
   const pendientes = total - entregadas - rechazadas;
   const eff        = total > 0 ? entregadas / total * 100 : 0;
   return { total, entregadas, rechazadas, pendientes, eff };
@@ -2372,19 +3139,33 @@ async function loadVehiculos() {
   }
 }
 
+function isResFilterActive() {
+  const { deposito, flota, vehiculo, empleador } = _resFilters;
+  return (Array.isArray(deposito) ? deposito.length > 0 : !!deposito) ||
+         (Array.isArray(flota)    ? flota.length    > 0 : !!flota)    ||
+         !!(vehiculo || '').trim() || !!empleador;
+}
+
 // Aplica _resFilters a un set de filas (sin tocar el filtro de depósitos de usuario)
 function applyResFilterLogic(rows) {
   const { deposito, flota, vehiculo, empleador } = _resFilters;
-  const q = vehiculo.trim().toLowerCase();
-  if (!deposito && !flota && !q && !empleador) return rows;
+  const q          = vehiculo.trim().toLowerCase();
+  const hasDepFlt  = Array.isArray(deposito) ? deposito.length > 0 : !!deposito;
+  const hasFltFlt  = Array.isArray(flota)    ? flota.length    > 0 : !!flota;
+  if (!hasDepFlt && !hasFltFlt && !q && !empleador) return rows;
   return rows.filter(r => {
-    if (deposito && r.deposito !== deposito) return false;
-    if (flota) {
-      const vInfo = VEHICULOS_MAP[r.vehiculo];
+    if (hasDepFlt) {
+      if (Array.isArray(deposito) ? !deposito.includes(r.deposito) : r.deposito !== deposito) return false;
+    }
+    if (hasFltFlt) {
+      const vInfo  = VEHICULOS_MAP[r.vehiculo];
       const flotas = vInfo && vInfo.fleets
         ? vInfo.fleets.split(',').map(f => f.trim()).filter(Boolean)
         : [];
-      if (!flotas.includes(flota)) return false;
+      const ok = Array.isArray(flota)
+        ? flotas.some(f => flota.includes(f))
+        : flotas.includes(flota);
+      if (!ok) return false;
     }
     if (q) {
       const matchV = (r.vehiculo  || '').toLowerCase().includes(q);
@@ -2413,8 +3194,25 @@ function getEffectiveRAW() {
 // Usar exclusivamente en el tab Resumen para que los filtros funcionen
 // aunque _resScope sea 'resumen'.
 function getResRAW() {
+  if (!RAW_RES.length) {
+    loadDetalleResumen();
+    return [];
+  }
   const deps = APP_STATE.userDepositos;
-  let rows = RAW;
+  let rows = RAW_RES;
+  if (deps && deps.length) rows = rows.filter(r => deps.includes(r.deposito));
+  rows = applyResFilterLogic(rows);
+  // Aplicar slider de período (solo tarjetas; renderEvolutivo usa getResRAWCompleto)
+  if (periodSlider.desde) rows = rows.filter(r => r.fecha >= periodSlider.desde);
+  if (periodSlider.hasta) rows = rows.filter(r => r.fecha <= periodSlider.hasta);
+  return rows;
+}
+
+// Igual a getResRAW pero SIN aplicar periodSlider — usada por renderEvolutivo
+function getResRAWCompleto() {
+  if (!RAW_RES.length) return [];
+  const deps = APP_STATE.userDepositos;
+  let rows = RAW_RES;
   if (deps && deps.length) rows = rows.filter(r => deps.includes(r.deposito));
   return applyResFilterLogic(rows);
 }
@@ -2422,35 +3220,46 @@ function getResRAW() {
 /* ---- Gestión de filtros del tab Resumen ---- */
 
 function populateResFilterDropdowns() {
-  const deps = APP_STATE.userDepositos;
-  let base = RAW;
-  if (deps && deps.length) base = base.filter(r => deps.includes(r.deposito));
+  const userDeps = APP_STATE.userDepositos;
+  // Fuente de datos: RAW_RES si ya cargó (período completo del RESUMEN), sino RAW_TODAY como fallback parcial
+  let base = RAW_RES.length ? RAW_RES : RAW_TODAY;
+  if (userDeps && userDeps.length) base = base.filter(r => userDeps.includes(r.deposito));
 
-  // Depósito — valores únicos del conjunto base
-  const depSel = el('rfDeposito');
-  if (depSel) {
-    const prev = depSel.value;
+  // Depósito — multi-select con checkboxes
+  const depOpts = el('msOptsDep');
+  if (depOpts) {
     const vals = [...new Set(base.map(r => r.deposito).filter(Boolean))].sort();
-    depSel.innerHTML = '<option value="">Todos</option>';
-    vals.forEach(v => depSel.add(new Option(v, v)));
-    if (prev && vals.includes(prev)) depSel.value = prev;
+    depOpts.innerHTML = vals.map(v => {
+      const chk = _msDepSel.has(v) ? ' checked' : '';
+      return `<label class="ms-opt"><input type="checkbox" data-g="dep" data-v="${v.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"${chk}><span>${esc(v)}</span></label>`;
+    }).join('');
+    depOpts.querySelectorAll('input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => toggleMsOpt(cb.dataset.g, cb.dataset.v));
+    });
+    _syncMsAllCbx('dep');
+    updateMsLabel('dep');
   }
 
-  // Flota — desde VEHICULOS_MAP (campo fleets, separado por coma)
-  const fltSel = el('rfFlota');
-  if (fltSel) {
-    const prev = fltSel.value;
+  // Flota — multi-select con checkboxes (desde VEHICULOS_MAP)
+  const fltOpts = el('msOptsFlt');
+  if (fltOpts) {
     const flotas = new Set();
     Object.values(VEHICULOS_MAP).forEach(v => {
       if (v.fleets) v.fleets.split(',').map(f => f.trim()).filter(Boolean).forEach(f => flotas.add(f));
     });
     const vals = [...flotas].sort();
-    fltSel.innerHTML = '<option value="">Todas</option>';
-    vals.forEach(v => fltSel.add(new Option(v, v)));
-    if (prev && vals.includes(prev)) fltSel.value = prev;
+    fltOpts.innerHTML = vals.map(v => {
+      const chk = _msFltSel.has(v) ? ' checked' : '';
+      return `<label class="ms-opt"><input type="checkbox" data-g="flt" data-v="${v.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"${chk}><span>${esc(v)}</span></label>`;
+    }).join('');
+    fltOpts.querySelectorAll('input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => toggleMsOpt(cb.dataset.g, cb.dataset.v));
+    });
+    _syncMsAllCbx('flt');
+    updateMsLabel('flt');
   }
 
-  // Empleador — desde VEHICULOS_MAP
+  // Empleador — mantiene single-select
   const empSel = el('rfEmpleador');
   if (empSel) {
     const prev = empSel.value;
@@ -2462,17 +3271,20 @@ function populateResFilterDropdowns() {
 }
 
 function applyResFilters() {
-  _resFilters.deposito  = el('rfDeposito')?.value  || '';
-  _resFilters.flota     = el('rfFlota')?.value     || '';
+  _resFilters.deposito  = [..._msDepSel];
+  _resFilters.flota     = [..._msFltSel];
   _resFilters.vehiculo  = el('rfVehiculo')?.value  || '';
   _resFilters.empleador = el('rfEmpleador')?.value || '';
   renderResumen();
 }
 
 function clearResFilters() {
-  _resFilters = { deposito: '', flota: '', vehiculo: '', empleador: '' };
-  const depSel = el('rfDeposito');  if (depSel)  depSel.value = '';
-  const fltSel = el('rfFlota');     if (fltSel)  fltSel.value = '';
+  _msDepSel.clear(); _msFltSel.clear();
+  _resFilters = { deposito: [], flota: [], vehiculo: '', empleador: '' };
+  updateMsLabel('dep'); updateMsLabel('flt');
+  el('msOptsDep')?.querySelectorAll('input[type=checkbox]').forEach(cb => { cb.checked = false; });
+  el('msOptsFlt')?.querySelectorAll('input[type=checkbox]').forEach(cb => { cb.checked = false; });
+  _syncMsAllCbx('dep'); _syncMsAllCbx('flt');
   const vehIn  = el('rfVehiculo');  if (vehIn)   vehIn.value  = '';
   const empSel = el('rfEmpleador'); if (empSel)  empSel.value = '';
   renderResumen();
@@ -2847,7 +3659,8 @@ function toggleNadieDetail(cat) {
 ============================================================ */
 function el(id) { return document.getElementById(id); }
 
-function showOverlay(v) { el('overlay').classList.toggle('on', v); }
+function showOverlay(v)     { el('overlay').classList.toggle('on', v); }
+function showLoadingBar(v)  { el('loadBar')?.classList.toggle('on', v); }
 
 function showErr(msg) { const e = el('errBanner'); e.textContent = msg; e.classList.add('on'); }
 function hideErr()    { el('errBanner').classList.remove('on'); }
@@ -2867,7 +3680,512 @@ let _npsFilter       = '';
 
 function average(arr) { return arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : null; }
 
+/* ============================================================
+   RENDER RESUMEN DESDE CACHE — modo rápido
+============================================================ */
+function renderResumenFromCache() {
+  // Poblar filtros con lo que haya disponible: flotas/empleadores desde VEHICULOS_MAP,
+  // depósito desde RAW (si ya cargó) o RAW_TODAY
+  populateResFilterDropdowns();
+
+  const noData = el('resNoData');
+
+  // Acumular totales desde CACHE_ROWS (días pasados ya cacheados)
+  let total = 0, aprob = 0, rech = 0, pend = 0, dnvC = 0;
+  let ierSum = 0, ierCnt = 0;
+  let npsP = 0, npsN = 0, npsD = 0, npsT = 0;
+  const tRutas = [], ordVeh = [], prodKg = [], prodBul = [];
+
+  CACHE_ROWS.forEach(c => {
+    total += Number(c.total_ordenes) || 0;
+    aprob += Number(c.aprobadas)     || 0;
+    rech  += Number(c.rechazadas)    || 0;
+    pend  += Number(c.pendientes)    || 0;
+    dnvC  += Number(c.dnv_count)     || 0;
+    ierSum += Number(c.ingreso_total)           || 0;
+    ierCnt += Number(c.ingreso_ordenes_con_ier) || 0;
+    npsP   += Number(c.nps_promotores)          || 0;
+    npsN   += Number(c.nps_neutrales)           || 0;
+    npsD   += Number(c.nps_detractores)         || 0;
+    npsT   += Number(c.nps_total_respuestas)    || 0;
+    const t = Number(c.tiempo_ruta_prom_min);    if (t > 0) tRutas.push(t);
+    const k = Number(c.ordenes_x_vehiculo_prom); if (k > 0) ordVeh.push(k);
+    const pk = Number(c.prod_kg_prom_pct);       if (pk > 0) prodKg.push(pk);
+    const pb = Number(c.prod_bultos_prom_pct);   if (pb > 0) prodBul.push(pb);
+  });
+
+  // Agregar datos de hoy (raw) si los hay
+  if (RAW_TODAY.length) {
+    const todAprob = RAW_TODAY.filter(r => r.status === 'approved' || r.status === 'delivered').length;
+    total += RAW_TODAY.length;
+    aprob += todAprob;
+    rech  += RAW_TODAY.filter(r => r.status === 'rejected').length;
+    pend  += RAW_TODAY.filter(r => r.status === 'pending').length;
+    dnvC  += RAW_TODAY.filter(r => r.status === 'rejected' &&
+              (r.motivo_rechazo || '').toLowerCase().trim() === 'domicilio no visitado').length;
+    RAW_TODAY.forEach(r => { const v = parseFloat(r.ier); if (!isNaN(v) && v > 0) { ierSum += v; ierCnt++; } });
+    const nT = calcNPS(RAW_TODAY);
+    npsP += nT.promotores; npsN += nT.neutrales; npsD += nT.detractores; npsT += nT.total;
+    const tT = calcTiempoRutaPromedio(RAW_TODAY);
+    if (tT.avg)  tRutas.push(tT.avg);
+    const oT = calcOrdenesPorVehiculo(RAW_TODAY);
+    if (oT != null) ordVeh.push(oT);
+    const pkT = calcProductividadKG(RAW_TODAY);
+    if (pkT != null) prodKg.push(pkT);
+    const pbT = calcProductividadBultos(RAW_TODAY);
+    if (pbT != null) prodBul.push(pbT);
+  }
+
+  if (!total) {
+    if (noData) noData.style.display = '';
+    const evol = el('resEvolutivo'); if (evol) evol.style.display = 'none';
+    return;
+  }
+  if (noData) noData.style.display = 'none';
+  const botGrid = el('resGridBot');
+  if (botGrid) botGrid.style.display = canSeeFinancials() ? '' : 'none';
+
+  // --- Tarjeta Efectividad ---
+  const eff   = aprob / total * 100;
+  const effOk = eff >= 95;
+  const rcE   = el('rcEfectividad');
+  if (rcE) rcE.className = 'res-card ' + (effOk ? 'rc-eff-g' : 'rc-eff-d');
+  setText('rcvEfectividad', eff.toFixed(1) + '%');
+  setText('rcsEfectividad', `${aprob.toLocaleString('es-AR')} de ${total.toLocaleString('es-AR')}`);
+  const rcoE = el('rcoEfectividad');
+  if (rcoE) { rcoE.className = 'rc-obj '+(effOk?'rc-obj-ok':'rc-obj-fail'); rcoE.textContent = effOk ? 'Objetivo: 95%  ✓' : 'Objetivo: 95%  ✗'; }
+
+  // --- Tarjeta Domicilio Visitado ---
+  const conGest = total - pend - dnvC;
+  const dvPct   = conGest / total * 100;
+  const dvOk    = dvPct >= 98;
+  const rcDNV   = el('rcDNV');
+  if (rcDNV) rcDNV.className = 'res-card ' + (dvOk ? 'rc-eff-g' : 'rc-eff-d');
+  setText('rcvDNV', dvPct.toFixed(1) + '%');
+  setText('rcsDNV', dnvC + ' sin gestión');
+  const rcoDNV = el('rcoDNV');
+  if (rcoDNV) { rcoDNV.className = 'rc-obj '+(dvOk?'rc-obj-ok':'rc-obj-fail'); rcoDNV.textContent = dvOk ? 'Objetivo: 98%  ✓' : 'Objetivo: 98%  ✗'; }
+
+  // --- Tarjeta T. Promedio Ruta ---
+  const rcTr = el('rcTruta');
+  const rcoTrFast = el('rcoTruta');
+  if (tRutas.length) {
+    const pm = Math.round(tRutas.reduce((a,b)=>a+b,0)/tRutas.length);
+    const h = Math.floor(pm/60), m = pm%60;
+    const tOk = pm >= 480;
+    if (rcTr) rcTr.className = 'res-card ' + (tOk ? 'rc-eff-g' : 'rc-eff-d');
+    setText('rcvTruta', h>0 ? `${h}h ${m}m` : `${m}m`);
+    setText('rcsTruta', 'promedio del período');
+    setText('rcsTruta2', '');
+    if (rcoTrFast) { rcoTrFast.className = 'rc-obj ' + (tOk ? 'rc-obj-ok' : 'rc-obj-fail'); rcoTrFast.textContent = tOk ? 'Objetivo: ≥8hs  ✓' : 'Objetivo: ≥8hs  ✗'; }
+  } else {
+    if (rcTr) rcTr.className = 'res-card rc-cyan';
+    setText('rcvTruta', '—'); setText('rcsTruta', 'sin datos');
+    if (rcoTrFast) rcoTrFast.textContent = '';
+  }
+
+  // --- Tarjeta Órd. x Vehículo ---
+  if (ordVeh.length) {
+    setText('rcvOrdxveh', (ordVeh.reduce((a,b)=>a+b,0)/ordVeh.length).toFixed(1));
+  } else { setText('rcvOrdxveh', '—'); }
+
+  // --- Tarjeta Productividad KG ---
+  if (prodKg.length) {
+    const pk = prodKg.reduce((a,b)=>a+b,0)/prodKg.length;
+    setText('rcvProdKG', pk.toFixed(1)+'%'); setText('rcsProdKG','ocupación promedio');
+  } else { setText('rcvProdKG','—'); setText('rcsProdKG','sin datos'); }
+
+  // --- Tarjeta Productividad Bultos ---
+  const rcoPB = el('rcoProdBultos');
+  if (prodBul.length) {
+    const pb  = prodBul.reduce((a,b)=>a+b,0)/prodBul.length;
+    const pbOk = pb >= 95;
+    const rcPB = el('rcProdBultos');
+    if (rcPB) rcPB.className = 'res-card rc-cyan';
+    setText('rcvProdBultos', pb.toFixed(1)+'%'); setText('rcsProdBultos','ocupación promedio');
+    if (rcoPB) { rcoPB.className='rc-obj '+(pbOk?'rc-obj-ok':'rc-obj-fail'); rcoPB.textContent = pbOk?'Objetivo: 95%  ✓':'Objetivo: 95%  ✗'; }
+  } else { setText('rcvProdBultos','—'); if(rcoPB) rcoPB.textContent=''; }
+
+  // --- Tarjeta NPS ---
+  const rcN  = el('rcNPS');
+  const rcoN = el('rcoNPS');
+  if (npsT > 0) {
+    const sc    = (npsP - npsD) / npsT * 100;
+    const npsOk = sc >= 95;
+    if (rcN) rcN.className = 'res-card ' + (npsOk ? 'rc-eff-g' : 'rc-eff-d');
+    setText('rcvNPS', (sc>=0?'+':'') + sc.toFixed(1));
+    setText('rcsNPS', npsT + ' respuestas · ' + (aprob>0 ? (npsT/aprob*100).toFixed(1) : 0) + '% tasa');
+    if (rcoN) { rcoN.className='rc-obj '+(npsOk?'rc-obj-ok':'rc-obj-fail'); rcoN.textContent=npsOk?'Objetivo: 95  ✓':'Objetivo: 95  ✗'; }
+  } else {
+    if (rcN) rcN.className = 'res-card rc-cyan';
+    setText('rcvNPS','—'); setText('rcsNPS','sin datos NPS'); if(rcoN) rcoN.textContent='';
+  }
+
+  // --- Tarjeta Ingreso ---
+  if (canSeeFinancials()) {
+    setText('rcvIngreso', ierSum > 0 ? ierSum.toLocaleString('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}) : '—');
+    setText('rcsIngreso', ierCnt > 0 ? ierCnt.toLocaleString('es-AR') + ' órdenes con IER' : '—');
+  }
+
+  // Mostrar evolutivo
+  renderEvolutivo();
+}
+
+/* ============================================================
+   EVOLUTIVO DE INDICADORES
+============================================================ */
+function setEvolAgrup(agrup) {
+  _evolAgrup = agrup;
+  el('evolBtnQ')?.classList.toggle('active', agrup === 'quincenal');
+  el('evolBtnM')?.classList.toggle('active', agrup === 'mensual');
+  renderEvolutivo();
+}
+
+function renderEvolutivo() {
+  const sec = el('resEvolutivo');
+  if (!sec) return;
+
+  // Si hay filtro activo y RAW_RES cargado → construir evolutivo desde RAW filtrado (sin slider)
+  if (isResFilterActive() && RAW_RES.length) {
+    const rawRows = getResRAWCompleto();
+    const fechas  = rawRows.map(r => r.fecha).filter(Boolean).sort();
+    if (!fechas.length) { sec.style.display = 'none'; return; }
+    sec.style.display = '';
+    const fMin = fechas[0], fMax = fechas[fechas.length - 1];
+    const sub = el('evolSubtitle');
+    if (sub) sub.textContent = `Evolución desde ${fmtDD(fMin)} hasta ${fmtDD(fMax)}`;
+    const periodos = _evolAgrup === 'quincenal' ? buildPeriodosQuincenales(fMin, fMax) : buildPeriodosMensuales(fMin, fMax);
+    if (!periodos.length) return;
+    _evolData = periodos.map(p => {
+      const filas = rawRows.filter(r => r.fecha >= p.desde && r.fecha <= p.hasta);
+      return { label: p.label, ...aggregateRawSet(filas) };
+    });
+    renderEvolTable();
+    renderEvolChart();
+    return;
+  }
+
+  // Sin filtro pero RAW_RES disponible → usarlo como fuente (consistente con las tarjetas)
+  if (RAW_RES.length) {
+    const deps = APP_STATE.userDepositos;
+    let rawRows = RAW_RES;
+    if (deps && deps.length) rawRows = rawRows.filter(r => deps.includes(r.deposito));
+    const fechas = rawRows.map(r => r.fecha).filter(Boolean).sort();
+    if (!fechas.length) { sec.style.display = 'none'; return; }
+    sec.style.display = '';
+    const fMin = fechas[0], fMax = fechas[fechas.length - 1];
+    const sub = el('evolSubtitle');
+    if (sub) sub.textContent = `Evolución desde ${fmtDD(fMin)} hasta ${fmtDD(fMax)}`;
+    const periodos = _evolAgrup === 'quincenal' ? buildPeriodosQuincenales(fMin, fMax) : buildPeriodosMensuales(fMin, fMax);
+    if (!periodos.length) return;
+    _evolData = periodos.map(p => {
+      const filas = rawRows.filter(r => r.fecha >= p.desde && r.fecha <= p.hasta);
+      return { label: p.label, ...aggregateRawSet(filas) };
+    });
+    renderEvolTable();
+    renderEvolChart();
+    return;
+  }
+
+  // Fallback: CACHE_ROWS mientras RAW no carga
+  const allRows = [...CACHE_ROWS];
+  // Incluir hoy si hay datos raw
+  if (RAW_TODAY.length) {
+    const today = isoToday();
+    if (!allRows.find(c => c.fecha === today)) {
+      // Generar fila sintética para hoy desde raw
+      const todAprob = RAW_TODAY.filter(r => r.status==='approved'||r.status==='delivered').length;
+      const todRech  = RAW_TODAY.filter(r => r.status==='rejected').length;
+      const todPend  = RAW_TODAY.filter(r => r.status==='pending').length;
+      const todDnv   = RAW_TODAY.filter(r => r.status==='rejected'&&(r.motivo_rechazo||'').toLowerCase().trim()==='domicilio no visitado').length;
+      const todNps   = calcNPS(RAW_TODAY);
+      const todIer   = RAW_TODAY.reduce((s,r)=>{const v=parseFloat(r.ier);return s+(isNaN(v)||v<=0?0:v);},0);
+      allRows.push({
+        fecha: today,
+        total_ordenes: RAW_TODAY.length, aprobadas: todAprob, rechazadas: todRech,
+        pendientes: todPend, dnv_count: todDnv,
+        nps_promotores: todNps.promotores, nps_neutrales: todNps.neutrales,
+        nps_detractores: todNps.detractores, nps_total_respuestas: todNps.total,
+        ingreso_total: todIer, tiempo_ruta_prom_min: 0,
+        ordenes_x_vehiculo_prom: 0, prod_kg_prom_pct: 0, prod_bultos_prom_pct: 0,
+        vehiculos_activos: new Set(RAW_TODAY.map(r=>r.vehiculo).filter(Boolean)).size,
+        conductores_activos: new Set(RAW_TODAY.map(r=>r.conductor).filter(Boolean)).size
+      });
+    }
+  }
+
+  if (!allRows.length) { sec.style.display = 'none'; return; }
+
+  sec.style.display = '';
+
+  // Rango
+  const fechas = allRows.map(r => r.fecha).sort();
+  const fMin = fechas[0], fMax = fechas[fechas.length-1];
+  const sub = el('evolSubtitle');
+  if (sub) sub.textContent = `Evolución desde ${fmtDD(fMin)} hasta ${fmtDD(fMax)}`;
+
+  // Generar períodos
+  const periodos = _evolAgrup === 'quincenal' ? buildPeriodosQuincenales(fMin, fMax) : buildPeriodosMensuales(fMin, fMax);
+  if (!periodos.length) return;
+
+  // Para cada período, agregar las filas correspondientes
+  _evolData = periodos.map(p => {
+    const filas = allRows.filter(r => r.fecha >= p.desde && r.fecha <= p.hasta);
+    return { label: p.label, ...aggregateCacheSet(filas) };
+  });
+
+  renderEvolTable();
+  renderEvolChart();
+}
+
+function fmtDD(iso) {
+  if (!iso) return '—';
+  const [,mm,dd] = iso.split('-');
+  const meses = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return `${parseInt(dd)}/${meses[parseInt(mm)]}`;
+}
+
+function buildPeriodosQuincenales(fMin, fMax) {
+  const periodos = [];
+  let cursor = fMin.substring(0,7) + '-01'; // primer día del mes de fMin
+  const limitStr = fMax;
+  while (cursor <= limitStr) {
+    const [y, m] = cursor.split('-').map(Number);
+    const d1 = `${cursor.substring(0,7)}-01`;
+    const d2 = `${cursor.substring(0,7)}-15`;
+    const lastDay = new Date(y, m, 0).getDate(); // último día del mes
+    const d3 = `${cursor.substring(0,7)}-16`;
+    const d4 = `${cursor.substring(0,7)}-${String(lastDay).padStart(2,'0')}`;
+    const meses = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const ml = meses[m];
+    if (d1 <= limitStr) periodos.push({ label:`1-15 ${ml}`, desde: d1, hasta: d2 });
+    if (d3 <= limitStr) periodos.push({ label:`16-${lastDay} ${ml}`, desde: d3, hasta: d4 });
+    // Avanzar al mes siguiente
+    const next = new Date(y, m, 1); // m (0-indexed in JS) = mes actual + 1
+    cursor = `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-01`;
+  }
+  return periodos.filter(p => p.hasta >= fMin);
+}
+
+function buildPeriodosMensuales(fMin, fMax) {
+  const meses = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const periodos = [];
+  let cursor = fMin.substring(0,7) + '-01';
+  while (cursor.substring(0,7) <= fMax.substring(0,7)) {
+    const [y, m] = cursor.split('-').map(Number);
+    const lastDay = new Date(y, m, 0).getDate();
+    const desde = `${cursor.substring(0,7)}-01`;
+    const hasta  = `${cursor.substring(0,7)}-${String(lastDay).padStart(2,'0')}`;
+    periodos.push({ label: `${meses[m]} ${y}`, desde, hasta });
+    const next = new Date(y, m, 1);
+    cursor = `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-01`;
+  }
+  return periodos;
+}
+
+function aggregateCacheSet(filas) {
+  if (!filas.length) return { _empty: true, total:0, aprob:0, rech:0, pend:0, dnvC:0, npsP:0,npsN:0,npsD:0,npsT:0, ierSum:0, tRutaAvg:null, ordVehAvg:null, pkAvg:null, pbAvg:null, vehAvg:null, condAvg:null };
+  let total=0,aprob=0,rech=0,pend=0,dnvC=0,npsP=0,npsN=0,npsD=0,npsT=0,ierSum=0;
+  const tRutas=[],ordVeh=[],prodKg=[],prodBul=[],vehD=[],condD=[];
+  filas.forEach(c => {
+    total+=Number(c.total_ordenes)||0; aprob+=Number(c.aprobadas)||0;
+    rech+=Number(c.rechazadas)||0;     pend+=Number(c.pendientes)||0;
+    dnvC+=Number(c.dnv_count)||0;      ierSum+=Number(c.ingreso_total)||0;
+    npsP+=Number(c.nps_promotores)||0; npsN+=Number(c.nps_neutrales)||0;
+    npsD+=Number(c.nps_detractores)||0; npsT+=Number(c.nps_total)||0;
+    const t=Number(c.tiempo_ruta_prom_min);    if(t>0) tRutas.push(t);
+    const k=Number(c.ordenes_x_vehiculo_prom); if(k>0) ordVeh.push(k);
+    const pk=Number(c.prod_kg_prom_pct);       if(pk>0) prodKg.push(pk);
+    const pb=Number(c.prod_bultos_prom_pct);   if(pb>0) prodBul.push(pb);
+    const v=Number(c.vehiculos_activos);       if(v>0) vehD.push(v);
+    const cd=Number(c.conductores_activos);    if(cd>0) condD.push(cd);
+  });
+  const eff    = total>0 ? aprob/total*100 : null;
+  const dvPct  = total>0 ? (total-pend-dnvC)/total*100 : null;
+  const npsScore = npsT>0 ? (npsP-npsD)/npsT*100 : null;
+  return {
+    total,aprob,rech,pend,dnvC,npsP,npsN,npsD,npsT,ierSum,
+    eff, dvPct, npsScore,
+    tRutaAvg:  tRutas.length  ? tRutas.reduce((a,b)=>a+b,0)/tRutas.length  : null,
+    ordVehAvg: ordVeh.length  ? ordVeh.reduce((a,b)=>a+b,0)/ordVeh.length  : null,
+    pkAvg:     prodKg.length  ? prodKg.reduce((a,b)=>a+b,0)/prodKg.length  : null,
+    pbAvg:     prodBul.length ? prodBul.reduce((a,b)=>a+b,0)/prodBul.length : null,
+    vehAvg:    vehD.length    ? vehD.reduce((a,b)=>a+b,0)/vehD.length    : null,
+    condAvg:   condD.length   ? condD.reduce((a,b)=>a+b,0)/condD.length   : null
+  };
+}
+
+// Versión RAW de aggregateCacheSet: computa KPIs de período desde filas crudas (para evolutivo filtrado)
+function aggregateRawSet(rows) {
+  if (!rows.length) return { _empty:true, total:0, aprob:0, rech:0, pend:0, dnvC:0, npsP:0,npsN:0,npsD:0,npsT:0, ierSum:0, tRutaAvg:null, ordVehAvg:null, pkAvg:null, pbAvg:null, vehAvg:null, condAvg:null, eff:null, dvPct:null, npsScore:null };
+  const _cnt  = r => r._cache_count || 1;
+  const total = rows.reduce((s, r) => s + _cnt(r), 0);
+  const aprob = rows.filter(r => r.status === 'approved' || r.status === 'delivered').reduce((s, r) => s + _cnt(r), 0);
+  const rech  = rows.filter(r => r.status === 'rejected').reduce((s, r) => s + _cnt(r), 0);
+  const pend  = rows.filter(r => r.status === 'pending').reduce((s, r) => s + _cnt(r), 0);
+  const dnvC  = rows.filter(r => (r.motivo_rechazo || '').toLowerCase().trim() === 'domicilio no visitado').reduce((s, r) => s + _cnt(r), 0);
+  const ierSum = rows.reduce((s, r) => { const v = parseFloat(r.ier); return s + (isNaN(v) || v <= 0 ? 0 : v); }, 0);
+  const nps = calcNPS(rows);
+  const tRuta  = calcTiempoRutaPromedio(rows);
+  const ordVeh = calcOrdenesPorVehiculo(rows);
+  const pkAvg  = calcProductividadKG(rows);
+  const pbAvg  = calcProductividadBultos(rows);
+  // Vehículos y conductores activos: promedio de uniques por día (igual que CACHE)
+  const vehByDay = {}, condByDay = {};
+  rows.forEach(r => {
+    if (r.fecha && r.vehiculo)   { if (!vehByDay[r.fecha])  vehByDay[r.fecha]  = new Set(); vehByDay[r.fecha].add(r.vehiculo); }
+    if (r.fecha && r.conductor)  { if (!condByDay[r.fecha]) condByDay[r.fecha] = new Set(); condByDay[r.fecha].add(r.conductor); }
+  });
+  const vehCounts  = Object.values(vehByDay).map(s => s.size);
+  const condCounts = Object.values(condByDay).map(s => s.size);
+  const eff      = total > 0 ? aprob / total * 100 : null;
+  const dvPct    = total > 0 ? (total - pend - dnvC) / total * 100 : null;
+  const npsScore = nps.total > 0 ? nps.score : null;
+  return {
+    total, aprob, rech, pend, dnvC,
+    npsP: nps.promotores, npsN: nps.neutrales, npsD: nps.detractores, npsT: nps.total,
+    ierSum, eff, dvPct, npsScore,
+    tRutaAvg:  tRuta.avg,
+    ordVehAvg: ordVeh,
+    pkAvg, pbAvg,
+    vehAvg:  vehCounts.length  ? average(vehCounts)  : null,
+    condAvg: condCounts.length ? average(condCounts) : null
+  };
+}
+
+function renderEvolTable() {
+  const thead = el('evolThead'), tbody = el('evolTbody');
+  if (!thead || !tbody || !_evolData.length) return;
+
+  const labels = _evolData.map(p => p.label);
+  thead.innerHTML = `<tr>
+    <th>KPI</th>${labels.map(l=>`<th>${esc(l)}</th>`).join('')}<th>Tendencia</th>
+  </tr>`;
+
+  // Definición de filas del evolutivo
+  const rows = [
+    { key:'eff',      label:'Efectividad (%)',       fmt: v=>v!=null?v.toFixed(1)+'%':'—',   obj:95,  hiOk:true  },
+    { key:'dvPct',    label:'Dom. Visitado (%)',      fmt: v=>v!=null?v.toFixed(1)+'%':'—',   obj:98,  hiOk:true  },
+    { key:'tRutaAvg', label:'T. Prom. Ruta',          fmt: v=>v!=null?fmtMin(v):'—',          obj:480, hiOk:true  },
+    { key:'ordVehAvg',label:'Órd. Prom. x Vehículo',  fmt: v=>v!=null?v.toFixed(1):'—',       obj:null,hiOk:true  },
+    { key:'pkAvg',    label:'Productividad KG (%)',   fmt: v=>v!=null?v.toFixed(1)+'%':'—',   obj:null,hiOk:true  },
+    { key:'pbAvg',    label:'Productividad Bultos (%)',fmt: v=>v!=null?v.toFixed(1)+'%':'—',  obj:null,hiOk:true  },
+    { key:'npsScore', label:'NPS Score',              fmt: v=>v!=null?(v>=0?'+':'')+v.toFixed(1):'—', obj:95, hiOk:true },
+    { key:'ierSum',   label:'Ingreso Total',          fmt: v=>v>0?v.toLocaleString('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}):'—', obj:null, hiOk:true },
+    { key:'vehAvg',   label:'Vehículos Activos (prom)',fmt: v=>v!=null?v.toFixed(0):'—',      obj:null,hiOk:true  },
+    { key:'condAvg',  label:'Conductores Activos (prom)',fmt: v=>v!=null?v.toFixed(0):'—',    obj:null,hiOk:true  },
+  ];
+
+  tbody.innerHTML = rows.map(row => {
+    const vals   = _evolData.map(p => p[row.key]);
+    const last   = vals[vals.length-1];
+    const prev   = vals.length>=2 ? vals[vals.length-2] : null;
+
+    // Tendencia: comparar último vs penúltimo
+    let trendHtml = '<span class="evol-trend-flat">→</span>';
+    if (last != null && prev != null) {
+      const delta = last - prev;
+      const pct   = prev !== 0 ? Math.abs(delta/prev*100) : 0;
+      if (pct > 0.5) {
+        const up = delta > 0;
+        const green = row.hiOk ? up : !up;
+        trendHtml = `<span class="${green?'evol-trend-up':'evol-trend-dn'}">${up?'↑':'↓'}</span>`;
+      }
+    }
+
+    const cells = vals.map((v, i) => {
+      let cls = '';
+      if (row.obj != null && v != null) {
+        cls = v >= row.obj ? 'evol-cell-ok' : 'evol-cell-fail';
+      }
+      return `<td class="${cls}">${row.fmt(v)}</td>`;
+    }).join('');
+
+    return `<tr><td>${esc(row.label)}</td>${cells}<td>${trendHtml}</td></tr>`;
+  }).join('');
+}
+
+function fmtMin(min) {
+  if (min == null) return '—';
+  const h = Math.floor(min/60), m = Math.round(min%60);
+  return h>0 ? `${h}h ${m}m` : `${m}m`;
+}
+
+function renderEvolChart() {
+  killChart('evol');
+  const canvas = el('cEvol');
+  if (!canvas || !_evolData.length) return;
+
+  const kpi  = el('evolKpiSel')?.value || 'efectividad';
+  const kpiMap = {
+    efectividad: { key:'eff',      label:'Efectividad (%)',  obj:95,  color:'#01feff' },
+    dnv:         { key:'dvPct',    label:'Dom. Visitado (%)',    obj:98, color:'#f97316' },
+    nps:         { key:'npsScore', label:'NPS Score',        obj:95,  color:'#22c55e' },
+    ingreso:     { key:'ierSum',   label:'Ingreso Total ($)', obj:null, color:'#eab308' },
+    truta:       { key:'tRutaAvg', label:'T. Prom. Ruta (min)',obj:480, color:'#a78bfa' }
+  };
+  const def = kpiMap[kpi] || kpiMap.efectividad;
+
+  const labels = _evolData.map(p => p.label);
+  const data   = _evolData.map(p => {
+    const v = p[def.key];
+    return v != null ? parseFloat(v.toFixed(2)) : null;
+  });
+
+  const datasets = [{
+    label: def.label, data,
+    borderColor: def.color, backgroundColor: def.color + '22',
+    tension:.3, pointRadius:4, pointHoverRadius:6, fill:true, spanGaps:true
+  }];
+
+  if (def.obj != null) {
+    datasets.push({
+      label: `Objetivo: ${def.obj}`, data: labels.map(()=>def.obj),
+      borderColor:'rgba(255,255,255,0.55)', borderWidth:1.5, borderDash:[6,4],
+      pointRadius:0, fill:false
+    });
+  }
+
+  CH.evol = new Chart(canvas, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend:{ labels:{color:'#a0b4c8',font:{size:11}} } },
+      scales: {
+        x: axisOpts(30),
+        y: { ...axisOpts(0), beginAtZero:false }
+      }
+    }
+  });
+}
+
+function exportEvolCSV() {
+  if (!_evolData.length) return;
+  const rows = [
+    ['KPI', ..._evolData.map(p=>p.label),'Tendencia'],
+    ...['Efectividad (%)','Dom. Visitado (%)','T. Prom. Ruta','Órd. x Vehículo','Prod. KG (%)','Prod. Bultos (%)','NPS Score','Ingreso Total','Vehículos Activos','Conductores Activos'].map((lbl,i) => {
+      const keys=['eff','dvPct','tRutaAvg','ordVehAvg','pkAvg','pbAvg','npsScore','ierSum','vehAvg','condAvg'];
+      const k = keys[i];
+      const vals = _evolData.map(p => p[k] != null ? String(parseFloat(p[k].toFixed(2))) : '');
+      const last=_evolData[_evolData.length-1]?.[k], prev=_evolData.length>=2?_evolData[_evolData.length-2]?.[k]:null;
+      let trend='=';
+      if(last!=null&&prev!=null){const d=last-prev;const p=prev!==0?Math.abs(d/prev*100):0;if(p>0.5)trend=d>0?'↑':'↓';}
+      return [lbl,...vals,trend];
+    })
+  ];
+  dlCSV(rows.map(r=>r.map(cv)), csvFilename('evolutivo',''));
+}
+
 function renderResumen() {
+  // Si hay filtro activo Y RAW_RES ya cargó → usar path RAW para que las tarjetas respeten el filtro
+  // Si no hay filtro (vista total) → usar CACHE siempre que esté disponible (más rápido)
+  // RAW_RES es la fuente única de verdad. CACHE solo como placeholder antes del primer mes.
+  if (!RAW_RES.length) {
+    renderResumenFromCache();
+    return;
+  }
+
   populateResFilterDropdowns();
   const ERAW   = getResRAW();
   const noData = el('resNoData');
@@ -2896,9 +4214,10 @@ function renderResumen() {
   // Tarjeta DNV: Órdenes con gestión real (sin tipificado Domicilio No Visitado)
   // Numerador: órdenes que no son pending Y no tienen motivo DNV
   // Denominador: total órdenes del período
-  const dnvTotal = ERAW.length;
-  const dnvCount = ERAW.filter(r => (r.motivo_rechazo || '').toLowerCase().trim() === 'domicilio no visitado').length;
-  const conGestion = ERAW.filter(r => r.status !== 'pending' && (r.motivo_rechazo || '').toLowerCase().trim() !== 'domicilio no visitado').length;
+  const _cnt       = r => r._cache_count || 1;
+  const dnvTotal   = ERAW.reduce((s, r) => s + _cnt(r), 0);
+  const dnvCount   = ERAW.filter(r => (r.motivo_rechazo || '').toLowerCase().trim() === 'domicilio no visitado').reduce((s, r) => s + _cnt(r), 0);
+  const conGestion = ERAW.filter(r => r.status !== 'pending' && (r.motivo_rechazo || '').toLowerCase().trim() !== 'domicilio no visitado').reduce((s, r) => s + _cnt(r), 0);
   const rcDNV  = el('rcDNV');
   const rcoDNV = el('rcoDNV');
   if (dnvTotal > 0) {
@@ -2931,13 +4250,10 @@ function renderResumen() {
   // Tarjeta 3: Órd x Vehículo
   const ordProm = calcOrdenesPorVehiculo(ERAW);
   const rcOV = el('rcOrdxveh');
-  if (rcOV) rcOV.className = 'res-card ' + (ordProm != null ? (ordProm >= 60 ? 'rc-eff-g' : 'rc-eff-d') : 'rc-blue');
+  if (rcOV) rcOV.className = 'res-card rc-cyan';
   setText('rcvOrdxveh', ordProm != null ? ordProm.toFixed(1) : '—');
   const rcoOV = el('rcoOrdxveh');
-  if (rcoOV) {
-    if (ordProm != null) { const ok = ordProm >= 60; rcoOV.className = 'rc-obj ' + (ok ? 'rc-obj-ok' : 'rc-obj-fail'); rcoOV.textContent = ok ? 'Objetivo: 60 guías  ✓' : 'Objetivo: 60 guías  ✗'; }
-    else rcoOV.textContent = '';
-  }
+  if (rcoOV) rcoOV.textContent = '';
 
   // Tarjeta 4: Productividad KG
   const prodKG = calcProductividadKG(ERAW);
@@ -2979,10 +4295,14 @@ function renderResumen() {
   // Tarjeta 7: Ingreso (solo financiales)
   if (canSeeFinancials()) {
     const ingreso = ERAW.reduce((sum, r) => { const v = parseFloat(r.ier); return sum + (isNaN(v) ? 0 : v); }, 0);
-    const conIer  = ERAW.filter(r => r.ier != null && r.ier !== '' && Number(r.ier) > 0).length;
+    const conIer  = ERAW.filter(r => r.ier != null && r.ier !== '' && Number(r.ier) > 0).reduce((s, r) => s + (r._cache_count || 1), 0);
     setText('rcvIngreso', '$ ' + Math.round(ingreso).toLocaleString('es-AR'));
     setText('rcsIngreso', conIer.toLocaleString('es-AR') + ' órdenes con IER');
   }
+
+  // Evolutivo (si hay cache disponible)
+  if (CACHE_ROWS.length || RAW_TODAY.length) renderEvolutivo();
+  else { const s = el('resEvolutivo'); if (s) s.style.display = 'none'; }
 }
 
 function setText(id, v) { const e = el(id); if (e) e.textContent = v; }
@@ -2990,8 +4310,9 @@ function setText(id, v) { const e = el(id); if (e) e.textContent = v; }
 /* -- Cálculos -- */
 
 function calcTiempoRutaPromedio(rows) {
-  // Paso 1: deduplicar por ruta (fecha+scenario_token+vehiculo)
-  const rutaMap   = {};
+  // Deduplicar por ruta única (fecha+scenario_token+vehiculo) — igual que GAS calcKPIsParaDia_
+  // Promedio POR RUTA (no por vehículo-día) para que coincida con el CACHE
+  const rutaMap    = {};
   const rutaInicio = {};
   rows.forEach(r => {
     const rk = (r.fecha||'')+'||'+(r.scenario_token||'')+'||'+(r.vehiculo||'');
@@ -3003,24 +4324,22 @@ function calcTiempoRutaPromedio(rows) {
       const minAbs = tsToMinutesLocal(r.route_started_at);
       if (minAbs !== null) rutaInicio[rk] = minAbs;
     }
+    if (!(rk in rutaInicio) && r.inicio_ruta_min != null) {
+      rutaInicio[rk] = r.inicio_ruta_min;
+    }
   });
-  // Paso 2: sumar rutas del mismo vehículo en el mismo día → un total por fecha+vehiculo
-  const dvTiempo = {};
-  const dvInicio = {};
-  Object.entries(rutaMap).forEach(([rk, t]) => {
-    const [fecha,,vehiculo] = rk.split('||');
-    const dvk = fecha + '||' + vehiculo;
-    dvTiempo[dvk] = (dvTiempo[dvk] || 0) + t;
-  });
-  Object.entries(rutaInicio).forEach(([rk, minAbs]) => {
-    const [fecha,,vehiculo] = rk.split('||');
-    const dvk = fecha + '||' + vehiculo;
-    // inicio = el más temprano del día
-    if (!(dvk in dvInicio) || minAbs < dvInicio[dvk]) dvInicio[dvk] = minAbs;
-  });
-  const tiempos = Object.values(dvTiempo);
-  const inits   = Object.values(dvInicio);
+  const tiempos = Object.values(rutaMap);
   const avg     = tiempos.length ? average(tiempos) : null;
+
+  // Inicio promedio: mínimo por vehículo-día (igual que buildModalTruta)
+  // Si un vehículo tiene 2 rutas, solo cuenta el inicio de la primera
+  const dvInicio = {};
+  Object.entries(rutaInicio).forEach(([rk, m]) => {
+    const parts = rk.split('||');
+    const dvk   = parts[0] + '||' + parts[2]; // fecha || vehiculo
+    if (!(dvk in dvInicio) || m < dvInicio[dvk]) dvInicio[dvk] = m;
+  });
+  const inits = Object.values(dvInicio);
   let inicioPromedio = null;
   if (inits.length) {
     const avgMin = Math.round(average(inits));
@@ -3046,7 +4365,7 @@ function tsToMinutesLocal(ts) {
 
 function calcOrdenesPorVehiculo(rows) {
   const map = {};
-  rows.forEach(r => { const k = (r.fecha||'')+'||'+(r.vehiculo||''); map[k] = (map[k]||0) + 1; });
+  rows.forEach(r => { const k = (r.fecha||'')+'||'+(r.vehiculo||''); map[k] = (map[k]||0) + (r._cache_count || 1); });
   const counts = Object.values(map);
   return counts.length ? average(counts) : null;
 }
@@ -3087,6 +4406,7 @@ function calcProductividadBultos(rows) {
 }
 
 function calcNPS(rows) {
+  const cnt       = r => r._cache_count || 1;
   const aprobadas = rows.filter(r => r.status === 'delivered' || r.status === 'approved');
   const conRating = aprobadas.filter(r =>
     (r.rating_1 != null && r.rating_1 !== '') ||
@@ -3096,17 +4416,19 @@ function calcNPS(rows) {
   if (!conRating.length) return { score: 0, total: 0, promotores: 0, neutrales: 0, detractores: 0, pctRespuesta: 0 };
   let p = 0, n = 0, d = 0;
   conRating.forEach(r => {
+    const c    = cnt(r);
     const suma = (Number(r.rating_1)||0) + (Number(r.rating_2)||0) + (Number(r.rating_3)||0);
-    if (suma >= 14) p++; else if (suma >= 11) n++; else d++;
+    if (suma >= 14) p += c; else if (suma >= 11) n += c; else d += c;
   });
-  const total = conRating.length;
+  const total        = p + n + d;
+  const totalAprobadas = aprobadas.reduce((s, r) => s + cnt(r), 0);
   return {
-    score:         (p - d) / total * 100,
+    score:        total > 0 ? (p - d) / total * 100 : 0,
     total,
-    promotores:    p,
-    neutrales:     n,
-    detractores:   d,
-    pctRespuesta:  aprobadas.length > 0 ? total / aprobadas.length * 100 : 0
+    promotores:   p,
+    neutrales:    n,
+    detractores:  d,
+    pctRespuesta: totalAprobadas > 0 ? total / totalAprobadas * 100 : 0
   };
 }
 
@@ -3162,7 +4484,23 @@ function openResModal(tipo) {
     titleEl.appendChild(span);
     titleEl.appendChild(btnWrap);
   }
-  if (bodyEl)  bodyEl.innerHTML = builderMap[tipo](ERAW);
+  if (bodyEl) {
+    if (!RAW_RES.length) {
+      // RAW_RES todavía no cargó → mostrar spinner y disparar carga
+      loadDetalleResumen();
+      bodyEl.innerHTML = `
+        <div class="fast-placeholder" style="min-height:160px">
+          <div class="fp-icon">⏳</div>
+          <div class="fp-msg">Cargando datos del período completo...<br>
+            <span style="font-size:11px">Abrí la tarjeta de nuevo en unos segundos.</span>
+          </div>
+        </div>`;
+      if (expBtn) expBtn.style.display = 'none';
+    } else {
+      bodyEl.innerHTML = builderMap[tipo](ERAW);
+      if (expBtn) expBtn.style.display = '';
+    }
+  }
   if (overlay) overlay.classList.add('on');
 }
 
@@ -3190,26 +4528,30 @@ function exportResModal() {
 /* -- Builders de contenido modal -- */
 
 function buildModalDNV(rows) {
-  const total = rows.length;
+  const _cnt = r => r._cache_count || 1;
+  const total = rows.reduce((s, r) => s + _cnt(r), 0);
   if (!total) return '<div class="empty">Sin datos en el período</div>';
 
   const DNV_MOTIVO = 'domicilio no visitado';
-  const entregadas = rows.filter(r => r.status === 'approved' || r.status === 'delivered').length;
-  const pendientes = rows.filter(r => r.status === 'pending').length;
-  const dnvCount   = rows.filter(r => (r.motivo_rechazo || '').toLowerCase().trim() === DNV_MOTIVO).length;
-  const conGestion = rows.filter(r => r.status !== 'pending' && (r.motivo_rechazo || '').toLowerCase().trim() !== DNV_MOTIVO).length;
+  const entregadas = rows.filter(r => r.status === 'approved' || r.status === 'delivered').reduce((s, r) => s + _cnt(r), 0);
+  const pendientes = rows.filter(r => r.status === 'pending').reduce((s, r) => s + _cnt(r), 0);
+  const dnvCount   = rows.filter(r => (r.motivo_rechazo || '').toLowerCase().trim() === DNV_MOTIVO).reduce((s, r) => s + _cnt(r), 0);
+  const conGestion = rows.filter(r => r.status !== 'pending' && (r.motivo_rechazo || '').toLowerCase().trim() !== DNV_MOTIVO).reduce((s, r) => s + _cnt(r), 0);
   const pctGestion = (conGestion / total * 100).toFixed(1);
   const pctColor   = parseFloat(pctGestion) >= 95 ? 'var(--success)' : 'var(--danger)';
 
-  // Agrupar rechazos por motivo, DNV siempre al final
+  // Agrupar rechazos por motivo (case-insensitive), DNV siempre al final
   const motivoMap = {};
+  const motivoLabel = {};
   rows.filter(r => r.status === 'rejected').forEach(r => {
-    const m = r.motivo_rechazo || '(sin motivo)';
-    motivoMap[m] = (motivoMap[m] || 0) + 1;
+    const raw = r.motivo_rechazo || '(sin motivo)';
+    const key = raw.toLowerCase().trim();
+    motivoMap[key] = (motivoMap[key] || 0) + _cnt(r);
+    if (!motivoLabel[key] || raw !== raw.toLowerCase()) motivoLabel[key] = raw;
   });
   const motivoList = Object.entries(motivoMap).sort((a, b) => {
-    const aDnv = a[0].toLowerCase().trim() === DNV_MOTIVO;
-    const bDnv = b[0].toLowerCase().trim() === DNV_MOTIVO;
+    const aDnv = a[0] === DNV_MOTIVO;
+    const bDnv = b[0] === DNV_MOTIVO;
     if (aDnv && !bDnv) return 1;
     if (!aDnv && bDnv) return -1;
     return b[1] - a[1];
@@ -3217,14 +4559,14 @@ function buildModalDNV(rows) {
 
   _resModalData = [
     { resultado: 'Entregadas / Aprobadas', cantidad: entregadas, pct: (entregadas/total*100).toFixed(1) },
-    ...motivoList.map(([m, c]) => ({ resultado: m, cantidad: c, pct: (c/total*100).toFixed(1) })),
+    ...motivoList.map(([m, c]) => ({ resultado: motivoLabel[m] || m, cantidad: c, pct: (c/total*100).toFixed(1) })),
     ...(pendientes > 0 ? [{ resultado: 'Pendientes (sin resolución)', cantidad: pendientes, pct: (pendientes/total*100).toFixed(1) }] : [])
   ];
 
   const motivoRows = motivoList.map(([m, c]) => {
-    const isDnv = m.toLowerCase().trim() === DNV_MOTIVO;
+    const isDnv = m === DNV_MOTIVO;
     return `<tr ${isDnv ? 'style="background:rgba(239,68,68,.08)"' : ''}>
-      <td style="${isDnv ? 'color:var(--danger);font-weight:600' : ''}">${esc(m)}</td>
+      <td style="${isDnv ? 'color:var(--danger);font-weight:600' : ''}">${esc(motivoLabel[m] || m)}</td>
       <td class="mono ${isDnv ? 'td' : ''}">${c.toLocaleString('es-AR')}</td>
       <td class="mono" style="color:var(--muted)">${(c/total*100).toFixed(1)}%</td>
     </tr>`;
@@ -3300,6 +4642,9 @@ function buildModalTruta(rows) {
       const m = tsToMinutesLocal(r.route_started_at);
       if (m !== null) rutaInicio[rk] = m;
     }
+    if (!(rk in rutaInicio) && r.inicio_ruta_min != null) {
+      rutaInicio[rk] = r.inicio_ruta_min;
+    }
   });
   // Paso 2: sumar rutas del mismo vehículo en el mismo día
   const dvMap = {};
@@ -3317,7 +4662,9 @@ function buildModalTruta(rows) {
   if (!items.length) return '<div class="empty">Sin datos de tiempo de ruta en el período</div>';
   items.sort((a, b) => b.tiempo - a.tiempo);
   _resModalData = items;
-  const avg       = average(items.map(i => i.tiempo));
+  // Promedio POR RUTA (igual que GAS): usar rutaMap directamente, no los totales por vehículo-día
+  const avgRutas = Object.values(rutaMap).map(info => info.t);
+  const avg      = avgRutas.length ? average(avgRutas) : 0;
   const inits     = items.filter(i => i.inicio !== null).map(i => i.inicio);
   const avgIni    = inits.length ? Math.round(average(inits)) : null;
   const avgIniFmt = avgIni !== null ? String(Math.floor(avgIni/60)).padStart(2,'0')+':'+String(avgIni%60).padStart(2,'0') : '—';
@@ -3349,7 +4696,7 @@ function buildModalOrdxveh(rows) {
   rows.forEach(r => {
     const k = (r.fecha||'')+'||'+(r.vehiculo||'');
     if (!vdMap[k]) vdMap[k] = { fecha: r.fecha, vehiculo: r.vehiculo, conductor: r.conductor, count: 0 };
-    vdMap[k].count++;
+    vdMap[k].count += (r._cache_count || 1);
     if (!vdMap[k].conductor && r.conductor) vdMap[k].conductor = r.conductor;
   });
   const vdItems = Object.values(vdMap);
@@ -3729,6 +5076,75 @@ function exportResCSV_ingreso() {
     );
   }
 }
+
+/* ============================================================
+   MULTI-SELECT HELPERS (Depósito / Flota)
+============================================================ */
+function _msGroup(g)  { return g === 'dep' ? _msDepSel : _msFltSel; }
+
+function toggleMs(g) {
+  const panel = el(g === 'dep' ? 'mspDep' : 'mspFlt');
+  if (!panel) return;
+  const wasOpen = panel.classList.contains('open');
+  // Cerrar todos
+  el('mspDep')?.classList.remove('open');
+  el('mspFlt')?.classList.remove('open');
+  if (!wasOpen) panel.classList.add('open');
+}
+
+function toggleMsOpt(g, val) {
+  const sel = _msGroup(g);
+  if (sel.has(val)) sel.delete(val); else sel.add(val);
+  _syncMsAllCbx(g);
+  updateMsLabel(g);
+  applyResFilters();
+}
+
+function toggleMsAll(g, checked) {
+  const sel     = _msGroup(g);
+  const optsDiv = el(g === 'dep' ? 'msOptsDep' : 'msOptsFlt');
+  if (checked) {
+    // Marcar "Todos" = limpiar selección individual
+    sel.clear();
+    optsDiv?.querySelectorAll('input[type=checkbox]').forEach(cb => { cb.checked = false; });
+  } else {
+    // No dejar desmarcado "Todos" sin tener nada: restaurar
+    const allCbx = el(g === 'dep' ? 'msCbxAllDep' : 'msCbxAllFlt');
+    if (allCbx) allCbx.checked = true;
+  }
+  updateMsLabel(g);
+  applyResFilters();
+}
+
+function _syncMsAllCbx(g) {
+  const allCbx = el(g === 'dep' ? 'msCbxAllDep' : 'msCbxAllFlt');
+  if (allCbx) allCbx.checked = _msGroup(g).size === 0;
+}
+
+function updateMsLabel(g) {
+  const sel = _msGroup(g);
+  const lbl = el(g === 'dep' ? 'mslDep' : 'mslFlt');
+  const btn = el(g === 'dep' ? 'mswDep' : 'mswFlt')?.querySelector('.ms-btn');
+  if (!lbl) return;
+  if (sel.size === 0) {
+    lbl.textContent = g === 'dep' ? 'Todos' : 'Todas';
+    btn?.classList.remove('ms-active');
+  } else if (sel.size === 1) {
+    lbl.textContent = [...sel][0];
+    btn?.classList.add('ms-active');
+  } else {
+    lbl.textContent = sel.size + ' seleccionados';
+    btn?.classList.add('ms-active');
+  }
+}
+
+// Cerrar dropdowns al hacer clic fuera
+document.addEventListener('click', e => {
+  if (!e.target.closest('.ms-wrap')) {
+    el('mspDep')?.classList.remove('open');
+    el('mspFlt')?.classList.remove('open');
+  }
+});
 </script>
 </body>
 </html>
