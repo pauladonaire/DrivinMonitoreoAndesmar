@@ -7,6 +7,7 @@ const APP_STATE = {
   filteredOrders: [],
   driversMap:     {},   // { email: { phone, ... } }
   addressesMap:   {},   // { address_code: { phone, ... } }
+  vehiculosMap:   {},   // { vehicle_code: { capacidad_bultos, capacidad_kg, fleets, ... } }
 
   // Tabla principal
   currentPage: 1,

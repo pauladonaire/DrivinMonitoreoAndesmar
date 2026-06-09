@@ -421,6 +421,18 @@
       padding:4px 10px; border-radius:5px; cursor:pointer; transition:all .2s;
     }
     .res-scope-btn.active { border-color:var(--cyan); color:var(--cyan); background:rgba(1,254,255,.06); }
+    /* Badge de flota activa en tabs no-Resumen */
+    .flota-badge {
+      display:flex; align-items:center; gap:8px;
+      background:rgba(1,254,255,.07); border:1px solid rgba(1,254,255,.3);
+      border-radius:6px; padding:6px 12px; font-size:12px; color:var(--cyan);
+    }
+    .flota-badge strong { color:#fff; }
+    .flota-badge-x {
+      margin-left:auto; background:none; border:none;
+      color:var(--cyan); cursor:pointer; font-size:14px; opacity:.7; padding:0 4px;
+    }
+    .flota-badge-x:hover { opacity:1; }
     .res-grid-top { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 12px; }
     .res-grid-bot { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
     @media (max-width: 1366px) { .res-grid-top { grid-template-columns: repeat(4, 1fr); } }
@@ -892,6 +904,7 @@
        TAB: GENERAL
   ======================================== -->
   <div id="tab-general" class="tab-pane active">
+    <div id="flotaBadge-general" class="flota-badge" style="display:none;margin-bottom:12px;">Filtrando por flota: <strong id="flotaBadge-general-val"></strong><button class="flota-badge-x" onclick="clearFlotaFilter()">✕</button></div>
     <div class="kpi-grid">
       <div class="kpi c">
         <div class="kpi-label">Total Órdenes</div>
@@ -981,6 +994,7 @@
        TAB: POR DÍA
   ======================================== -->
   <div id="tab-pordia" class="tab-pane">
+    <div id="flotaBadge-pordia" class="flota-badge" style="display:none;margin-bottom:12px;">Filtrando por flota: <strong id="flotaBadge-pordia-val"></strong><button class="flota-badge-x" onclick="clearFlotaFilter()">✕</button></div>
     <!-- Overview chart (todo el período) -->
     <div class="ch-box sec">
       <div class="ch-title">Órdenes por día — Entregadas / Rechazadas / Pendientes</div>
@@ -1070,6 +1084,7 @@
        TAB: CONDUCTORES
   ======================================== -->
   <div id="tab-conductores" class="tab-pane">
+    <div id="flotaBadge-conductores" class="flota-badge" style="display:none;margin-bottom:12px;">Filtrando por flota: <strong id="flotaBadge-conductores-val"></strong><button class="flota-badge-x" onclick="clearFlotaFilter()">✕</button></div>
     <div class="filter-panel">
       <div class="f-grp">
         <label class="lbl">Depósito</label>
@@ -1139,6 +1154,7 @@
        TAB: DEPÓSITOS
   ======================================== -->
   <div id="tab-depositos" class="tab-pane">
+    <div id="flotaBadge-depositos" class="flota-badge" style="display:none;margin-bottom:12px;">Filtrando por flota: <strong id="flotaBadge-depositos-val"></strong><button class="flota-badge-x" onclick="clearFlotaFilter()">✕</button></div>
     <div class="filter-panel">
       <div class="f-grp">
         <label class="lbl">Ver depósito</label>
@@ -1230,6 +1246,7 @@
        TAB: RECHAZOS
   ======================================== -->
   <div id="tab-rechazos" class="tab-pane">
+    <div id="flotaBadge-rechazos" class="flota-badge" style="display:none;margin-bottom:12px;">Filtrando por flota: <strong id="flotaBadge-rechazos-val"></strong><button class="flota-badge-x" onclick="clearFlotaFilter()">✕</button></div>
     <div class="ch-row c2 sec">
       <div class="ch-box">
         <div class="ch-title">Top 10 motivos de rechazo</div>
@@ -1315,6 +1332,7 @@
        TAB: ACCIONES
   ======================================== -->
   <div id="tab-acciones" class="tab-pane">
+    <div id="flotaBadge-acciones" class="flota-badge" style="display:none;margin-bottom:12px;">Filtrando por flota: <strong id="flotaBadge-acciones-val"></strong><button class="flota-badge-x" onclick="clearFlotaFilter()">✕</button></div>
 
     <!-- KPIs resumen acciones -->
     <div class="kpi-grid-8 sec">
@@ -1546,6 +1564,15 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('th.s').forEach(th => {
     th.addEventListener('click', () => handleSort(th.dataset.tbl, th.dataset.col));
   });
+
+  // Mover barra de filtros fuera del tab Resumen para que sea visible en todos los tabs
+  (function() {
+    const rfBar     = document.getElementById('resFilterBar');
+    const errBanner = document.getElementById('errBanner');
+    if (rfBar && errBanner && errBanner.parentNode) {
+      errBanner.parentNode.insertBefore(rfBar, errBanner.nextSibling);
+    }
+  })();
 
   // Auth + vehículos (no bloquea) + auto-load
   initAuth();
@@ -3133,6 +3160,8 @@ async function loadVehiculos() {
     VEHICULOS = res.vehiculos || [];
     VEHICULOS_MAP = {};
     VEHICULOS.forEach(v => { if (v.code) VEHICULOS_MAP[v.code] = v; });
+    // Pre-popular flotas y empleadores sin esperar a renderResumen
+    populateResFilterDropdowns();
   } catch(e) {
     console.warn('[loadVehiculos]', e.message);
   }
@@ -3274,7 +3303,40 @@ function applyResFilters() {
   _resFilters.flota     = [..._msFltSel];
   _resFilters.vehiculo  = el('rfVehiculo')?.value  || '';
   _resFilters.empleador = el('rfEmpleador')?.value || '';
+  updateFlotaBadges();
   renderResumen();
+  // Si el tab activo no es Resumen y scope=all, re-renderizar con el nuevo filtro
+  const cur = activeTab();
+  if (cur !== 'resumen' && _resScope === 'all' && (RAW.length || CACHE_ROWS.length)) {
+    renderTab(cur);
+  }
+}
+
+/** Actualiza los badges de flota en todos los tabs no-Resumen */
+function updateFlotaBadges() {
+  const flotas = _resFilters.flota || [];
+  const show   = flotas.length > 0 && _resScope === 'all';
+  const label  = flotas.join(', ');
+  ['general','pordia','conductores','depositos','rechazos','acciones'].forEach(tab => {
+    const badge = document.getElementById(`flotaBadge-${tab}`);
+    if (!badge) return;
+    badge.style.display = show ? '' : 'none';
+    const valEl = document.getElementById(`flotaBadge-${tab}-val`);
+    if (valEl) valEl.textContent = label;
+  });
+}
+
+/** Limpia el filtro de flota desde cualquier badge de tab */
+function clearFlotaFilter() {
+  _msFltSel.clear();
+  _resFilters.flota = [];
+  updateMsLabel('flt');
+  el('msOptsFlt')?.querySelectorAll('input[type=checkbox]').forEach(cb => { cb.checked = false; });
+  _syncMsAllCbx('flt');
+  updateFlotaBadges();
+  renderResumen();
+  const cur = activeTab();
+  if (cur !== 'resumen' && (RAW.length || CACHE_ROWS.length)) renderTab(cur);
 }
 
 function clearResFilters() {
@@ -3286,6 +3348,7 @@ function clearResFilters() {
   _syncMsAllCbx('dep'); _syncMsAllCbx('flt');
   const vehIn  = el('rfVehiculo');  if (vehIn)   vehIn.value  = '';
   const empSel = el('rfEmpleador'); if (empSel)  empSel.value = '';
+  updateFlotaBadges();
   renderResumen();
 }
 
@@ -3293,7 +3356,10 @@ function setResScope(scope) {
   _resScope = scope;
   el('rfScopeAll')?.classList.toggle('active', scope === 'all');
   el('rfScopeRes')?.classList.toggle('active', scope === 'resumen');
+  updateFlotaBadges();
   renderResumen();
+  const cur = activeTab();
+  if (cur !== 'resumen' && (RAW.length || CACHE_ROWS.length)) renderTab(cur);
 }
 
 function getEffectiveACTIONS() {

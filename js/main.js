@@ -69,6 +69,14 @@ async function initApp() {
     });
   });
 
+  // ---- Vehículos en background (capacidades para OBJETIVOS DEL DÍA) ----
+  gasGet({ action: 'get_vehiculos' })
+    .then(res => {
+      const vehiculos = res.vehiculos || [];
+      vehiculos.forEach(v => { if (v.code) APP_STATE.vehiculosMap[v.code] = v; });
+    })
+    .catch(err => console.warn('[main] vehiculosMap no disponible:', err.message));
+
   // ---- Conductores en background (no bloquea el render inicial) ----
   fetchDrivers()
     .then(drivers => {
@@ -162,6 +170,7 @@ async function loadPhonesBackground() {
  */
 function renderAll() {
   try { calcAndRenderKPIs();   } catch(e) { console.error('[renderAll] KPIs:', e); }
+  try { renderObjetivos();     } catch(e) { console.error('[renderAll] Objetivos:', e); }
   try { renderCharts();        } catch(e) { console.error('[renderAll] Charts:', e); }
   try { renderTop10();         } catch(e) { console.error('[renderAll] Top10:', e); }
   try { renderDriversTable();  } catch(e) { console.error('[renderAll] Drivers:', e); }

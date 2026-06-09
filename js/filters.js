@@ -252,6 +252,11 @@ function buildFlatRow(stop, order) {
 
     // Mejora 5: PARADA — posición en la ruta
     position: stop.position ?? order.position ?? null,
+
+    // NPS: ratings del stop (para cálculo en OBJETIVOS DEL DÍA)
+    rating_1: stop.rating_1 != null ? stop.rating_1 : null,
+    rating_2: stop.rating_2 != null ? stop.rating_2 : null,
+    rating_3: stop.rating_3 != null ? stop.rating_3 : null,
   };
 }
 

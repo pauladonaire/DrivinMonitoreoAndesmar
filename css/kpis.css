@@ -100,6 +100,52 @@
 .kpi-card.kpi--warning .kpi-value { color: var(--color-warning); }
 .kpi-card.kpi--success .kpi-value { color: var(--color-success); }
 
+/* ============================================================
+   OBJETIVOS DEL DÍA — 5 tarjetas en fila
+   ============================================================ */
+.obj-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 1200px) { .obj-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 700px)  { .obj-grid { grid-template-columns: 1fr; } }
+
+/* Estado visual: reutiliza kpi-card pero con umbrales propios */
+.kpi-card.obj-card--ok   { border-color: var(--color-success); }
+.kpi-card.obj-card--fail { border-color: var(--color-danger);  }
+
+.kpi-card.obj-card--ok   .kpi-value { color: var(--color-success); }
+.kpi-card.obj-card--fail .kpi-value { color: var(--color-danger);  }
+
+/* Subtexto y objetivo */
+.obj-sub {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.obj-obj {
+  font-size: 10px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+.kpi-card.obj-card--ok   .obj-obj { color: var(--color-success); }
+.kpi-card.obj-card--fail .obj-obj { color: var(--color-danger);  }
+.kpi-card .obj-obj { color: var(--color-text-muted); }
+
+/* Tarjeta Tiempo de Ruta — valor en dos líneas */
+#objTiempoRutaVal {
+  font-size: 13px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.obj-truta-row { display: block; }
+
 /* ---- Tooltip de fórmula ---- */
 .kpi-has-tooltip { position: relative; }
 

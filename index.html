@@ -194,21 +194,22 @@
             <div class="kpi-card kpi-has-tooltip" id="kpiEfectividadGeneral">
               <div class="kpi-label">Efectividad General <span class="kpi-info">ⓘ</span></div>
               <div class="kpi-value" id="valEfectividadGeneral">—</div>
-              <div class="kpi-tooltip-box">Aprobadas ÷ Gestionadas × 100<br><em>Gestionadas = todas excepto Pendientes</em><br>🟢 ≥90% · 🟡 70–89% · 🔴 &lt;70%</div>
+              <div class="kpi-tooltip-box">Aprobadas ÷ Total órdenes × 100<br><em>Incluye pendientes en el denominador</em><br>🟢 ≥95% · 🔴 &lt;95%</div>
             </div>
             <div class="kpi-card kpi-has-tooltip" id="kpiEfectividadEntregas">
               <div class="kpi-label">Efectividad Entregas <span class="kpi-info">ⓘ</span></div>
               <div class="kpi-value" id="valEfectividadEntregas">—</div>
-              <div class="kpi-tooltip-box">Entregas aprobadas ÷ Entregas gestionadas × 100<br><em>Solo órdenes de tipo Entrega</em></div>
+              <div class="kpi-tooltip-box">Entregas aprobadas ÷ Total entregas × 100<br><em>Solo órdenes de tipo Entrega</em><br>🟢 ≥95% · 🔴 &lt;95%</div>
             </div>
             <div class="kpi-card kpi-has-tooltip" id="kpiEfectividadRetiros">
               <div class="kpi-label">Efectividad Retiros <span class="kpi-info">ⓘ</span></div>
               <div class="kpi-value" id="valEfectividadRetiros">—</div>
-              <div class="kpi-tooltip-box">Retiros aprobados ÷ Retiros gestionados × 100<br><em>Solo órdenes de tipo Retiro</em></div>
+              <div class="kpi-tooltip-box">Retiros aprobados ÷ Total retiros × 100<br><em>Solo órdenes de tipo Retiro</em><br>🟢 ≥95% · 🔴 &lt;95%</div>
             </div>
             <div class="kpi-card kpi-has-tooltip" id="kpiPendientes">
               <div class="kpi-label">% Pendientes <span class="kpi-info">ⓘ</span></div>
               <div class="kpi-value" id="valPendientes">—</div>
+              <div class="obj-sub" id="subPendientes"></div>
               <div class="kpi-tooltip-box">Pendientes ÷ Total órdenes × 100<br><em>Órdenes aún sin gestionar</em><br>🟢 ≤10% · 🟡 10–30% · 🔴 &gt;30%</div>
             </div>
           </div>
@@ -244,6 +245,58 @@
           <div class="chart-container">
             <canvas id="chartDona"></canvas>
           </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===== 1B. OBJETIVOS DEL DÍA ===== -->
+    <!-- Visible para todos los perfiles autenticados (admin, monitoreo, monitoreosuc) -->
+    <section class="section" id="secObjetivos" style="display:none;">
+      <h2 class="section-title">OBJETIVOS DEL DÍA</h2>
+      <div class="obj-grid">
+
+        <!-- Tarjeta 1: Efectividad -->
+        <div class="kpi-card obj-card kpi-has-tooltip" id="objEfectividad">
+          <div class="kpi-label">Efectividad <span class="kpi-info">ⓘ</span></div>
+          <div class="kpi-value" id="objEfectividadVal">—</div>
+          <div class="obj-sub"  id="objEfectividadSub"></div>
+          <div class="obj-obj"  id="objEfectividadObj"></div>
+          <div class="kpi-tooltip-box">Aprobadas ÷ Total órdenes × 100</div>
+        </div>
+
+        <!-- Tarjeta 2: Domicilio Visitado -->
+        <div class="kpi-card obj-card kpi-has-tooltip" id="objDomVisitado">
+          <div class="kpi-label">Dom. Visitado <span class="kpi-info">ⓘ</span></div>
+          <div class="kpi-value" id="objDomVisitadoVal">—</div>
+          <div class="obj-sub"  id="objDomVisitadoSub"></div>
+          <div class="obj-obj"  id="objDomVisitadoObj"></div>
+          <div class="kpi-tooltip-box">Entregadas + Rechazadas con presencia ÷ Total órdenes × 100<br><em>Excluye rechazadas por "Domicilio No Visitado"</em></div>
+        </div>
+
+        <!-- Tarjeta 3: Tiempo Promedio de Ruta -->
+        <div class="kpi-card obj-card" id="objTiempoRuta" style="cursor:pointer;" title="Clic para ver detalle por ruta">
+          <div class="kpi-label">Tiempo Prom. de Ruta <span class="kpi-info" style="opacity:0.6;">↗</span></div>
+          <div class="kpi-value" id="objTiempoRutaVal">—</div>
+          <div class="obj-sub"  id="objTiempoRutaSub"></div>
+          <div class="obj-obj"  id="objTiempoRutaObj"></div>
+        </div>
+
+        <!-- Tarjeta 4: Productividad Bultos -->
+        <div class="kpi-card obj-card kpi-has-tooltip" id="objProdBultos">
+          <div class="kpi-label">Prod. Bultos <span class="kpi-info">ⓘ</span></div>
+          <div class="kpi-value" id="objProdBultosVal">—</div>
+          <div class="obj-sub"  id="objProdBultosSub"></div>
+          <div class="obj-obj"  id="objProdBultosObj"></div>
+          <div class="kpi-tooltip-box">Bultos cargados ÷ Capacidad de bultos del vehículo × 100</div>
+        </div>
+
+        <!-- Tarjeta 5: NPS -->
+        <div class="kpi-card obj-card" id="objNPS">
+          <div class="kpi-label">NPS</div>
+          <div class="kpi-value" id="objNPSVal">—</div>
+          <div class="obj-sub"  id="objNPSSub"></div>
+          <div class="obj-obj"  id="objNPSObj"></div>
         </div>
 
       </div>
@@ -614,6 +667,17 @@
   <!-- ===== TOOLTIP ===== -->
   <div class="copy-tooltip" id="copyTooltip">¡Copiado!</div>
 
+  <!-- ===== MODAL DETALLE TIEMPO DE RUTA ===== -->
+  <div class="modal-overlay" id="tiempoRutaModal" style="display:none;">
+    <div class="modal-box modal-box--wide">
+      <h2 class="modal-title">Detalle — Tiempo de Ruta</h2>
+      <div id="tiempoRutaModalContent" style="overflow-y:auto;max-height:60vh;"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="document.getElementById('tiempoRutaModal').style.display='none'">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   </div><!-- /#appContent -->
 
   <!-- ===== CDN ===== -->
@@ -634,6 +698,7 @@
   <script src="js/actions.js"></script>
   <script src="js/notifications.js"></script>
   <script src="js/refresh.js"></script>
+  <script src="js/objetivos.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/main.js"></script>
 

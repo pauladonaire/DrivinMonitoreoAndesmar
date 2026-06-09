@@ -37,10 +37,10 @@ function calcAndRenderKPIs() {
   const retirosManaged   = retiros.filter(o  => o.status !== 'pending');
 
   // ---- Cálculo de efectividades ----
-  // Efectividad = aprobadas / gestionadas (excluye pendientes del denominador)
-  const efectividadGeneral  = pct(approved.length,        managed.length);
-  const efectividadEntregas = pct(entregasApproved.length, entregasManaged.length);
-  const efectividadRetiros  = pct(retirosApproved.length,  retirosManaged.length);
+  // Efectividad = aprobadas / TOTAL (incluyendo pendientes) — objetivo 95%
+  const efectividadGeneral  = pct(approved.length,        totalOrdenes);
+  const efectividadEntregas = pct(entregasApproved.length, entregas.length);
+  const efectividadRetiros  = pct(retirosApproved.length,  retiros.length);
 
   // % Pendientes (órdenes sin gestionar sobre el total)
   const pctPendientes = pct(pending.length, totalOrdenes);
@@ -51,14 +51,16 @@ function calcAndRenderKPIs() {
   setKPI('kpiTotalRetiros',    retiros.length,   'valTotalRetiros',    null, '');
   setKPI('kpiTotalRechazadas', rejected.length,  'valTotalRechazadas', null, '');
 
-  // ---- Fila 2: efectividades con color semántico ----
-  setKPI('kpiEfectividadGeneral',  efectividadGeneral,  'valEfectividadGeneral',  efectividadGeneral,  '%');
-  setKPI('kpiEfectividadEntregas', efectividadEntregas, 'valEfectividadEntregas', efectividadEntregas, '%');
-  setKPI('kpiEfectividadRetiros',  efectividadRetiros,  'valEfectividadRetiros',  efectividadRetiros,  '%');
+  // ---- Fila 2: efectividades con umbral 95% (verde/rojo, sin amarillo) ----
+  setEffKPI('kpiEfectividadGeneral',  efectividadGeneral,  'valEfectividadGeneral',  efectividadGeneral,  '%');
+  setEffKPI('kpiEfectividadEntregas', efectividadEntregas, 'valEfectividadEntregas', efectividadEntregas, '%');
+  setEffKPI('kpiEfectividadRetiros',  efectividadRetiros,  'valEfectividadRetiros',  efectividadRetiros,  '%');
 
   // % Pendientes: color inverso (más alto = peor)
   setKPI('kpiPendientes', pctPendientes, 'valPendientes', null, '%');
   colorPendientes('kpiPendientes', pctPendientes);
+  const subPendEl = document.getElementById('subPendientes');
+  if (subPendEl) subPendEl.textContent = pending.length + ' órdenes';
 
   // ---- Mejora 4: Promedio de bultos y kg por vehículo ----
   const vehicleBultos = {};
@@ -99,6 +101,21 @@ function calcAndRenderKPIs() {
 function pct(num, den) {
   if (!den || den === 0) return 0;
   return parseFloat(((num / den) * 100).toFixed(1));
+}
+
+/**
+ * Actualiza una tarjeta KPI de efectividad con umbral binario 95%.
+ * Verde si ≥ 95%, rojo si < 95%. Sin amarillo.
+ */
+function setEffKPI(cardId, value, valId, pctVal, suffix) {
+  const card  = document.getElementById(cardId);
+  const valEl = document.getElementById(valId);
+  if (valEl) valEl.textContent = `${value}${suffix}`;
+  if (!card) return;
+  card.classList.remove('kpi--danger', 'kpi--warning', 'kpi--success');
+  if (pctVal !== null) {
+    card.classList.add(parseFloat(pctVal) >= 95 ? 'kpi--success' : 'kpi--danger');
+  }
 }
 
 /**
