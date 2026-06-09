@@ -257,8 +257,8 @@
       <div class="obj-grid">
 
         <!-- Tarjeta 1: Efectividad -->
-        <div class="kpi-card obj-card kpi-has-tooltip" id="objEfectividad">
-          <div class="kpi-label">Efectividad <span class="kpi-info">ⓘ</span></div>
+        <div class="kpi-card obj-card kpi-has-tooltip" id="objEfectividad" style="cursor:pointer;" title="Clic para ver detalle por vehículo">
+          <div class="kpi-label">Efectividad <span class="kpi-info" style="opacity:0.6;">↗</span></div>
           <div class="kpi-value" id="objEfectividadVal">—</div>
           <div class="obj-sub"  id="objEfectividadSub"></div>
           <div class="obj-obj"  id="objEfectividadObj"></div>
@@ -266,8 +266,8 @@
         </div>
 
         <!-- Tarjeta 2: Domicilio Visitado -->
-        <div class="kpi-card obj-card kpi-has-tooltip" id="objDomVisitado">
-          <div class="kpi-label">Dom. Visitado <span class="kpi-info">ⓘ</span></div>
+        <div class="kpi-card obj-card kpi-has-tooltip" id="objDomVisitado" style="cursor:pointer;" title="Clic para ver detalle por vehículo">
+          <div class="kpi-label">Dom. Visitado <span class="kpi-info" style="opacity:0.6;">↗</span></div>
           <div class="kpi-value" id="objDomVisitadoVal">—</div>
           <div class="obj-sub"  id="objDomVisitadoSub"></div>
           <div class="obj-obj"  id="objDomVisitadoObj"></div>
@@ -283,8 +283,8 @@
         </div>
 
         <!-- Tarjeta 4: Productividad Bultos -->
-        <div class="kpi-card obj-card kpi-has-tooltip" id="objProdBultos">
-          <div class="kpi-label">Prod. Bultos <span class="kpi-info">ⓘ</span></div>
+        <div class="kpi-card obj-card kpi-has-tooltip" id="objProdBultos" style="cursor:pointer;" title="Clic para ver detalle por vehículo">
+          <div class="kpi-label">Prod. Bultos <span class="kpi-info" style="opacity:0.6;">↗</span></div>
           <div class="kpi-value" id="objProdBultosVal">—</div>
           <div class="obj-sub"  id="objProdBultosSub"></div>
           <div class="obj-obj"  id="objProdBultosObj"></div>
@@ -292,8 +292,8 @@
         </div>
 
         <!-- Tarjeta 5: NPS -->
-        <div class="kpi-card obj-card" id="objNPS">
-          <div class="kpi-label">NPS</div>
+        <div class="kpi-card obj-card" id="objNPS" style="cursor:pointer;" title="Clic para ver detalle por vehículo">
+          <div class="kpi-label">NPS <span class="kpi-info" style="opacity:0.6;">↗</span></div>
           <div class="kpi-value" id="objNPSVal">—</div>
           <div class="obj-sub"  id="objNPSSub"></div>
           <div class="obj-obj"  id="objNPSObj"></div>
@@ -674,6 +674,50 @@
       <div id="tiempoRutaModalContent" style="overflow-y:auto;max-height:60vh;"></div>
       <div class="modal-actions">
         <button class="btn-secondary" onclick="document.getElementById('tiempoRutaModal').style.display='none'">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL DETALLE EFECTIVIDAD ===== -->
+  <div class="modal-overlay" id="efectividadModal" style="display:none;">
+    <div class="modal-box modal-box--wide">
+      <h2 class="modal-title">Detalle — Efectividad por Vehículo</h2>
+      <div id="efectividadModalContent" style="overflow-y:auto;max-height:60vh;"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="document.getElementById('efectividadModal').style.display='none'">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL DETALLE DOMICILIO VISITADO ===== -->
+  <div class="modal-overlay" id="domVisitadoModal" style="display:none;">
+    <div class="modal-box modal-box--wide">
+      <h2 class="modal-title">Detalle — Domicilio Visitado por Vehículo</h2>
+      <div id="domVisitadoModalContent" style="overflow-y:auto;max-height:60vh;"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="document.getElementById('domVisitadoModal').style.display='none'">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL DETALLE PRODUCTIVIDAD BULTOS ===== -->
+  <div class="modal-overlay" id="prodBultosModal" style="display:none;">
+    <div class="modal-box modal-box--wide">
+      <h2 class="modal-title">Detalle — Productividad Bultos por Vehículo</h2>
+      <div id="prodBultosModalContent" style="overflow-y:auto;max-height:60vh;"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="document.getElementById('prodBultosModal').style.display='none'">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL DETALLE NPS ===== -->
+  <div class="modal-overlay" id="npsModal" style="display:none;">
+    <div class="modal-box modal-box--wide">
+      <h2 class="modal-title">Detalle — NPS por Vehículo</h2>
+      <div id="npsModalContent" style="overflow-y:auto;max-height:60vh;"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="document.getElementById('npsModal').style.display='none'">Cerrar</button>
       </div>
     </div>
   </div>

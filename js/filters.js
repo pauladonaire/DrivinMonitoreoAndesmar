@@ -86,6 +86,11 @@ function populateDependentFilters() {
     });
   });
 
+  // Agregar flotas del catálogo completo de vehículos (campo "fleets", igual que en analytics)
+  Object.values(APP_STATE.vehiculosMap || {}).forEach(v => {
+    if (v.fleets) v.fleets.split(',').map(f => f.trim()).filter(Boolean).forEach(f => flotas.add(f));
+  });
+
   fillSelect('filterFlota',     [...flotas].sort());
   fillSelect('filterVehiculo',  [...vehiculos].sort());
   fillSelect('filterConductor', [...conductores].sort());
@@ -150,7 +155,13 @@ function applyFilters() {
     if (userDeps && userDeps.length > 0 && !userDeps.includes(stop.schema_name)) return;
 
     if (deposito  && stop.schema_name  !== deposito)  return;
-    if (flota     && stop.fleet_name   !== flota)     return;
+    if (flota) {
+      const matchStop    = stop.fleet_name === flota;
+      const vInfo        = APP_STATE.vehiculosMap[stop.vehicle_code];
+      const matchCatalog = vInfo && vInfo.fleets &&
+        vInfo.fleets.split(',').map(f => f.trim()).includes(flota);
+      if (!matchStop && !matchCatalog) return;
+    }
     if (vehiculo  && stop.vehicle_code !== vehiculo)  return;
     if (conductor && stop.driver_name  !== conductor) return;
 
