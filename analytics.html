@@ -879,6 +879,7 @@
       <div class="evol-controls">
         <button class="evol-agrup-btn active" id="evolBtnQ" onclick="setEvolAgrup('quincenal')">Quincenal</button>
         <button class="evol-agrup-btn"        id="evolBtnM" onclick="setEvolAgrup('mensual')">Mensual</button>
+        <button class="evol-agrup-btn"        id="evolBtnS" onclick="setEvolAgrup('semanal')">Semanal</button>
         <select class="evol-kpi-sel" id="evolKpiSel" onchange="renderEvolChart()">
           <option value="efectividad">Efectividad (%)</option>
           <option value="dnv">Dom. Visitado (%)</option>
@@ -3903,6 +3904,7 @@ function setEvolAgrup(agrup) {
   _evolAgrup = agrup;
   el('evolBtnQ')?.classList.toggle('active', agrup === 'quincenal');
   el('evolBtnM')?.classList.toggle('active', agrup === 'mensual');
+  el('evolBtnS')?.classList.toggle('active', agrup === 'semanal');
   renderEvolutivo();
 }
 
@@ -3919,7 +3921,9 @@ function renderEvolutivo() {
     const fMin = fechas[0], fMax = fechas[fechas.length - 1];
     const sub = el('evolSubtitle');
     if (sub) sub.textContent = `Evolución desde ${fmtDD(fMin)} hasta ${fmtDD(fMax)}`;
-    const periodos = _evolAgrup === 'quincenal' ? buildPeriodosQuincenales(fMin, fMax) : buildPeriodosMensuales(fMin, fMax);
+    const periodos = _evolAgrup === 'semanal'   ? buildPeriodosSemanales(fMin, fMax)
+                   : _evolAgrup === 'quincenal' ? buildPeriodosQuincenales(fMin, fMax)
+                   : buildPeriodosMensuales(fMin, fMax);
     if (!periodos.length) return;
     _evolData = periodos.map(p => {
       const filas = rawRows.filter(r => r.fecha >= p.desde && r.fecha <= p.hasta);
@@ -3941,7 +3945,9 @@ function renderEvolutivo() {
     const fMin = fechas[0], fMax = fechas[fechas.length - 1];
     const sub = el('evolSubtitle');
     if (sub) sub.textContent = `Evolución desde ${fmtDD(fMin)} hasta ${fmtDD(fMax)}`;
-    const periodos = _evolAgrup === 'quincenal' ? buildPeriodosQuincenales(fMin, fMax) : buildPeriodosMensuales(fMin, fMax);
+    const periodos = _evolAgrup === 'semanal'   ? buildPeriodosSemanales(fMin, fMax)
+                   : _evolAgrup === 'quincenal' ? buildPeriodosQuincenales(fMin, fMax)
+                   : buildPeriodosMensuales(fMin, fMax);
     if (!periodos.length) return;
     _evolData = periodos.map(p => {
       const filas = rawRows.filter(r => r.fecha >= p.desde && r.fecha <= p.hasta);
@@ -3990,7 +3996,9 @@ function renderEvolutivo() {
   if (sub) sub.textContent = `Evolución desde ${fmtDD(fMin)} hasta ${fmtDD(fMax)}`;
 
   // Generar períodos
-  const periodos = _evolAgrup === 'quincenal' ? buildPeriodosQuincenales(fMin, fMax) : buildPeriodosMensuales(fMin, fMax);
+  const periodos = _evolAgrup === 'semanal'   ? buildPeriodosSemanales(fMin, fMax)
+                 : _evolAgrup === 'quincenal' ? buildPeriodosQuincenales(fMin, fMax)
+                 : buildPeriodosMensuales(fMin, fMax);
   if (!periodos.length) return;
 
   // Para cada período, agregar las filas correspondientes
@@ -4046,6 +4054,25 @@ function buildPeriodosMensuales(fMin, fMax) {
     cursor = `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-01`;
   }
   return periodos;
+}
+
+function buildPeriodosSemanales(fMin, fMax) {
+  const periodos = [];
+  // Arrancar desde el lunes de la semana que contiene fMin
+  const start = new Date(fMin + 'T00:00:00');
+  const dow   = start.getDay(); // 0=Dom, 1=Lun ... 6=Sab
+  start.setDate(start.getDate() - (dow === 0 ? 6 : dow - 1));
+  const end = new Date(fMax + 'T00:00:00');
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  while (start <= end) {
+    const desde = iso(start);
+    const sunDate = new Date(start);
+    sunDate.setDate(sunDate.getDate() + 6);
+    const hasta = iso(sunDate);
+    periodos.push({ label: `${fmtDD(desde)}-${fmtDD(hasta)}`, desde, hasta });
+    start.setDate(start.getDate() + 7);
+  }
+  return periodos.filter(p => p.hasta >= fMin);
 }
 
 function aggregateCacheSet(filas) {
