@@ -299,18 +299,15 @@ async function gestionarRespuesta(hoja, nroOrden, cardId) {
       hour: '2-digit', minute: '2-digit', second: '2-digit'
     });
 
-    const res  = await fetch(GAS_WEBAPP_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        action:         'gestionar_respuesta',
-        hoja,
-        nroOrden,
-        usuario:        user.usuario        || '',
-        nombreCompleto: user.nombre_completo || user.usuario || '',
-        gestionadoAt:   now
-      })
+    const params = new URLSearchParams({
+      action:         'gestionar_respuesta',
+      hoja,
+      nroOrden,
+      usuario:        user.usuario        || '',
+      nombreCompleto: user.nombre_completo || user.usuario || '',
+      gestionadoAt:   now
     });
+    const res  = await fetch(GAS_WEBAPP_URL + '?' + params.toString());
     const json = await res.json();
 
     if (json.status === 'ok') {
