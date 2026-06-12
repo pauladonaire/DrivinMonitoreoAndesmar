@@ -59,6 +59,9 @@ async function initApp() {
   setInterval(checkAutoClosure, 60000);
   renderClosureHistory();
 
+  // [RESPUESTAS] Iniciar módulo de respuestas de destinatarios (rawData ya está cargado)
+  if (typeof initRespuestas === 'function') initRespuestas();
+
   // [MEJORA 7a — Debug historial] Verificar claves en localStorage
   const claves = Object.keys(localStorage).filter(k => k.startsWith('fleet_closure_'));
   console.log('[HISTORIAL] Claves encontradas:', claves);

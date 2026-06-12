@@ -146,7 +146,7 @@ function buildTableRow(row) {
     <td>${esc(row.description)}</td>
     <td class="text-muted" style="text-align:center;">${paradaHtml}</td>
     <td class="text-muted">${esc(row.alt_code) || '—'}</td>
-    <td class="text-muted">${addrTooltip}</td>
+    <td class="text-muted" data-orden-code="${esc(row.code)}">${addrTooltip}</td>
     <td>${esc(row.client_name || row.address_customer_name)}</td>
     <td class="text-muted">${esc(row.supplier_name) || '—'}</td>
     <td>${addrContactHtml}</td>

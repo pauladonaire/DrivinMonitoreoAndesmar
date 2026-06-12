@@ -75,6 +75,13 @@
       <button class="btn-user-mgmt" id="btnUserMgmt" onclick="openUserMgmt()" style="display:none;">
         Usuarios
       </button>
+      <!-- [RESPUESTAS] Badge de alerta — respuestas de destinatarios sin gestionar -->
+      <div id="resp-alert-btn" onclick="togglePanel()" role="button"
+           aria-label="Respuestas de destinatarios pendientes">
+        <div class="resp-dot"></div>
+        <span class="resp-alert-txt">Cargando...</span>
+        <i class="ti ti-chevron-right" id="resp-alert-icon" aria-hidden="true"></i>
+      </div>
       <!-- Análisis histórico -->
       <button onclick="window.open('analytics.html','_blank')"
               style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;background:transparent;color:var(--color-cyan);border:1px solid var(--color-cyan);padding:5px 14px;border-radius:5px;cursor:pointer;transition:all .2s;"
@@ -507,6 +514,72 @@
 
   </main>
 
+  <!-- [RESPUESTAS] Panel lateral — drawer de respuestas de destinatarios -->
+  <div id="resp-panel">
+    <div class="resp-panel-inner">
+
+      <!-- Header del drawer -->
+      <div class="resp-drawer-header">
+        <div class="resp-drawer-title">
+          <i class="ti ti-bell" style="font-size:11px" aria-hidden="true"></i>
+          RESPUESTAS A GESTIONAR
+        </div>
+        <div id="resp-pend-count">—</div>
+      </div>
+
+      <!-- Filtro por depósito -->
+      <div class="resp-filter">
+        <div class="resp-filter-label">
+          <i class="ti ti-building-warehouse" style="font-size:10px" aria-hidden="true"></i>
+          Filtrar por depósito
+        </div>
+        <select id="resp-dep-select" onchange="filterByDeposito()">
+          <option value="">Todos los depósitos</option>
+        </select>
+        <div class="resp-filter-note">
+          El depósito se cruza desde los datos del monitor por N° Orden
+        </div>
+      </div>
+
+      <!-- Tabs de prioridad -->
+      <div class="resp-tabs">
+        <div class="resp-dtab active" data-tab="urgente" onclick="setRespTab('urgente')">Dir. fallida (0)</div>
+        <div class="resp-dtab"        data-tab="aviso"   onclick="setRespTab('aviso')">No estará (0)</div>
+        <div class="resp-dtab"        data-tab="info"    onclick="setRespTab('info')">Info (0)</div>
+      </div>
+
+      <!-- Cuerpo con las tarjetas -->
+      <div id="resp-drawer-body">
+        <div style="text-align:center;padding:32px 16px;color:#7a9ab8;font-size:11px">
+          Cargando respuestas...
+        </div>
+      </div>
+
+      <!-- Footer con stats globales -->
+      <div class="resp-drawer-footer">
+        <div class="resp-footer-stats">
+          <div class="resp-fstat">
+            <div class="resp-fstat-val" style="color:#fca5a5" id="resp-count-urgente">0</div>
+            <div class="resp-fstat-lbl">Dir. fallida</div>
+          </div>
+          <div class="resp-fstat">
+            <div class="resp-fstat-val" style="color:#fde68a" id="resp-count-aviso">0</div>
+            <div class="resp-fstat-lbl">No estará</div>
+          </div>
+          <div class="resp-fstat">
+            <div class="resp-fstat-val" style="color:#93c5fd" id="resp-count-info">0</div>
+            <div class="resp-fstat-lbl">Con info</div>
+          </div>
+          <div class="resp-fstat">
+            <div class="resp-fstat-val" style="color:#86efac" id="resp-count-gestionado">0</div>
+            <div class="resp-fstat-lbl">Gestionadas</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ===== MODAL LIGHTBOX ===== -->
   <div class="lightbox-overlay" id="lightboxOverlay" style="display:none;">
     <div class="lightbox-container">
@@ -744,6 +817,8 @@
   <script src="js/refresh.js"></script>
   <script src="js/objetivos.js"></script>
   <script src="js/auth.js"></script>
+  <!-- [RESPUESTAS] Módulo de respuestas de destinatarios — ANTES de main.js -->
+  <script src="js/respuestas.js"></script>
   <script src="js/main.js"></script>
 
 </body>
