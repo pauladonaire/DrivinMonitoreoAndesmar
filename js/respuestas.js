@@ -301,7 +301,7 @@ async function gestionarRespuesta(hoja, nroOrden, cardId) {
 
     const res  = await fetch(GAS_WEBAPP_URL, {
       method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({
         action:         'gestionar_respuesta',
         hoja,
