@@ -54,7 +54,7 @@ function getConductorPhone(driverEmail) {
 // [RESPUESTAS — carga desde GAS y enriquece con datos locales]
 async function loadRespuestas() {
   try {
-    const url  = GAS_URL + '?action=get_respuestas_pendientes';
+    const url  = GAS_WEBAPP_URL + '?action=get_respuestas_pendientes';
     const res  = await fetch(url);
     const json = await res.json();
     if (json.status !== 'ok') return;
@@ -299,7 +299,7 @@ async function gestionarRespuesta(hoja, nroOrden, cardId) {
       hour: '2-digit', minute: '2-digit', second: '2-digit'
     });
 
-    const res  = await fetch(GAS_URL, {
+    const res  = await fetch(GAS_WEBAPP_URL, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
