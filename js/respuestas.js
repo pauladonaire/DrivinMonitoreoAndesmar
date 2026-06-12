@@ -286,7 +286,7 @@ function buildRespCard(r) {
 
 // [RESPUESTAS — envía la gestión al GAS y actualiza estado local]
 async function gestionarRespuesta(hoja, nroOrden, cardId) {
-  const user = APP_STATE.currentUser;
+  const user = (typeof getSession === 'function') ? getSession() : null;
   if (!user) { alert('Debe estar logueado para gestionar respuestas.'); return; }
 
   const card = document.getElementById(cardId);

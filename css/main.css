@@ -399,11 +399,11 @@ a {
   transition: width 0.3s ease, border-left-width 0.3s ease;
 }
 #resp-panel.resp-panel-open {
-  width: 320px;
+  width: 440px;
   border-left-width: 1px;
 }
 .resp-panel-inner {
-  width: 320px;
+  width: 440px;
   display: flex;
   flex-direction: column;
   height: 100%;
