@@ -52,18 +52,14 @@ async function closeDayProcedure() {
   const totalPickups      = orders.filter(o => o.category === 'pickup').length;
   const totalRejected     = orders.filter(o => o.status === 'rejected').length;
 
-  // Misma fórmula que kpis.js: aprobadas / gestionadas (excluye pending)
-  const totalApproved = orders.filter(o => o.status === 'approved').length;
-  const totalManaged  = orders.filter(o => o.status !== 'pending').length;
-
-  const entregasManaged  = orders.filter(o => o.category === 'delivery' && o.status !== 'pending').length;
+  // Fórmula: aprobadas / total (igual que kpis.js)
+  const totalApproved    = orders.filter(o => o.status === 'approved').length;
   const entregasApproved = orders.filter(o => o.category === 'delivery' && o.status === 'approved').length;
-  const retirosManaged   = orders.filter(o => o.category === 'pickup'   && o.status !== 'pending').length;
   const retirosApproved  = orders.filter(o => o.category === 'pickup'   && o.status === 'approved').length;
 
-  const effGeneral  = totalManaged    > 0 ? ((totalApproved   / totalManaged)    * 100).toFixed(1) : '0.0';
-  const effDelivery = entregasManaged > 0 ? ((entregasApproved / entregasManaged) * 100).toFixed(1) : '0.0';
-  const effPickup   = retirosManaged  > 0 ? ((retirosApproved  / retirosManaged)  * 100).toFixed(1) : '0.0';
+  const effGeneral  = totalOrders     > 0 ? ((totalApproved   / totalOrders)     * 100).toFixed(1) : '0.0';
+  const effDelivery = totalDeliveries > 0 ? ((entregasApproved / totalDeliveries) * 100).toFixed(1) : '0.0';
+  const effPickup   = totalPickups    > 0 ? ((retirosApproved  / totalPickups)    * 100).toFixed(1) : '0.0';
   const otdPct      = totalOrders     > 0
     ? ((orders.filter(o => o.is_otd === true).length / totalOrders) * 100).toFixed(1)
     : '0.0';
@@ -117,8 +113,7 @@ async function closeDayProcedure() {
   const depositosSummary = Object.entries(byDeposito)
     .sort((a, b) => b[1].total - a[1].total)
     .map(([dep, d]) => {
-      const gest = d.total - d.pending;
-      const eff  = gest > 0 ? ((d.aprobadas / gest) * 100).toFixed(1) : '0.0';
+      const eff  = d.total > 0 ? ((d.aprobadas / d.total) * 100).toFixed(1) : '0.0';
       return `${dep}: ${d.total} órdenes | ✅ ${d.aprobadas} | ❌ ${d.rechazadas} | Ef: ${eff}%`;
     })
     .join('\n');
@@ -658,14 +653,24 @@ function exportClosureCSV() {
  * Verifica a las 23:55 si se debe hacer el cierre automático.
  * Se llama con setInterval cada minuto desde main.js.
  */
-function checkAutoClosure() {
+async function checkAutoClosure() {
   const now  = new Date();
   const hhmm = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  if (hhmm === '23:55') {
-    // Evitar doble cierre: verificar si ya se cerró hoy
-    const key = `fleet_closure_${getTodayString()}`;
-    if (!localStorage.getItem(key)) {
-      closeDayProcedure();
-    }
+  if (hhmm !== '23:55') return;
+
+  // 1. Verificar localStorage (cierre manual en este browser)
+  const key = `fleet_closure_${getTodayString()}`;
+  if (localStorage.getItem(key)) return;
+
+  // 2. Verificar en GAS por si el trigger automático de 23:50 ya cerró el día
+  try {
+    const today = getTodayString();
+    const res   = await gasGet({ action: 'get_resumen' });
+    const rows  = res?.rows || [];
+    if (rows.some(r => r.date === today)) return;
+  } catch (e) {
+    console.warn('[checkAutoClosure] No se pudo verificar GAS, procediendo:', e.message);
   }
+
+  closeDayProcedure();
 }

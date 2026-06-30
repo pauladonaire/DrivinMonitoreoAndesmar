@@ -161,14 +161,14 @@ function _buildStatsPayload() {
   const pending  = orders.filter(o => o.status === 'pending').length;
   const managed  = orders.filter(o => o.status !== 'pending').length;
 
-  const entMgd = orders.filter(o => o.category === 'delivery' && o.status !== 'pending').length;
-  const entApp = orders.filter(o => o.category === 'delivery' && o.status === 'approved').length;
-  const retMgd = orders.filter(o => o.category === 'pickup'   && o.status !== 'pending').length;
-  const retApp = orders.filter(o => o.category === 'pickup'   && o.status === 'approved').length;
+  const entTotal = orders.filter(o => o.category === 'delivery').length;
+  const entApp   = orders.filter(o => o.category === 'delivery' && o.status === 'approved').length;
+  const retTotal = orders.filter(o => o.category === 'pickup').length;
+  const retApp   = orders.filter(o => o.category === 'pickup'   && o.status === 'approved').length;
 
-  const effGeneral  = managed > 0 ? ((approved / managed) * 100).toFixed(1) : '0.0';
-  const effEntregas = entMgd  > 0 ? ((entApp   / entMgd)  * 100).toFixed(1) : '0.0';
-  const effRetiros  = retMgd  > 0 ? ((retApp   / retMgd)  * 100).toFixed(1) : '0.0';
+  const effGeneral  = total    > 0 ? ((approved / total)    * 100).toFixed(1) : '0.0';
+  const effEntregas = entTotal > 0 ? ((entApp   / entTotal) * 100).toFixed(1) : '0.0';
+  const effRetiros  = retTotal > 0 ? ((retApp   / retTotal) * 100).toFixed(1) : '0.0';
   const otd = total > 0
     ? ((orders.filter(o => o.is_otd === true).length / total) * 100).toFixed(1)
     : '0.0';
