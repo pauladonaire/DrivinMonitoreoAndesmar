@@ -133,10 +133,8 @@ function buildDriverRows() {
 
   // Convertir a array con métricas calculadas
   return Object.values(map).map(d => {
-    // Efectividad: aprobadas / gestionadas (excluye pendientes del denominador)
-    const gestionadas = d.total - d.pending;
-    const eff = gestionadas > 0
-      ? parseFloat(((d.aprobadas / gestionadas) * 100).toFixed(1))
+    const eff = d.total > 0
+      ? parseFloat(((d.aprobadas / d.total) * 100).toFixed(1))
       : 0;
 
     // Tiempo en ruta: sumar cada ruta única (evita duplicado)
