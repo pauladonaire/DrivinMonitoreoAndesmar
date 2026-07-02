@@ -7,7 +7,8 @@ const APP_STATE = {
   filteredOrders: [],
   driversMap:     {},   // { email: { phone, ... } }
   addressesMap:   {},   // { address_code: { phone, ... } }
-  vehiculosMap:   {},   // { vehicle_code: { capacidad_bultos, capacidad_kg, fleets, ... } }
+  vehiculosMap:      {},   // { vehicle_code: { capacidad_bultos, capacidad_kg, fleets, ... } }
+  vehiculosExcluidos: new Set(), // vehicle_codes (lowercase) excluidos de mediciones — hoja ExcluirMediciones
 
   // Tabla principal
   currentPage: 1,

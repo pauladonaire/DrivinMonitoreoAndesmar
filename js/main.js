@@ -80,6 +80,18 @@ async function initApp() {
     })
     .catch(err => console.warn('[main] vehiculosMap no disponible:', err.message));
 
+  // ---- Vehículos excluidos de mediciones (hoja ExcluirMediciones) ----
+  gasGet({ action: 'get_vehiculos_excluidos' })
+    .then(res => {
+      const excluidos = res.vehiculos || [];
+      excluidos.forEach(v => { if (v) APP_STATE.vehiculosExcluidos.add(v.toLowerCase()); });
+      if (excluidos.length) {
+        console.log('[main] vehiculosExcluidos cargados:', excluidos.length);
+        applyFilters(); // re-render con exclusiones activas
+      }
+    })
+    .catch(err => console.warn('[main] vehiculosExcluidos no disponibles:', err.message));
+
   // ---- Conductores en background (no bloquea el render inicial) ----
   fetchDrivers()
     .then(drivers => {

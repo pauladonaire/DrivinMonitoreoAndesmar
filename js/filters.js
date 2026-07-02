@@ -78,6 +78,7 @@ function populateDependentFilters() {
   const estados     = new Set();
 
   baseStops.forEach(stop => {
+    if (APP_STATE.vehiculosExcluidos.has((stop.vehicle_code || '').toLowerCase())) return;
     if (stop.fleet_name)   flotas.add(stop.fleet_name);
     if (stop.vehicle_code) vehiculos.add(stop.vehicle_code);
     if (stop.driver_name)  conductores.add(stop.driver_name);
@@ -153,6 +154,9 @@ function applyFilters() {
 
     // Restricción de perfil: monitoreosuc solo ve sus depósitos
     if (userDeps && userDeps.length > 0 && !userDeps.includes(stop.schema_name)) return;
+
+    // Excluir vehículos de la hoja ExcluirMediciones
+    if (APP_STATE.vehiculosExcluidos.has((stop.vehicle_code || '').toLowerCase())) return;
 
     if (deposito  && stop.schema_name  !== deposito)  return;
     if (flota) {
