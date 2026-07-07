@@ -114,7 +114,7 @@ async function closeDayProcedure() {
     .sort((a, b) => b[1].total - a[1].total)
     .map(([dep, d]) => {
       const eff  = d.total > 0 ? ((d.aprobadas / d.total) * 100).toFixed(1) : '0.0';
-      return `${dep}: ${d.total} órdenes | ✅ ${d.aprobadas} | ❌ ${d.rechazadas} | Ef: ${eff}%`;
+      return `${dep}: ${d.total} órdenes | ✅ ${d.aprobadas} | ❌ ${d.rechazadas} | ⏳ ${d.pending} | Ef: ${eff}%`;
     })
     .join('\n');
 
