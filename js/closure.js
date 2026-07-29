@@ -76,8 +76,12 @@ async function closeDayProcedure() {
     .map(([reason, count]) => ({ reason, count }));
 
   // [MEJORA 3] Top 10 conductores con más rechazadas — usa calcTop10Conductores
-  // Trabaja sobre rawData para incluir tiempoEnRuta y VD en calle
-  const top10Calc = calcTop10Conductores(APP_STATE.rawData);
+  // Trabaja sobre rawData (sin vehículos de ExcluirMediciones) para incluir
+  // tiempoEnRuta y VD en calle
+  const stopsParaTop10 = APP_STATE.rawData.filter(
+    s => !APP_STATE.vehiculosExcluidos.has((s.vehicle_code || '').toLowerCase())
+  );
+  const top10Calc = calcTop10Conductores(stopsParaTop10);
   const topDriversRejected = top10Calc.slice(0, 10)
     .map(c => ({ driver: c.name, count: c.rechazadas, vehicle: c.vehicle }));
 
@@ -212,6 +216,7 @@ async function closeDayProcedure() {
 function buildFlatAllOrders() {
   const rows = [];
   APP_STATE.rawData.forEach(stop => {
+    if (APP_STATE.vehiculosExcluidos.has((stop.vehicle_code || '').toLowerCase())) return;
     (stop.orders || []).forEach(order => {
       rows.push(buildFlatRow(stop, order));
     });

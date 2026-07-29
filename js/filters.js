@@ -160,11 +160,15 @@ function applyFilters() {
 
     if (deposito  && stop.schema_name  !== deposito)  return;
     if (flota) {
-      const matchStop    = stop.fleet_name === flota;
-      const vInfo        = APP_STATE.vehiculosMap[stop.vehicle_code];
-      const matchCatalog = vInfo && vInfo.fleets &&
-        vInfo.fleets.split(',').map(f => f.trim()).includes(flota);
-      if (!matchStop && !matchCatalog) return;
+      // El catálogo de vehículos (hoja Vehículos) es la fuente de verdad de la flota.
+      // Si el vehículo está catalogado, se ignora el fleet_name crudo de Drivin
+      // (puede venir mal asignado en la plataforma de ruteo).
+      // Solo si no está catalogado se usa el fleet_name como respaldo.
+      const vInfo = APP_STATE.vehiculosMap[stop.vehicle_code];
+      const match = (vInfo && vInfo.fleets)
+        ? vInfo.fleets.split(',').map(f => f.trim()).includes(flota)
+        : stop.fleet_name === flota;
+      if (!match) return;
     }
     if (vehiculo  && stop.vehicle_code !== vehiculo)  return;
     if (conductor && stop.driver_name  !== conductor) return;
