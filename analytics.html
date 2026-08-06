@@ -1665,7 +1665,8 @@ async function loadDetalle(overrideDe, overrideHa) {
       gasPost({ action: 'get_actions_range', desde, hasta })
     ]);
 
-    RAW     = histRes.rows   || [];
+    const _detalleSrc = histRes.source || 'base1';
+    RAW     = _detalleSrc === 'cache' ? cacheRowsToSynthetic(histRes.rows || []) : (histRes.rows || []);
     ACTIONS = actRes.actions || [];
     APP_MODE = 'detail';
 
@@ -1676,7 +1677,9 @@ async function loadDetalle(overrideDe, overrideHa) {
     ['general','pordia','conductores','depositos','rechazos','acciones'].forEach(removeFastPlaceholder);
 
     const dias = new Set(RAW.map(r => r.fecha)).size;
-    setSt(`📊 ${RAW.length.toLocaleString('es-AR')} órdenes · ${dias} días · ${ACTIONS.length} acciones`, '');
+    // Con filas de CACHE el total real se calcula con _cache_count
+    const totalOrdenes = RAW.reduce((s, r) => s + (r._cache_count || 1), 0);
+    setSt(`📊 ${totalOrdenes.toLocaleString('es-AR')} órdenes · ${dias} días · ${ACTIONS.length} acciones`, '');
     // setModeBar NO va acá: el mode bar del RESUMEN lo controla loadDetalleResumen()
     renderTab(activeTab());
 
