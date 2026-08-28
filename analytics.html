@@ -1661,7 +1661,7 @@ async function loadDetalle(overrideDe, overrideHa) {
 
   try {
     const [histRes, actRes] = await Promise.all([
-      fetch(`${GAS_URL}?action=get_historico&desde=${encodeURIComponent(desde)}&hasta=${encodeURIComponent(hasta)}`).then(r => r.json()),
+      fetch(`${GAS_URL}?action=get_historico&desde=${encodeURIComponent(desde)}&hasta=${encodeURIComponent(hasta)}&force_base1=true`).then(r => r.json()),
       gasPost({ action: 'get_actions_range', desde, hasta })
     ]);
 
@@ -3604,7 +3604,8 @@ function exportCSV_acciones() {
 }
 
 function dlCSV(rows, filename) {
-  const csv  = rows.map(r => r.join(',')).join('\n');
+  // sep=; → Excel Argentina (decimal=coma) reconoce el separador automáticamente
+  const csv  = 'sep=;\n' + rows.map(r => r.join(';')).join('\n');
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
