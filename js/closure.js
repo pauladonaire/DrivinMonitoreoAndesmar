@@ -100,8 +100,10 @@ async function closeDayProcedure() {
   const totalPending = orders.filter(o => o.status === 'pending').length;
 
   // ---- Mejora 8: Resumen por sucursal ----
+  // Siempre usa todas las órdenes del día (sin filtros) para el desglose por depósito
+  const allOrdersForDeposito = buildFlatAllOrders();
   const byDeposito = {};
-  orders.forEach(o => {
+  allOrdersForDeposito.forEach(o => {
     const dep = o.schema_name || 'Sin sucursal';
     if (!byDeposito[dep]) {
       byDeposito[dep] = { total: 0, aprobadas: 0, rechazadas: 0, pending: 0, entregas: 0, retiros: 0 };
