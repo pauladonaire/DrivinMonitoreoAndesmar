@@ -41,10 +41,9 @@ function abrirModalConfirmacionCierre() {
  * [MEJORA 5] El confirm nativo fue reemplazado por el warning modal.
  */
 async function closeDayProcedure() {
-  const hoy     = getTodayString();
-  const orders  = APP_STATE.filteredOrders.length > 0
-    ? APP_STATE.filteredOrders
-    : buildFlatAllOrders(); // usar todos si no hay filtros aplicados
+  const hoy    = getTodayString();
+  // Siempre usar TODAS las órdenes del día para el reporte, sin importar los filtros activos
+  const orders = buildFlatAllOrders();
 
   // Calcular métricas finales del día
   const totalOrders       = orders.length;
@@ -100,10 +99,8 @@ async function closeDayProcedure() {
   const totalPending = orders.filter(o => o.status === 'pending').length;
 
   // ---- Mejora 8: Resumen por sucursal ----
-  // Siempre usa todas las órdenes del día (sin filtros) para el desglose por depósito
-  const allOrdersForDeposito = buildFlatAllOrders();
   const byDeposito = {};
-  allOrdersForDeposito.forEach(o => {
+  orders.forEach(o => {
     const dep = o.schema_name || 'Sin sucursal';
     if (!byDeposito[dep]) {
       byDeposito[dep] = { total: 0, aprobadas: 0, rechazadas: 0, pending: 0, entregas: 0, retiros: 0 };
@@ -676,7 +673,9 @@ async function checkAutoClosure() {
     const rows  = res?.rows || [];
     if (rows.some(r => r.date === today)) return;
   } catch (e) {
-    console.warn('[checkAutoClosure] No se pudo verificar GAS, procediendo:', e.message);
+    // Si falla la consulta a GAS, abortamos para evitar doble cierre
+    console.warn('[checkAutoClosure] No se pudo verificar GAS. Abortando para evitar doble envío:', e.message);
+    return;
   }
 
   closeDayProcedure();
