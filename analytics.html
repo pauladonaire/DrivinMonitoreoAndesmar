@@ -1125,6 +1125,7 @@
               <th class="s" data-col="retiros"    data-tbl="conductores">Retiros <span class="si">↕</span></th>
               <th class="s" data-col="top10"      data-tbl="conductores">Top10↓ <span class="si">↕</span></th>
               <th class="s" data-col="rutaAvg"    data-tbl="conductores">T.Ruta <span class="si">↕</span></th>
+              <th class="s" data-col="rutaDiaAvg" data-tbl="conductores">T.Día <span class="si">↕</span></th>
             </tr></thead>
             <tbody id="bCond"></tbody>
           </table>
@@ -2201,7 +2202,7 @@ function buildCondData(rows) {
   const condMap = {};
   rows.forEach(r => {
     const k = r.conductor || '(sin conductor)';
-    if (!condMap[k]) condMap[k] = { conductor: k, total: 0, entregadas: 0, rechazadas: 0, pendientes: 0, dias: new Set(), retiros: 0, rutaKeys: new Set(), tiemposRuta: [] };
+    if (!condMap[k]) condMap[k] = { conductor: k, total: 0, entregadas: 0, rechazadas: 0, pendientes: 0, dias: new Set(), retiros: 0, rutaKeys: new Set(), tiemposRuta: [], diasRutas: {} };
     condMap[k].total++;
     if (r.status === 'delivered' || r.status === 'approved') condMap[k].entregadas++;
     else if (r.status === 'rejected') condMap[k].rechazadas++;
@@ -2212,7 +2213,13 @@ function buildCondData(rows) {
     const rutaKey = (r.fecha||'')+'||'+(r.scenario_token||'')+'||'+(r.vehiculo||'');
     if (!condMap[k].rutaKeys.has(rutaKey) && r.tiempo_en_ruta_min != null && r.tiempo_en_ruta_min !== '') {
       const t = Number(r.tiempo_en_ruta_min);
-      if (!isNaN(t) && t > 0) { condMap[k].rutaKeys.add(rutaKey); condMap[k].tiemposRuta.push(t); }
+      if (!isNaN(t) && t > 0) {
+        condMap[k].rutaKeys.add(rutaKey);
+        condMap[k].tiemposRuta.push(t);
+        const f = r.fecha || 'sin-fecha';
+        if (!condMap[k].diasRutas[f]) condMap[k].diasRutas[f] = [];
+        condMap[k].diasRutas[f].push({ plan: r.scenario_token || '?', tiempo: t });
+      }
     }
   });
   return Object.values(condMap).map(c => ({
@@ -2225,6 +2232,8 @@ function buildCondData(rows) {
     dias:       c.dias.size,
     retiros:    c.retiros,
     rutaAvg:    c.tiemposRuta.length > 0 ? c.tiemposRuta.reduce((s, v) => s + v, 0) / c.tiemposRuta.length : null,
+    rutaDiaAvg: (()=>{ const dv=Object.values(c.diasRutas).map(ps=>ps.reduce((s,p)=>s+p.tiempo,0)); return dv.length>0?dv.reduce((s,v)=>s+v,0)/dv.length:null; })(),
+    diasRutas:  c.diasRutas,
     top10:      _top10Map[c.conductor] || 0,
   }));
 }
@@ -2609,6 +2618,18 @@ function debounceCondFilter() {
   _condDebTimer = setTimeout(applyCondFilters, 300);
 }
 
+function buildDiaTooltip(diasRutas) {
+  if (!diasRutas || !Object.keys(diasRutas).length) return '';
+  return Object.entries(diasRutas)
+    .sort(([a],[b]) => a.localeCompare(b))
+    .map(([f, planes]) => {
+      const sum = planes.reduce((s,p) => s+p.tiempo, 0);
+      if (planes.length === 1) return f + ': ' + planes[0].plan + ' (' + fmtMin(planes[0].tiempo) + ')';
+      const detalle = planes.map(p => p.plan + ' (' + fmtMin(p.tiempo) + ')').join(' + ');
+      return f + ': ' + detalle + ' = ' + fmtMin(sum);
+    }).join('\n');
+}
+
 function sortAndRender_conductores() {
   const { col, dir } = SORT['conductores'] || { col: 'rechazadas', dir: 'desc' };
   const src = D_COND_FILTERED.length > 0 || el('filtroCondTxt')?.value || el('filtroCondDep')?.value
@@ -2626,6 +2647,7 @@ function sortAndRender_conductores() {
     <td class="tm">${item.retiros}</td>
     <td class="tm ${item.top10 > 0 ? 'td' : ''}">${item.top10 > 0 ? item.top10 : '—'}</td>
     <td class="tm">${item.rutaAvg != null ? fmtMin(item.rutaAvg) : '—'}</td>
+    <td class="tm" title="${buildDiaTooltip(item.diasRutas)}">${item.rutaDiaAvg != null ? fmtMin(item.rutaDiaAvg) : '—'}</td>
   </tr>`);
   updSortIcons('tConductores', col, dir);
 }
@@ -3179,15 +3201,23 @@ function isResFilterActive() {
 }
 
 // Aplica _resFilters a un set de filas (sin tocar el filtro de depósitos de usuario)
+function normalizeStr(s) {
+  return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+}
+
 function applyResFilterLogic(rows) {
   const { deposito, flota, vehiculo, empleador } = _resFilters;
   const q          = vehiculo.trim().toLowerCase();
   const hasDepFlt  = Array.isArray(deposito) ? deposito.length > 0 : !!deposito;
   const hasFltFlt  = Array.isArray(flota)    ? flota.length    > 0 : !!flota;
   if (!hasDepFlt && !hasFltFlt && !q && !empleador) return rows;
+  // Normalizar filtros de depósito una sola vez (sin acentos, minúsculas)
+  const depNorm = hasDepFlt
+    ? (Array.isArray(deposito) ? deposito.map(normalizeStr) : [normalizeStr(deposito)])
+    : [];
   return rows.filter(r => {
     if (hasDepFlt) {
-      if (Array.isArray(deposito) ? !deposito.includes(r.deposito) : r.deposito !== deposito) return false;
+      if (!depNorm.includes(normalizeStr(r.deposito))) return false;
     }
     if (hasFltFlt) {
       const vInfo  = VEHICULOS_MAP[r.vehiculo];
@@ -4758,9 +4788,8 @@ function buildModalTruta(rows) {
   if (!items.length) return '<div class="empty">Sin datos de tiempo de ruta en el período</div>';
   items.sort((a, b) => b.tiempo - a.tiempo);
   _resModalData = items;
-  // Promedio POR RUTA (igual que GAS): usar rutaMap directamente, no los totales por vehículo-día
-  const avgRutas = Object.values(rutaMap).map(info => info.t);
-  const avg      = avgRutas.length ? average(avgRutas) : 0;
+  // Promedio POR DÍA: usar items (tiempo ya sumado por vehículo-día)
+  const avg = items.length ? average(items.map(i => i.tiempo)) : 0;
   const inits     = items.filter(i => i.inicio !== null).map(i => i.inicio);
   const avgIni    = inits.length ? Math.round(average(inits)) : null;
   const avgIniFmt = avgIni !== null ? String(Math.floor(avgIni/60)).padStart(2,'0')+':'+String(avgIni%60).padStart(2,'0') : '—';
