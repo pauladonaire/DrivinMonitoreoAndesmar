@@ -4436,8 +4436,7 @@ function setText(id, v) { const e = el(id); if (e) e.textContent = v; }
 /* -- Cálculos -- */
 
 function calcTiempoRutaPromedio(rows) {
-  // Deduplicar por ruta única (fecha+scenario_token+vehiculo) — igual que GAS calcKPIsParaDia_
-  // Promedio POR RUTA (no por vehículo-día) para que coincida con el CACHE
+  // T.Día: deduplicar por ruta, sumar tiempos por vehículo-día, luego promediar esos totales
   const rutaMap    = {};
   const rutaInicio = {};
   rows.forEach(r => {
@@ -4454,7 +4453,14 @@ function calcTiempoRutaPromedio(rows) {
       rutaInicio[rk] = r.inicio_ruta_min;
     }
   });
-  const tiempos = Object.values(rutaMap);
+  // Agrupar por vehículo-día y sumar rutas del mismo vehículo en el mismo día
+  const dvTiempo = {};
+  Object.entries(rutaMap).forEach(([rk, t]) => {
+    const parts = rk.split('||');
+    const dvk   = parts[0] + '||' + parts[2]; // fecha || vehiculo
+    dvTiempo[dvk] = (dvTiempo[dvk] || 0) + t;
+  });
+  const tiempos = Object.values(dvTiempo);
   const avg     = tiempos.length ? average(tiempos) : null;
 
   // Inicio promedio: mínimo por vehículo-día (igual que buildModalTruta)
